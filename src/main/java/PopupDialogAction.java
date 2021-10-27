@@ -19,12 +19,12 @@ public class PopupDialogAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent event) {
         // Using the event, create and show a dialog
         Project currentProject = event.getProject();
-        StringBuffer dialogMessage = new StringBuffer(event.getPresentation().getText() + " Selected!");
+        StringBuilder dialogMessage = new StringBuilder(event.getPresentation().getText() + " Selected!");
         String dialogTitle = event.getPresentation().getDescription();
         // If an element is selected in the editor, add info about it.
         Navigatable nav = event.getData(CommonDataKeys.NAVIGATABLE);
         if(nav != null) {
-            dialogMessage.append(String.format("\nSelected Element: %s", nav.toString()));
+            dialogMessage.append(String.format("\nSelected Element: %s", nav));
         }
         Messages.showMessageDialog(currentProject, dialogMessage.toString(), dialogTitle, Messages.getInformationIcon());
     }

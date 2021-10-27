@@ -27,3 +27,14 @@ patchPluginXml {
 test {
     useJUnitPlatform()
 }
+
+// Fixed runIde issue below:
+// 2021-10-27 13:26:58,167 [   1656]   WARN - j.internal.DebugAttachDetector - Unable to start DebugAttachDetector, please add `--add-exports java.base/jdk.internal.vm=ALL-UNNAMED` to VM options
+// https://stackoverflow.com/questions/60027717/intellij-idea-vm-options
+// https://stackoverflow.com/questions/58133725/how-to-fix-jvm-options-exports-javafx-11-to-com-jfoenix-on-gradle-idea
+runIde {
+    jvmArgs = [
+            '--add-exports',
+            'java.base/jdk.internal.vm=ALL-UNNAMED'
+            ]
+}

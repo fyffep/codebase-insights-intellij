@@ -1,11 +1,10 @@
 <idea-plugin>
     <id>edu.indiana.luddy.p532.fall21.finalproject.team3</id>
-    <name>Plugin display name here</name>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <name>Codebase Heatmap Insight</name>
+    <vendor email="ebehar@iu.edu">P532 Final Project</vendor>
 
     <description><![CDATA[
-    Enter short description for your plugin here.<br>
-    <em>most HTML tags may be used</em>
+    A plugin that will analyze the commit history of a branch and created a heatmap based on various options and weights provided by the user.<br>
     ]]></description>
 
     <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
