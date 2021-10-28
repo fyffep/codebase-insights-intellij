@@ -18,7 +18,7 @@
 
     <actions>
         <!-- Add your actions here -->
-        <action id="PopupDialogAction" class="PopupDialogAction" text="Test Action Basics Plugin: Pop Dialog Action"
+        <action id="PopupDialogAction" class="intellij_extension.PopupDialogAction" text="Test Action Basics Plugin: Pop Dialog Action"
                 description="Going through tutorial. This is a test.">
             <override-text place="MainMenu" text="Pop Dialog Action"/>
             <keyboard-shortcut first-keystroke="control alt A" second-keystroke="C" keymap="$default"/>
