@@ -1,10 +1,11 @@
+package intellij_extension;
+
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.pom.Navigatable;
-import org.jetbrains.annotations.NotNull;
 
 public class PopupDialogAction extends AnAction {
 
@@ -16,7 +17,7 @@ public class PopupDialogAction extends AnAction {
     }
 
     @Override
-    public void actionPerformed(@NotNull AnActionEvent event) {
+    public void actionPerformed(AnActionEvent event) {
         // Using the event, create and show a dialog
         Project currentProject = event.getProject();
         StringBuffer dialogMessage = new StringBuffer(event.getPresentation().getText() + " Selected!");
