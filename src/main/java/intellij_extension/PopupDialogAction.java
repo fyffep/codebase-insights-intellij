@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.pom.Navigatable;
+import javafx.application.Application;
 
 public class PopupDialogAction extends AnAction {
 
@@ -18,7 +19,8 @@ public class PopupDialogAction extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent event) {
-        // Using the event, create and show a dialog
+        System.out.println("actionPerformed triggered!");
+        /*// Using the event, create and show a dialog
         Project currentProject = event.getProject();
         StringBuffer dialogMessage = new StringBuffer(event.getPresentation().getText() + " Selected!");
         String dialogTitle = event.getPresentation().getDescription();
@@ -27,6 +29,10 @@ public class PopupDialogAction extends AnAction {
         if(nav != null) {
             dialogMessage.append(String.format("\nSelected Element: %s", nav.toString()));
         }
-        Messages.showMessageDialog(currentProject, dialogMessage.toString(), dialogTitle, Messages.getInformationIcon());
+        Messages.showMessageDialog(currentProject, dialogMessage.toString(), dialogTitle, Messages.getInformationIcon());*/
+
+
+        Application.launch(ParentWindow.class);
+
     }
 }

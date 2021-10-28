@@ -1,11 +1,12 @@
 <idea-plugin>
     <id>edu.indiana.luddy.p532.fall21.finalproject.team3</id>
-    <name>Plugin display name here</name>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <name>Code Heat Map</name>
+    <vendor email="pfyffe@iu.edu">Team 3 of CSCI-P 532</vendor>
 
     <description><![CDATA[
-    Enter short description for your plugin here.<br>
-    <em>most HTML tags may be used</em>
+    This plugin creates a heat map that shows which code may be causing the most problems.
+    <br>Features:
+        TODO
     ]]></description>
 
     <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
@@ -21,8 +22,8 @@
         <action id="PopupDialogAction" class="intellij_extension.PopupDialogAction" text="Test Action Basics Plugin: Pop Dialog Action"
                 description="Going through tutorial. This is a test.">
             <override-text place="MainMenu" text="Pop Dialog Action"/>
-            <keyboard-shortcut first-keystroke="control alt A" second-keystroke="C" keymap="$default"/>
-            <mouse-shortcut keystroke="control button3 doubleClick" keymap="$default"/>
+            <keyboard-shortcut first-keystroke="control 1" keymap="$default"/>
+            <!--mouse-shortcut keystroke="control button3 doubleClick" keymap="$default"/-->
             <add-to-group group-id="ToolsMenu" anchor="first"/>
         </action>
     </actions>

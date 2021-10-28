@@ -23,6 +23,14 @@ dependencies {
 intellij {
     version = '2021.2.3'
 }
+
+runIde {
+    jvmArgs = [
+            '--add-exports',
+            'java.base/jdk.internal.vm=ALL-UNNAMED'
+    ]
+}
+
 patchPluginXml {
     changeNotes = """
       Add change notes here.<br>
