@@ -5,6 +5,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.application.Application;
 import javafx.scene.Group;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -26,8 +27,11 @@ public class ParentWindow extends Application
     @Override
     public void start(Stage primaryStage) throws InterruptedException, IOException
     {
+        System.out.println("Creating Parent");
         //Load in the XML of the testing window
-        Parent playRoot = FXMLLoader.load(getClass().getClassLoader().getResource("parent-play-window.fxml"));
+        //Parent playRoot = FXMLLoader.load(getClass().getClassLoader().getResource("parent-play-window.fxml"));
+        //Parent playRoot = FXMLLoader.load(getClass().getClassLoader().getResource("temp.fxml"));
+        Parent playRoot = new VBox();
 
         //Set up the scenes
         heatMapScene = new Scene(playRoot, 300, 300);
