@@ -1,11 +1,13 @@
 plugins {
-    id 'org.jetbrains.intellij' version '1.2.1'
     id 'java'
     id 'org.openjfx.javafxplugin' version  '0.0.10'
+    id 'org.jetbrains.intellij' version '1.2.1'
 }
 
-group 'edu.indiana.luddy'
+group 'p532.fall21.finalproject.team3'
 version '1.0-SNAPSHOT'
+
+sourceCompatibility = 11
 
 repositories {
     mavenCentral()
@@ -21,6 +23,7 @@ dependencies {
 intellij {
     version = '2021.2.3'
 }
+
 patchPluginXml {
     changeNotes = """
       Add change notes here.<br>
@@ -32,7 +35,7 @@ test {
 }
 
 javafx {
-    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.graphics', 'javafx.swing', 'javafx.base' ]
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.swing']
     version = '11.0.2'
 }
 
