@@ -4,7 +4,7 @@
     <vendor email="ebehar@iu.edu">P532 Final Project</vendor>
 
     <description><![CDATA[
-    A plugin that will analyze the commit history of a branch and created a heatmap based on various options and weights provided by the user.<br>
+    A plugin that will analyze the commit history of a branch and create a heatmap based on various options and weights provided by the user.<br>
     ]]></description>
 
     <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
