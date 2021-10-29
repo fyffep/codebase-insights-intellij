@@ -1,6 +1,7 @@
 plugins {
     id 'org.jetbrains.intellij' version '1.2.1'
     id 'java'
+    id 'org.openjfx.javafxplugin' version  '0.0.10'
 }
 
 group 'edu.indiana.luddy'
@@ -11,8 +12,9 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    implementation 'org.openjfx:javafx-swing:11-ea+24'
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
@@ -24,8 +26,14 @@ patchPluginXml {
       Add change notes here.<br>
       <em>most HTML tags may be used</em>"""
 }
+
 test {
     useJUnitPlatform()
+}
+
+javafx {
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.graphics', 'javafx.swing', 'javafx.base' ]
+    version = '11.0.2'
 }
 
 // Fixed runIde issue below:
