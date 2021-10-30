@@ -127,4 +127,9 @@ public class FileObject
 		
 		return this.depth;
 	}
+
+	public int computeHeatLevel()
+	{
+		return (int) (Math.random() * 10); //TODO
+	}
 }
