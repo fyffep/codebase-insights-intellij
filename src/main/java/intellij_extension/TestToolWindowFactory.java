@@ -3,53 +3,57 @@ package intellij_extension;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
-import intellij_extension.controllers.HeatMapController;
-import intellij_extension.models.FileObject;
-import intellij_extension.views.HeatMapContainer;
+import intellij_extension.views.*;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
-import javax.swing.*;
-import java.util.LinkedList;
-import java.util.List;
 
-public class TestToolWindowFactory implements ToolWindowFactory
-{
+import javax.swing.*;
+import java.awt.*;
+
+public class TestToolWindowFactory implements ToolWindowFactory {
     @Override
-    public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow)
-    {
+    public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         final JFXPanel fxPanel = new JFXPanel();
+        fxPanel.setBackground(Color.BLACK);
         JComponent component = toolWindow.getComponent();
+        int componentWidth = component.getWidth();
+        int componentHeight = component.getHeight();
 
         Platform.setImplicitExit(false);
         Platform.runLater(() -> {
-            Group root  =  new Group();
-            Scene heatMapScene = new Scene(root, 300, 300);
-            /*
-            Text text  =  new Text();
-            text.setX(40);
-            text.setY(100);
-            text.setFont(new Font(25));
-            text.setText("Welcome JavaFX!");
-            root.getChildren().add(text);
-            */
+            CodebaseHeatMapSplitPane root = new CodebaseHeatMapSplitPane();
+            MainView mainView = new MainView(root, componentWidth, componentHeight);
+//            root.setFillHeight(true);
+            root.prefWidthProperty().bind(mainView.widthProperty());
+            root.prefHeightProperty().bind(mainView.heightProperty());
 
-            List<FileObject> fileObjectList = new LinkedList<>();
-            fileObjectList.add(new FileObject("TestFile1", "TestDir1", 3));
-            fileObjectList.add(new FileObject("TestFile2", "TestDir2", 3));
-            fileObjectList.add(new FileObject("TestFile3", "TestDir3", 3));
+            // Left Half of Tools Windows
+            HeatMapPane heatMapPane = new HeatMapPane();
+            root.getItems().add(heatMapPane);
+//            codebaseScene.getSplitBox().getChildren().add(heatMapPane);
+//            HBox.setHgrow(heatMapPane, Priority.ALWAYS);
 
-            //Create the controller
-            HeatMapController heatMapController = new HeatMapController(fileObjectList);
+            // Right Half of Tools Window
+            // Will split into two sections
+            ExtrasSplitPane extrasSplitPane = new ExtrasSplitPane();
+            root.getItems().add(extrasSplitPane);
+//            codebaseScene.getSplitBox().getChildren().add(extrasVBox);
+//            HBox.setHgrow(extrasVBox, Priority.ALWAYS);
 
-            //Display the view created by the controller
-            root.getChildren().add(heatMapController.getView());
+            // Top half is Options/Commit Area
+            ExtrasTabPane extrasTabPane = new ExtrasTabPane();
+            extrasSplitPane.getItems().add(extrasTabPane);
+            VBox.setVgrow(extrasTabPane, Priority.ALWAYS);
 
-            fxPanel.setScene(heatMapScene);
+            //Bottom half is Packages/Files Area
+            PackagesFilesPane packagesFilesPane = new PackagesFilesPane();
+            extrasSplitPane.getItems().add(packagesFilesPane);
+            VBox.setVgrow(packagesFilesPane, Priority.ALWAYS);
+
+            fxPanel.setScene(mainView);
         });
 
         component.getParent().add(fxPanel);
