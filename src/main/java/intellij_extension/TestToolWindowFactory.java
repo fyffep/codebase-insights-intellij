@@ -3,6 +3,7 @@ package intellij_extension;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
+import intellij_extension.controllers.HeatMapController;
 import intellij_extension.models.FileObject;
 import intellij_extension.views.HeatMapContainer;
 import javafx.application.Platform;
@@ -42,9 +43,11 @@ public class TestToolWindowFactory implements ToolWindowFactory
             fileObjectList.add(new FileObject("TestFile2", "TestDir2", 3));
             fileObjectList.add(new FileObject("TestFile3", "TestDir3", 3));
 
-            HeatMapContainer heatMapContainer = new HeatMapContainer();
-            heatMapContainer.populate(fileObjectList);
-            root.getChildren().add(heatMapContainer);
+            //Create the controller
+            HeatMapController heatMapController = new HeatMapController(fileObjectList);
+
+            //Display the view created by the controller
+            root.getChildren().add(heatMapController.getView());
 
             fxPanel.setScene(heatMapScene);
         });
