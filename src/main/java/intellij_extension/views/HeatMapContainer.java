@@ -30,14 +30,4 @@ public class HeatMapContainer extends FlowPane
     {
         getChildren().add(node);
     }
-
-    public void populate(List<FileObject> heatList)
-    {
-        for (FileObject fileObject : heatList)
-        {
-            HeatFileComponent heatFileComponent = new HeatFileComponent();
-            heatFileComponent.setStyle("-fx-background-color: #AA0066");
-            addNode(heatFileComponent);
-        }
-    }
 }

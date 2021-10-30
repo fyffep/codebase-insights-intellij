@@ -2,7 +2,6 @@ package intellij_extension;
 
 import intellij_extension.models.FileObject;
 import intellij_extension.views.HeatMapContainer;
-import intellij_extension.views.HeatMapScene;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -21,13 +20,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * The app starts from here.
+ * THIS FILE IS UNUSED
  */
 public class RootWindow extends Application
 {
     //Views
     private static Stage stage = null;
-    private static HeatMapScene heatMapScene;
+    //private static HeatMapScene heatMapScene;
 
     //Logger TODO
     //public static final Logger logger = Logger.getLogger(RootWindow.class);

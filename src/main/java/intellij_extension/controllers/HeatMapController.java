@@ -1,48 +1,44 @@
 package intellij_extension.controllers;
 
-import intellij_extension.models.FileToHeatMap;
-import intellij_extension.models.HeatObject;
+import intellij_extension.models.FileObject;
 import intellij_extension.views.HeatFileComponent;
-import intellij_extension.views.HeatMapScene;
+import intellij_extension.views.HeatMapContainer;
+import javafx.scene.Node;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 public class HeatMapController
 {
-    private HeatMapScene heatMapScene;
-    private FileToHeatMap model;
+    private HeatMapContainer heatMapContainer;
+    private List<FileObject> heatList;
 
-    public HeatMapController(HeatMapScene heatMapScene, FileToHeatMap model)
+    public HeatMapController(List<FileObject> heatList)
     {
-        this.model = model;
-        this.heatMapScene = heatMapScene;
+        this.heatList = heatList; //model
 
-        populateWithHeat();
+        //Create the view
+        heatMapContainer = new HeatMapContainer();
+
+        populateHeatMap();
     }
 
     public void clearHeatContainer()
     {
-        heatMapScene.clear();
+        heatMapContainer.clear();
     }
 
-    public void populateWithHeat()
+    public void populateHeatMap()
     {
-        //Should this be in a presenter class?
-
-        HashMap<File, List<HeatObject>> heatMap = model.getMap();
-        Iterator<File> heatMapIterator = heatMap.keySet().iterator();
-        while (heatMapIterator.hasNext())
+        for (FileObject fileObject : heatList)
         {
-            File heatFile = heatMapIterator.next();
-            double heatAverage = model.getHeatAverage(heatFile);
-
             HeatFileComponent heatFileComponent = new HeatFileComponent();
-            heatFileComponent.setStyle("-fx-background-color: #BB0011");
-            heatMapScene.addNodeToHeatFileContainer(heatFileComponent);
-            System.out.println("Added 1 component");
+            heatFileComponent.setStyle("-fx-background-color: #AA0066");
+            heatMapContainer.addNode(heatFileComponent);
         }
+    }
+
+    public Node getView()
+    {
+        return this.heatMapContainer;
     }
 }
