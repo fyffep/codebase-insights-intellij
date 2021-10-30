@@ -1,23 +1,9 @@
 package intellij_extension;
 
-import intellij_extension.models.FileObject;
-import intellij_extension.views.HeatMapContainer;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.application.Application;
-import javafx.scene.Group;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * THIS FILE IS UNUSED

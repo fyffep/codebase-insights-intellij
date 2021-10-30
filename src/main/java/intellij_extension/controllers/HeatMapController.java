@@ -1,8 +1,8 @@
 package intellij_extension.controllers;
 
 import intellij_extension.models.FileObject;
-import intellij_extension.views.HeatFileComponent;
-import intellij_extension.views.HeatMapContainer;
+import intellij_extension.views.unused.HeatFileComponent;
+import intellij_extension.views.unused.HeatMapContainer;
 import javafx.scene.Node;
 
 import java.util.List;

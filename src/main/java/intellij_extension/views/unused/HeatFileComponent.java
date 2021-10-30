@@ -1,4 +1,4 @@
-package intellij_extension.views;
+package intellij_extension.views.unused;
 
 import javafx.scene.layout.Pane;
 
