@@ -1,5 +1,7 @@
 package intellij_extension;
 
+import intellij_extension.models.FileObject;
+import intellij_extension.views.HeatMapContainer;
 import intellij_extension.views.HeatMapScene;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,6 +17,8 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * The app starts from here.
@@ -43,15 +47,15 @@ public class RootWindow extends Application
         if (fxmlFile == null) {
             throw new NullPointerException("The FXML file `HeatMapScene.fxml` could not be found or loaded");
         }
-        Parent rootParent = FXMLLoader.load(fxmlFile);*/
+        Parent rootParent = FXMLLoader.load(fxmlFile);*
         Parent rootParent = new VBox();
 
-        /*// Load the loader
+        /*
         FXMLLoader fxmlLoader = new FXMLLoader(RootWindow.class.getResource("HeatMapScene.fxml"));
         // Load the scene
         Scene heatMapSceneView = new Scene(fxmlLoader.load());
         heatMapScene = fxmlLoader.getController();
-        primaryStage.setScene(heatMapSceneView);*/
+        primaryStage.setScene(heatMapSceneView);*
 
         //Change background colors
         rootParent.setStyle("-fx-background-color: #AAAAAA");
@@ -63,7 +67,7 @@ public class RootWindow extends Application
 
         //Set up the window
         primaryStage.setTitle("Heat Map Extension");
-        primaryStage.show();
+        primaryStage.show();*/
 
 
 
@@ -72,5 +76,26 @@ public class RootWindow extends Application
         File tempFile = new File("Constants.java");
         model.addHeatObject(tempFile, new CodeCoverageHeat(0.75));
         HeatMapController heatMapController = new HeatMapController(heatMapScene, model);*/
+
+
+
+
+
+
+
+
+        /*Group root  =  new Group();
+        Scene heatMapScene = new Scene(root, 300, 300);
+
+        List<FileObject> fileObjectList = new LinkedList<>();
+        fileObjectList.add(new FileObject("TestFile1", "TestDir1", 3));
+        fileObjectList.add(new FileObject("TestFile2", "TestDir2", 3));
+        fileObjectList.add(new FileObject("TestFile3", "TestDir3", 3));
+
+        HeatMapContainer heatMapContainer = new HeatMapContainer();
+        heatMapContainer.populate(fileObjectList);
+        root.getChildren().add(heatMapContainer);
+
+        primaryStage.setScene(heatMapScene);*/
     }
 }

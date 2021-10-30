@@ -7,7 +7,7 @@ public class HeatFileComponent extends Pane
     public HeatFileComponent()
     {
         super();
-        this.setPrefWidth(100);
-        this.setPrefHeight(250);
+        this.setPrefWidth(20);
+        this.setPrefHeight(30);
     }
 }
