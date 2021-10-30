@@ -27,6 +27,14 @@ public class HeatMapController
         heatMapContainer.clear();
     }
 
+    public void recalculateHeat()
+    {
+        heatList.clear();
+
+
+        //todo: order the file size measurer to create a list of file objects that will replace the current model
+    }
+
     public void populateHeatMap()
     {
         for (FileObject fileObject : heatList)
