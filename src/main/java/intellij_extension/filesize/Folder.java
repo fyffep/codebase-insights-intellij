@@ -18,8 +18,8 @@ import java.util.HashMap;
 public class Folder {
     //Folder members
     private String folderName;
-    private HashMap<String, FileObject> fileList;
-    private HashMap<String, Folder> folderList;
+    private final HashMap<String, FileObject> fileList;
+    private final HashMap<String, Folder> folderList;
     private String folderPath;
     private long fileCount, folderCount;
     private int depth;
@@ -38,7 +38,7 @@ public class Folder {
     //constructor
     public Folder(String folderName, String folderPath, int depth) {
         this.folderName = folderName;
-        this.folderPath=folderPath;
+        this.folderPath = folderPath;
         this.fileCount = 0;
         this.folderList = new HashMap<String, Folder>();
         this.fileList = new HashMap<String, FileObject>();
@@ -46,24 +46,23 @@ public class Folder {
         this.depth = depth;
     }
 
-    // folderName : getter and setter
-    public void setFolder(String folderName) {
-        this.folderName = folderName;
-    }
-
     public String getFolder() {
         return this.folderName;
     }
 
-    // folderPath : getter and setter
-    public void setFolderPath(String folderPath) {
-        this.folderPath = folderPath;
+    // folderName : getter and setter
+    public void setFolder(String folderName) {
+        this.folderName = folderName;
     }
 
     public String getFolderPath() {
         return this.folderPath;
     }
 
+    // folderPath : getter and setter
+    public void setFolderPath(String folderPath) {
+        this.folderPath = folderPath;
+    }
 
     // reads the folder information and maintains the folder and file objects within the folder in a hashmap
     public void parseFolder() throws IOException {
@@ -75,7 +74,7 @@ public class Folder {
 
             for (String folderObject : directory.list())  // list() on directory returns a String array containing the names of files/folders
             {
-                String path=getFolderPath() + "/" + folderObject;
+                String path = getFolderPath() + "/" + folderObject;
                 verifyFileOrFolder = new File(path);
 
                 // folder search
@@ -107,7 +106,6 @@ public class Folder {
 
     }
 
-
     // to store the depth of a folder with respect to parent. Used for display purpose
     public int getDepth() {
         return this.depth;
@@ -135,22 +133,22 @@ public class Folder {
         return fileList;
     }
 
+    public long getFileCount() {
+        return this.fileCount;
+    }
+
     //fileCount getter setter
     public void setFileCount(long fileCount) {
         this.fileCount = fileCount;
     }
 
-    public long getFileCount() {
-        return this.fileCount;
+    public long getFolderCount() {
+        return this.folderCount;
     }
 
     //folderCount getter setter
     public void setFolderCount(long folderCount) {
         this.folderCount = folderCount;
-    }
-
-    public long getFolderCount() {
-        return this.folderCount;
     }
 
     //displays all the folders and file details within the folder
