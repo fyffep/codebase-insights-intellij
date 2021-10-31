@@ -1,13 +1,11 @@
 package intellij_extension.filesize;
 
-import intellij_extension.filesize.Folder;
 import intellij_extension.models.FileObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.InputMismatchException;
 
 
 /**
@@ -18,8 +16,8 @@ import java.util.InputMismatchException;
 public class RootDirectory {
 
     // Members of RootDirectory
-    private HashMap<String, Folder> folderList;
-    private HashMap<String, FileObject> fileList;
+    private final HashMap<String, Folder> folderList;
+    private final HashMap<String, FileObject> fileList;
 
     private String baseDir;
     private long folderCount, fileCount;
@@ -45,16 +43,14 @@ public class RootDirectory {
         depth = 0;
     }
 
+    public String getBaseDir() {
+        return this.baseDir;
+    }
 
     // base directory path setter and getter
     public void setBaseDir(String sourcename) {
         this.baseDir = sourcename;
     }
-
-    public String getBaseDir() {
-        return this.baseDir;
-    }
-
 
     // reads the base directory information and maintains the folder and file objects within the base dir in a hashmap
     public void parseDirectory() throws IOException {
@@ -67,7 +63,7 @@ public class RootDirectory {
 
             for (String folderObject : directory.list())  // list() on directory returns a String array containing the names of files/folders
             {
-                String path=getBaseDir() + "/" + folderObject;
+                String path = getBaseDir() + "/" + folderObject;
                 verifyFileOrFolder = new File(path);
 
                 // folder search
@@ -98,22 +94,22 @@ public class RootDirectory {
 
     }
 
+    public long getFileCount() {
+        return this.fileCount;
+    }
+
     //fileCount getter and setter
     public void setFileCount(long fileCount) {
         this.fileCount = fileCount;
     }
 
-    public long getFileCount() {
-        return this.fileCount;
+    public long getFolderCount() {
+        return this.folderCount;
     }
 
     //folderCount getter and setter
     public void setFolderCount(long folderCount) {
         this.folderCount = folderCount;
-    }
-
-    public long getFolderCount() {
-        return this.folderCount;
     }
 
     // to store the depth of a folder with respect to root. Used for display purpose
@@ -142,7 +138,6 @@ public class RootDirectory {
     public HashMap<String, FileObject> getFileList() {
         return fileList;
     }
-
 
     //displays all the folders and file details within the root directory
     public void displayDetails() {
