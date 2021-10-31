@@ -2,8 +2,26 @@ plugins {
     id 'java'
     id 'org.openjfx.javafxplugin' version '0.0.10'
     id 'org.jetbrains.intellij' version '1.2.1'
+    id "jacoco"
+    id "org.sonarqube" version "3.3"
 }
 
+jacoco {
+    toolVersion = "0.8.7"
+}
+
+jacocoTestReport {
+    reports {
+        html.enabled false
+        csv.enabled true
+        csv.destination file("${buildDir}/reports/jacoco.csv")
+        xml.enabled true
+        xml.destination file("${buildDir}/reports/jacoco.xml")
+    }
+}
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
+}
 group 'p532.fall21.finalproject.team3'
 version '1.0-SNAPSHOT'
 
