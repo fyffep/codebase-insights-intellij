@@ -9,12 +9,15 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 
+
 /**
- * Holds multiple folder/package
+ * Tracks multiple folder/package within the basedir
+ * //TODO : folder Size
  */
 
 public class RootDirectory {
 
+    // Members of RootDirectory
     private HashMap<String, Folder> folderList;
     private HashMap<String, FileObject> fileList;
 
@@ -43,52 +46,50 @@ public class RootDirectory {
     }
 
 
-    //set base directory path
+    // base directory path setter and getter
     public void setBaseDir(String sourcename) {
         this.baseDir = sourcename;
     }
 
-    //get base directory path
     public String getBaseDir() {
         return this.baseDir;
     }
 
 
-    // reads the base directory information and sets the folder and file objects
-    public void parsedirectory() throws IOException {
+    // reads the base directory information and maintains the folder and file objects within the base dir in a hashmap
+    public void parseDirectory() throws IOException {
         File directory = null;
-        File verifyFolder = null;
+        File verifyFileOrFolder = null;
+        long folderCount = 0, fileCount = 0;
+
         try {
-            directory = new File(getBaseDir());
-            long folderCount = 0;
-            long fileCount = 0;
+            directory = new File(getBaseDir()); //At a high level, Java considers both files and directories as files when working with file systems,
 
-
-            for (String folderObject : directory.list()) {
-                verifyFolder = new File(getBaseDir() + "/" + folderObject);
+            for (String folderObject : directory.list())  // list() on directory returns a String array containing the names of files/folders
+            {
+                String path=getBaseDir() + "/" + folderObject;
+                verifyFileOrFolder = new File(path);
 
                 // folder search
-                if (verifyFolder.isDirectory()) {
-
-                    Folder folder = new Folder(folderObject, getBaseDir(), getDepth() + 1);
+                if (verifyFileOrFolder.isDirectory()) {
+                    Folder folder = new Folder(folderObject, path, getDepth() + 1);
                     folder.parseFolder();
-                    folderList.put(folderObject, folder);
+                    setFolderList(folderObject, folder);
                     folderCount++;
-
                 }
 
                 //file search
-                else if (verifyFolder.isFile()) {
-                    FileObject file = new FileObject(folderObject, getBaseDir(), getDepth() + 1);
+                else if (verifyFileOrFolder.isFile()) {
+                    FileObject file = new FileObject(folderObject, path, getDepth() + 1);
                     file.parseFile();
-                    fileList.put(folderObject, file);
+                    setFileList(folderObject, file);
                     fileCount++;
                 }
             }
         } catch (FileNotFoundException e) {
-            System.out.println("One of the following  members which as the value null is repsonsible for the exception");
+            System.out.println("One of the following  members which as the value null is responsible for the exception");
             System.out.println("Directory:" + directory);
-            System.out.println("Folder/File under search:" + verifyFolder);
+            System.out.println("Folder/File under search:" + verifyFileOrFolder);
 
         } finally {
             setFolderCount(folderCount);
@@ -97,17 +98,16 @@ public class RootDirectory {
 
     }
 
-
+    //fileCount getter and setter
     public void setFileCount(long fileCount) {
         this.fileCount = fileCount;
-
     }
 
     public long getFileCount() {
         return this.fileCount;
     }
 
-
+    //folderCount getter and setter
     public void setFolderCount(long folderCount) {
         this.folderCount = folderCount;
     }
@@ -118,7 +118,6 @@ public class RootDirectory {
 
     // to store the depth of a folder with respect to root. Used for display purpose
     public int getDepth() {
-
         return this.depth;
     }
 
@@ -126,7 +125,26 @@ public class RootDirectory {
         this.depth = depth;
     }
 
+    //folderList hashmap getter and setter
+    public void setFolderList(String name, Folder folder) {
+        this.folderList.put(name, folder);
+    }
 
+    public HashMap<String, Folder> getFolderList() {
+        return folderList;
+    }
+
+    //fileList hashmap getter and setter
+    public void setFileList(String name, FileObject file) {
+        this.fileList.put(name, file);
+    }
+
+    public HashMap<String, FileObject> getFileList() {
+        return fileList;
+    }
+
+
+    //displays all the folders and file details within the root directory
     public void displayDetails() {
         System.out.println(getBaseDir() + " Folder Count : " + getFolderCount());
 
@@ -134,7 +152,6 @@ public class RootDirectory {
         for (String foldername : folderList.keySet()) {
             Folder folder = folderList.get(foldername);
             folder.displayDetails();
-
         }
 
         // display all files within the base directory
@@ -142,15 +159,6 @@ public class RootDirectory {
             FileObject file = fileList.get(filename);
             file.displayFileDetails();
         }
-
-    }
-
-    public HashMap<String, Folder> getFolderList() {
-        return folderList;
-    }
-
-    public HashMap<String, FileObject> getFileList() {
-        return fileList;
     }
 
 }
