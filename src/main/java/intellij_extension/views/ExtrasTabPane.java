@@ -15,6 +15,8 @@ public class ExtrasTabPane extends TabPane {
     public ExtrasTabPane() {
         super();
 
+        // TODO extract these out to classes!!!
+        // This is for prototype only!
         Tab tab = new Tab();
         tab.setText("Commit History");
         Pane commitHistoryPane = new Pane();
@@ -26,7 +28,17 @@ public class ExtrasTabPane extends TabPane {
         getTabs().add(tab);
 
         tab = new Tab();
-        tab.setText("Options");
+        tab.setText("Commit Details");
+        Pane commitDetailsPane = new Pane();
+        backgroundColor = Color.DARKRED;
+        backgroundFill = new BackgroundFill(backgroundColor, null, null);
+        background = new Background(backgroundFill);
+        commitDetailsPane.setBackground(background);
+        tab.setContent(commitDetailsPane);
+        getTabs().add(tab);
+
+        tab = new Tab();
+        tab.setText("HeatMap Options");
         Pane optionsPane = new Pane();
         backgroundColor = Color.CHOCOLATE;
         backgroundFill = new BackgroundFill(backgroundColor, null, null);
