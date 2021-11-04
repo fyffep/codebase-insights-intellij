@@ -8,9 +8,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-public class ExtrasSplitPane extends SplitPane {
+public class CommitInfoSplitPane extends SplitPane {
 
-    public ExtrasSplitPane() {
+    public CommitInfoSplitPane() {
         super();
 
         setOrientation(Orientation.VERTICAL);

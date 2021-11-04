@@ -7,9 +7,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-public class PackagesFilesPane extends Pane {
+public class CommitDetailsPane extends Pane {
 
-    public PackagesFilesPane() {
+    public CommitDetailsPane() {
         super();
 
         Text text = new Text();
