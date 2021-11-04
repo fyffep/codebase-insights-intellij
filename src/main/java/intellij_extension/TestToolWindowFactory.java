@@ -37,17 +37,6 @@ public class TestToolWindowFactory implements ToolWindowFactory {
             // Will split into two sections
             CommitInfoSplitPane commitInfoSplitPane = new CommitInfoSplitPane();
             root.getItems().add(commitInfoSplitPane);
-
-            // Top half is Options/Commit Area
-            CommHistoryPane commitHistoryPane = new CommHistoryPane();
-            commitInfoSplitPane.getItems().add(commitHistoryPane);
-            VBox.setVgrow(commitHistoryPane, Priority.ALWAYS);
-
-            //Bottom half is Packages/Files Area
-            CommitDetailsPane commitDetailsPane = new CommitDetailsPane();
-            commitInfoSplitPane.getItems().add(commitDetailsPane);
-            VBox.setVgrow(commitDetailsPane, Priority.ALWAYS);
-
             fxPanel.setScene(mainScene);
         });
 

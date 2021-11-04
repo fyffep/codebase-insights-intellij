@@ -16,7 +16,7 @@ public class CommitDetailsPane extends Pane {
         text.setX(40);
         text.setY(100);
         text.setFont(new Font(25));
-        text.setText("PackagesFilesView");
+        text.setText("Commit Details View");
         getChildren().add(text);
 
         // Fill background with default
