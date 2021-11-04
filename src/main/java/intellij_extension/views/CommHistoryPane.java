@@ -10,9 +10,9 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-public class ExtrasTabPane extends TabPane {
+public class CommHistoryPane extends TabPane {
 
-    public ExtrasTabPane() {
+    public CommHistoryPane() {
         super();
 
         // TODO extract these out to classes!!!

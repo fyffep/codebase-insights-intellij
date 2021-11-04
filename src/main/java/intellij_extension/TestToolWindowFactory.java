@@ -25,35 +25,30 @@ public class TestToolWindowFactory implements ToolWindowFactory {
         Platform.setImplicitExit(false);
         Platform.runLater(() -> {
             CodebaseHeatMapSplitPane root = new CodebaseHeatMapSplitPane();
-            MainView mainView = new MainView(root, componentWidth, componentHeight);
-//            root.setFillHeight(true);
-            root.prefWidthProperty().bind(mainView.widthProperty());
-            root.prefHeightProperty().bind(mainView.heightProperty());
+            MainScene mainScene = new MainScene(root, componentWidth, componentHeight);
+            root.prefWidthProperty().bind(mainScene.widthProperty());
+            root.prefHeightProperty().bind(mainScene.heightProperty());
 
             // Left Half of Tools Windows
             HeatMapPane heatMapPane = new HeatMapPane();
-            root.getItems().add(heatMapPane);
-//            codebaseScene.getSplitBox().getChildren().add(heatMapPane);
-//            HBox.setHgrow(heatMapPane, Priority.ALWAYS);
+            root.getItems().add(heatMapPane);;
 
             // Right Half of Tools Window
             // Will split into two sections
-            ExtrasSplitPane extrasSplitPane = new ExtrasSplitPane();
-            root.getItems().add(extrasSplitPane);
-//            codebaseScene.getSplitBox().getChildren().add(extrasVBox);
-//            HBox.setHgrow(extrasVBox, Priority.ALWAYS);
+            CommitInfoSplitPane commitInfoSplitPane = new CommitInfoSplitPane();
+            root.getItems().add(commitInfoSplitPane);
 
             // Top half is Options/Commit Area
-            ExtrasTabPane extrasTabPane = new ExtrasTabPane();
-            extrasSplitPane.getItems().add(extrasTabPane);
-            VBox.setVgrow(extrasTabPane, Priority.ALWAYS);
+            CommHistoryPane commitHistoryPane = new CommHistoryPane();
+            commitInfoSplitPane.getItems().add(commitHistoryPane);
+            VBox.setVgrow(commitHistoryPane, Priority.ALWAYS);
 
             //Bottom half is Packages/Files Area
-            PackagesFilesPane packagesFilesPane = new PackagesFilesPane();
-            extrasSplitPane.getItems().add(packagesFilesPane);
-            VBox.setVgrow(packagesFilesPane, Priority.ALWAYS);
+            CommitDetailsPane commitDetailsPane = new CommitDetailsPane();
+            commitInfoSplitPane.getItems().add(commitDetailsPane);
+            VBox.setVgrow(commitDetailsPane, Priority.ALWAYS);
 
-            fxPanel.setScene(mainView);
+            fxPanel.setScene(mainScene);
         });
 
         component.getParent().add(fxPanel);
