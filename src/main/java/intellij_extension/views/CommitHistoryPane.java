@@ -23,7 +23,7 @@ import javafx.scene.text.Text;
  * https://stackoverflow.com/questions/14650787/javafx-column-in-tableview-auto-fit-size
  */
 
-public class CommHistoryPane extends VBox {
+public class CommitHistoryPane extends VBox {
 
     // TODO - MOVE TO TEST MOCK DATA EVENTUALLY
     // MOCK/TESTING DATA
@@ -52,7 +52,7 @@ public class CommHistoryPane extends VBox {
     private Pane topHoriztontalBanner;
     private TableView<CommitHistoryLine> commitList;
 
-    public CommHistoryPane() {
+    public CommitHistoryPane() {
         super();
 
         // TODO Extract to ViewFactory?
