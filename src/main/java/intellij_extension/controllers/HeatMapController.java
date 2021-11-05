@@ -1,6 +1,6 @@
 package intellij_extension.controllers;
 
-import intellij_extension.filesize.RootDirectory;
+import intellij_extension.filesize.Directory;
 import intellij_extension.models.CodeBase;
 import intellij_extension.models.Commit;
 import intellij_extension.models.FileObject;
@@ -44,15 +44,14 @@ public class HeatMapController
         {
             //Compute file size
             //TODO We may need to have the user select the project root
-            RootDirectory rootDirectory =new RootDirectory("C:\\Users\\Pete\\Desktop\\team3-project\\src\\main");
-            rootDirectory.parsedirectory();
+            Directory rootDirectory = new Directory("C:\\Users\\Pete\\Desktop\\team3-project\\src\\main");
+            rootDirectory.parseDirectory();
             rootDirectory.displayDetails();//TEMP
 
             //Add the file size data to the map
             Commit activeCommit = codeBase.getActiveCommit();
             HashMap<String, FileObject> fileMetricMap = activeCommit.getFileMetricMap();
             rootDirectory.editFileMetricMap(fileMetricMap);
-            System.out.println("Map size: "+fileMetricMap.size());
         }
         catch (IOException e)
         {
