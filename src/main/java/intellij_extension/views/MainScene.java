@@ -4,9 +4,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 
-public class MainView extends Scene {
+public class MainScene extends Scene {
 
-    public MainView(Parent root, double width, double height) {
+    public MainScene(Parent root, double width, double height) {
         super(root, width, height);
 
         setFill(Color.DARKMAGENTA);
