@@ -2,15 +2,16 @@ package intellij_extension.views;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 /**
@@ -23,6 +24,9 @@ import javafx.scene.text.Text;
  * https://stackoverflow.com/questions/14650787/javafx-column-in-tableview-auto-fit-size
  */
 
+// TODO
+    // REMOVE ALL MAGIC NUMBERS
+    // MOVE CREATION TO ViewFactory Class
 public class CommHistoryPane extends VBox {
 
     // TODO - MOVE TO TEST MOCK DATA EVENTUALLY
@@ -49,18 +53,23 @@ public class CommHistoryPane extends VBox {
             "major feature H"
     );
 
-    private Pane topHoriztontalBanner;
+    private HBox topHoriztontalBanner;
+    private Text branchLabel;
+    // This might have to change from String to something else.
+    private ComboBox<String> branchDropdown;
     private TableView<CommitHistoryLine> commitList;
 
     public CommHistoryPane() {
         super();
 
         // TODO Extract to ViewFactory?
-        topHoriztontalBanner = new Pane();
+        topHoriztontalBanner = new HBox();
+
         Color backgroundColor = Color.DARKGREEN;
         BackgroundFill backgroundFill = new BackgroundFill(backgroundColor, null, null);
         Background background = new Background(backgroundFill);
         topHoriztontalBanner.setBackground(background);
+
         // We want this so the user can make the Commit Details view as big
         // as the right side if desirable
         topHoriztontalBanner.setMinHeight(0);
@@ -72,6 +81,30 @@ public class CommHistoryPane extends VBox {
         topHoriztontalBanner.maxHeightProperty().bind(this.heightProperty().multiply(.25));
         topHoriztontalBanner.prefWidthProperty().bind(this.widthProperty());
         this.getChildren().add(topHoriztontalBanner);
+        // Child layout properties
+        topHoriztontalBanner.setAlignment(Pos.CENTER_LEFT);
+        topHoriztontalBanner.setSpacing(15.0);
+        topHoriztontalBanner.setPadding(new Insets(0,00,0,10));
+
+
+        // Branch Label
+        branchLabel = new Text();
+        branchLabel.setFont(Font.font("Veranda", FontWeight.BOLD, 24));
+        branchLabel.setText("Selected Branch:");
+        topHoriztontalBanner.getChildren().add(branchLabel);
+
+        // Create the Branch Dropdown
+        // TODO figure out how this gets data or maybe an observable update populates the dropdown
+        branchDropdown = new ComboBox(mockBranches);
+        // Select first entry by default
+        branchDropdown.getSelectionModel().selectFirst();
+        // Set up the select action
+        branchDropdown.setOnAction(event -> {
+            String selectedValue = branchDropdown.getValue();
+            System.out.println("The " + selectedValue + " branch was selected. Update HeatMap, CommitHistory, and CommitDetails, Hide SelectedFileTerminal Window");
+        });
+        topHoriztontalBanner.getChildren().add(branchDropdown);
+
 
         // TODO Extract to ViewFactory?
         // Create Tableview with data
@@ -134,13 +167,6 @@ public class CommHistoryPane extends VBox {
 
         // Add table view to CommitHistoryPane
         this.getChildren().add(commitList);
-
-        Text text = new Text();
-        text.setFont(new Font(12));
-        text.setText("Commit History View");
-        topHoriztontalBanner.getChildren().add(text);
-        text.setX(0);
-        text.setY(10);
 
         // Fill background with default
         backgroundColor = Color.LAWNGREEN;
