@@ -23,6 +23,8 @@ public class FileObject
 	private String folderPath;
 	private int depth;
 
+	private int heatLevel = -1;
+
 	public FileObject(String fileName, String folderPath,int depth)
 	{
 		this.fileName=fileName;
@@ -68,7 +70,7 @@ public class FileObject
 	}
 	
 	
-	public  void  computeLineCount() 
+	public  void  computeLineCount()  //TODO should be moved out of this model class
 	{
 		long lineCount=0;
 		try
@@ -130,6 +132,11 @@ public class FileObject
 
 	public int computeHeatLevel()
 	{
-		return (int) (Math.random() * 10); //TODO
+		this.heatLevel = (int) (Math.random() * 10); //TODO
+		return this.heatLevel;
+	}
+
+	public int getHeatLevel() {
+		return heatLevel;
 	}
 }

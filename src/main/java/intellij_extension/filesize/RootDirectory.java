@@ -1,5 +1,6 @@
 package intellij_extension.filesize;
 
+import intellij_extension.models.Commit;
 import intellij_extension.models.FileObject;
 
 import java.io.File;
@@ -13,8 +14,8 @@ import java.util.HashMap;
 public class RootDirectory {
 	
 	private String baseDir;
-	private HashMap<String,Folder> folderList;
-	private HashMap<String, FileObject> fileList;
+	private HashMap<String,Folder> folderMap;
+	private HashMap<String, FileObject> fileMap;
 
 	private long folderCount, fileCount;
 	private int depth;
@@ -23,8 +24,8 @@ public class RootDirectory {
 	public RootDirectory()
 	{
 		this.baseDir="/src";
-		folderList=new HashMap<String,Folder>();
-		fileList=new HashMap<String,FileObject>();
+		folderMap =new HashMap<String,Folder>();
+		fileMap=new HashMap<String,FileObject>();
 		folderCount=0;
 		fileCount=0;
 		depth=0;
@@ -34,8 +35,8 @@ public class RootDirectory {
 	public RootDirectory(String baseDir)
 	{
 		this.baseDir=baseDir;
-		folderList=new HashMap<String,Folder>();
-		fileList=new HashMap<String,FileObject>();
+		folderMap =new HashMap<String,Folder>();
+		fileMap=new HashMap<String,FileObject>();
 		folderCount=0;
 		fileCount=0;
 		depth=0;
@@ -56,9 +57,10 @@ public class RootDirectory {
 	
 	
 	// reads the base directory information and sets the folder and file objects
-	public  void parsedirectory() throws IOException
+	public void parsedirectory() throws IOException
 	{
 		File directory=new File(getBaseDir());
+		System.out.println("Parsing files from root dir `"+directory.getAbsolutePath()+"`");
 		
 		long folderCount=0;
 		
@@ -73,7 +75,7 @@ public class RootDirectory {
 				
 				Folder folder=new Folder(folderObject,getBaseDir(),getDepth()+1);
 				folder.parseFolder();
-				folderList.put(folderObject, folder);
+				folderMap.put(folderObject, folder);
 				folderCount++;
 			
 			}
@@ -83,7 +85,7 @@ public class RootDirectory {
 			{
 				FileObject file=new FileObject(folderObject,getBaseDir(),getDepth()+1);
 				file.parseFile();
-				fileList.put(folderObject,file);
+				fileMap.put(folderObject,file);
 				fileCount++;
 			}
 		}
@@ -129,20 +131,71 @@ public class RootDirectory {
 		System.out.println(getBaseDir()+" Folder Count : "+getFolderCount());
 		
 		// display all folders within the base directory
-		for( String foldername : folderList.keySet())
+		for( String foldername : folderMap.keySet())
 		{
-			Folder folder=folderList.get(foldername);
+			Folder folder= folderMap.get(foldername);
 			folder.displayDetails();
-			
 		}
 		
 		// display all files within the base directory 
-		for( String filename : fileList.keySet())
+		for( String filename : fileMap.keySet())
 		{
-			FileObject file=fileList.get(filename);
+			FileObject file=fileMap.get(filename);
 			file.displayFileDetails();	
 		}
 		
 	}
-	
+
+	/**
+	 * Changes the HashMap passed to it so that FileObjects inside of it
+	 * are either added (if they do not exist) or given more data.
+	 * In this case, the FileObjects should be given file size data.
+	 * @param existingFileMetricMap this holds all file data for one commit in the project
+	 * @return the input map but with all FileObjects in the project given file size counts.
+	 */
+	public HashMap<String, FileObject> editFileMetricMap(HashMap<String, FileObject> existingFileMetricMap)
+	{
+		//Place the FileObjects from this directory into the map
+		for(String filename : fileMap.keySet())
+		{
+			//Merge the existing data (if it exists) with the newly computed data
+			FileObject existingData = existingFileMetricMap.get(filename); //what was passed in as a param
+			FileObject fileSizeData = fileMap.get(filename); //what this class computed
+			if (existingData == null)
+				existingData = fileSizeData;
+			existingData.setFileSize(fileSizeData.getFileSize());
+			existingData.setLineCount(fileSizeData.getLineCount());
+
+			existingFileMetricMap.put(filename, existingData);
+			System.out.println("Mapped file "+filename);
+		}
+
+		//Recur on the sub-directories
+		for( String folderPath : folderMap.keySet())
+		{
+			Folder folder = folderMap.get(folderPath);
+			folder.editFileMetricMap(existingFileMetricMap);
+		}
+
+		return existingFileMetricMap;
+	}
+
+	public static void main(String[] args) {
+		//Compute file size
+		//TODO We may need to have the user select the project root
+		RootDirectory rootDirectory =new RootDirectory("C:\\Users\\Pete\\Desktop\\team3-project\\src\\main");
+		try {
+			rootDirectory.parsedirectory();
+			rootDirectory.displayDetails();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		//Add the file size data to the map
+		Commit activeCommit = new Commit();
+		HashMap<String, FileObject> fileMetricMap = activeCommit.getFileMetricMap();
+		rootDirectory.editFileMetricMap(fileMetricMap);
+		System.out.println("Complete");
+	}
+
 }
