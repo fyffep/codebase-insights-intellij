@@ -20,7 +20,7 @@
 <!--    <actions>-->
 <!--        &lt;!&ndash; Add your actions here &ndash;&gt;-->
 <!--        <action id="PopupDialogAction" class="PopupDialogAction" text="Test Action Basics Plugin: Pop Dialog Action"-->
-<!--                description="Going through tutorial. This is a test.">-->
+<!--                description="Going through tutorial. This is a testcase.">-->
 <!--            <override-text place="MainMenu" text="Pop Dialog Action"/>-->
 <!--            <keyboard-shortcut first-keystroke="control alt A" second-keystroke="C" keymap="$default"/>-->
 <!--            <mouse-shortcut keystroke="control button3 doubleClick" keymap="$default"/>-->
