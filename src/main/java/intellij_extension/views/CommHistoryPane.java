@@ -2,13 +2,16 @@ package intellij_extension.views;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.*;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import intellij_extension.Constants;
 
 /**
  * References on TableView:
@@ -16,24 +19,38 @@ import intellij_extension.Constants;
  * https://docs.oracle.com/javafx/2/ui_controls/table-view.htm
  * https://stackoverflow.com/questions/38049734/java-setcellvaluefactory-lambda-vs-propertyvaluefactory-advantages-disadvant/38050982#38050982
  * http://tutorials.jenkov.com/javafx/tableview.html
+ * https://www.superglobals.net/remove-extra-column-tableview-javafx/
+ * https://stackoverflow.com/questions/14650787/javafx-column-in-tableview-auto-fit-size
  */
 
-public class CommHistoryPane extends VBox
-{
-
-    private Pane topHoriztontalBanner;
-
-    private TableView<CommitHistoryLine> commitList;
+public class CommHistoryPane extends VBox {
 
     // TODO - MOVE TO TEST MOCK DATA EVENTUALLY
     // MOCK/TESTING DATA
     public static final ObservableList<CommitHistoryLine> mockCommitHistoryData = FXCollections.observableArrayList(
-            new CommitHistoryLine("1", "Commit 1's Description", "Smith", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-            new CommitHistoryLine("2", "Commit 2's Description", "Johnson", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-            new CommitHistoryLine("3", "Commit 3's Description", "Williams", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-            new CommitHistoryLine("4", "Commit 4's Description", "Jones", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-            new CommitHistoryLine("5", "Commit 5's Description", "Brown", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c")
+            new CommitHistoryLine("1", "Commit 1's Description is middle size.", "Smith", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
+            new CommitHistoryLine("2", "Commit 2's Description is middle size.", "Johnson", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
+            new CommitHistoryLine("3", "Commit 3's Description a much longer description for testing is needed", "Williams", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
+            new CommitHistoryLine("4", "A small description", "Jones", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
+            new CommitHistoryLine("5000", "Commit 5's Description is middle size.", "Brown", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c")
     );
+    public static final ObservableList<String> mockBranches = FXCollections.observableArrayList(
+            "master",
+            "development",
+            "major feature A",
+            "release 1.0",
+            "major feature B",
+            "hotfix 1.1hf",
+            "major feature C",
+            "major feature D",
+            "release 1.5",
+            "major feature F",
+            "release 2.0",
+            "major feature H"
+    );
+
+    private Pane topHoriztontalBanner;
+    private TableView<CommitHistoryLine> commitList;
 
     public CommHistoryPane() {
         super();
@@ -59,7 +76,11 @@ public class CommHistoryPane extends VBox
         // TODO Extract to ViewFactory?
         // Create Tableview with data
         commitList = new TableView(mockCommitHistoryData);
+        // Turn off editable
         commitList.setEditable(false);
+        // Do not create n + 1 columns with n + 1 being empty... (Why is that default behavior?!)
+//        commitList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        commitList.setColumnResizePolicy((param) -> true);
 
         //Background to see if its created/laid out properly
         backgroundColor = Color.MEDIUMSPRINGGREEN;
@@ -80,9 +101,14 @@ public class CommHistoryPane extends VBox
         // Set up columns
         TableColumn<CommitHistoryLine, String> rowColumn = new TableColumn("#");
         TableColumn<CommitHistoryLine, String> descriptionColumn = new TableColumn("Description");
+        // TODO get rid of Magic Number
+        descriptionColumn.setMaxWidth(200);
+        descriptionColumn.setSortable(false);
         TableColumn<CommitHistoryLine, String> authorColumn = new TableColumn("Author");
         TableColumn<CommitHistoryLine, String> dateColumn = new TableColumn("Date");
+        dateColumn.setSortable(false);
         TableColumn<CommitHistoryLine, String> hashColumn = new TableColumn("Hash");
+        hashColumn.setSortable(false);
 
         //Associate data with columns - don't really get this part
         rowColumn.setCellValueFactory(cellData -> cellData.getValue().getRowNumber());
@@ -91,6 +117,17 @@ public class CommHistoryPane extends VBox
         dateColumn.setCellValueFactory(cellData -> cellData.getValue().getCommitDate());
         hashColumn.setCellValueFactory(cellData -> cellData.getValue().getCommitHash());
 
+        // Add click method to rows
+        commitList.setRowFactory(tv -> {
+            TableRow<CommitHistoryLine> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    CommitHistoryLine rowData = row.getItem();
+                    System.out.println("Commit " + rowData.getRowNumber().getValue() + " was double clicked!");
+                }
+            });
+            return row;
+        });
 
         // Add columns to table
         commitList.getColumns().addAll(rowColumn, descriptionColumn, authorColumn, dateColumn, hashColumn);
