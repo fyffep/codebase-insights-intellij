@@ -1,4 +1,4 @@
-package intellij_extension.filesize;
+package intellij_extension.utility.filesize;
 
 import intellij_extension.models.FileObject;
 
@@ -48,7 +48,10 @@ public class Directory
             if (verifyFolder.isFile())
             {
                 FileObject file = new FileObject(folderPath, getPath(),getDepth()+1);
-                file.parseFile();
+                //Calculate the file's size
+                FileSizeCalculator.assignFileSize(file);
+                FileSizeCalculator.assignLineCount(file);
+
                 fileMap.put(folderPath,file);
                 fileCount++;
             }

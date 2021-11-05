@@ -1,9 +1,6 @@
 package intellij_extension.models;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import intellij_extension.utility.filesize.FileSizeCalculator;
 
 /**
 * filename
@@ -18,7 +15,7 @@ public class FileObject
 	private String fileName;
 	private long lineCount;
 	private long fileSize;
-	private int noOfCommits;
+	private int numberOfCommits = 1;
 	private String filePath;
 	private String folderPath;
 	private int depth;
@@ -38,6 +35,7 @@ public class FileObject
 	{
 		this.fileName=fileName;
 	}
+
 	public String getFileName()
 	{
 		return this.fileName;
@@ -47,8 +45,7 @@ public class FileObject
 	{
 		return this.folderPath;
 	}
-	
-	
+
 	public void setFilePath()
 	{
 		this.filePath=getFolderPath()+"/"+getFileName();	
@@ -70,29 +67,6 @@ public class FileObject
 	}
 	
 	
-	public  void  computeLineCount()  //TODO should be moved out of this model class
-	{
-		long lineCount=0;
-		try
-		{
-			BufferedReader buffer=new BufferedReader(new FileReader(getFilePath()));
-			
-			while(buffer.readLine()!=null)
-			{
-				lineCount++;
-			}
-			buffer.close();
-		}
-		catch(Exception e)
-		{
-			System.out.println("Unable to read:"+ getFilePath());
-			System.exit(0);
-		}
-	
-		setLineCount(lineCount);
-	}
-	
-	
 	public void setFileSize(long length)
 	{
 		this.fileSize=length;
@@ -103,21 +77,6 @@ public class FileObject
 	{
 		return this.fileSize;
 	}
-	
-	public  void computeFileSize() throws IOException
-	{
-		File file=new File(getFilePath());
-		setFileSize(file.length());
-	}
-
-	
-
-	public void parseFile() throws IOException 
-	{
-		computeLineCount();
-		computeFileSize();
-	}
-	
 	
 	public void displayFileDetails()
 	{
@@ -130,9 +89,20 @@ public class FileObject
 		return this.depth;
 	}
 
-	public int computeHeatLevel()
+	/**
+	 * Assigns a heat level to this FileObject based on its metrics.
+	 * @return a value from 1 to 10, with 10 being the hottest
+	 */
+	public int computeHeatLevel() //maybe this class (a model) is not the best place for this method
 	{
-		this.heatLevel = (int) (Math.random() * 10); //TODO
+		//Currently, this does not support accumulated heat
+
+		//Compute the heat of each metric
+		int sizeHeat = FileSizeCalculator.calculateHeat(this);
+
+		//Average all the metrics
+		heatLevel = sizeHeat; //should be changed when more metrics are added
+
 		return this.heatLevel;
 	}
 

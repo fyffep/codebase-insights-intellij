@@ -1,19 +1,17 @@
 package intellij_extension.controllers;
 
-import intellij_extension.filesize.Directory;
+import intellij_extension.utility.HeatColorUtility;
+import intellij_extension.utility.filesize.Directory;
 import intellij_extension.models.CodeBase;
 import intellij_extension.models.Commit;
 import intellij_extension.models.FileObject;
 import intellij_extension.views.HeatMapPane;
 import intellij_extension.views.unused.HeatFileComponent;
-import intellij_extension.views.unused.HeatMapContainer;
 import javafx.scene.Node;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 public class HeatMapController
 {
@@ -75,11 +73,10 @@ public class HeatMapController
         {
             String fileName = keyIterator.next();
             FileObject fileObject = fileMetricMap.get(fileName); //unused
+            fileObject.computeHeatLevel(); //TODO should be moved?
 
-            //Generate color (TODO -- this is just a placeholder version that arbitrarily chooses a red color)
-            fileObject.computeHeatLevel(); //TEMP should be moved?
-            int redValue = (int) ((fileObject.computeHeatLevel() / 10.0) * 255);
-            String color = String.format("%02x", redValue) + "0000";
+            //Generate color
+            String color = HeatColorUtility.colorOfHeat(fileObject.getHeatLevel());
 
             //Add a pane (rectangle) to the screen
             HeatFileComponent heatFileComponent = new HeatFileComponent();
