@@ -17,8 +17,8 @@ import java.util.HashMap;
 public class Folder {
 	
 	private String foldername;
-	private HashMap<String, FileObject> fileList;
-	private HashMap<String,Folder> folderList;
+	private HashMap<String, FileObject> fileMap;
+	private HashMap<String,Folder> folderMap;
 	private String folderpath;
 	private long fileCount,folderCount;
 	private int depth;
@@ -27,8 +27,8 @@ public class Folder {
 	public Folder ()
 	{
 		this.foldername="";
-		fileList=new HashMap<String,FileObject>();
-		folderList=new HashMap<String,Folder>();
+		fileMap =new HashMap<String,FileObject>();
+		folderMap =new HashMap<String,Folder>();
 
 		fileCount=0;
 		folderCount=0;
@@ -41,10 +41,10 @@ public class Folder {
 	{
 		
 		this.foldername=foldername;
-		fileList=new HashMap<String,FileObject>();
+		fileMap =new HashMap<String,FileObject>();
 		setFolderPath(basedir);
 		fileCount=0;
-		folderList=new HashMap<String,Folder>();
+		folderMap =new HashMap<String,Folder>();
 		folderCount=0;
 		this.depth=depth;
 	}
@@ -87,14 +87,14 @@ public class Folder {
 			{
 				FileObject file=new FileObject(folderObject,getFolderPath(),getDepth()+1);
 				file.parseFile();
-				fileList.put(folderObject,file);
+				fileMap.put(folderObject,file);
 				fileCount++;
 			}
 			else if(verifyobj.isDirectory())
 			{
 				Folder folder=new Folder(folderObject,getFolderPath(),getDepth()+1);
 				folder.parseFolder();
-				folderList.put(folderObject,folder);
+				folderMap.put(folderObject,folder);
 				folderCount++;
 			}
 				
@@ -138,16 +138,52 @@ public class Folder {
 	{
 		String output=getFolder()+"---> FileCount : "+getFileCount()+" Folder Count : "+getFolderCount();
 		System.out.println(String.format("%1$" + (output.length()+getDepth()) + "s", output));
-		for( String filename : fileList.keySet())
+		for( String filename : fileMap.keySet())
 		{
-			FileObject file=fileList.get(filename);
+			FileObject file= fileMap.get(filename);
 			file.displayFileDetails();	
 		}
 		
-		for(String foldername: folderList.keySet())
+		for(String foldername: folderMap.keySet())
 		{
-			Folder folder=folderList.get(foldername);
+			Folder folder= folderMap.get(foldername);
 			folder.displayDetails();
 		}
+	}
+
+
+
+	/**
+	 * Changes the HashMap passed to it so that FileObjects inside of it
+	 * are either added (if they do not exist) or given more data.
+	 * In this case, the FileObjects should be given file size data.
+	 * @param existingFileMetricMap this holds all file data for one commit in the project
+	 * @return the input map but with all FileObjects in the project given file size counts.
+	 */
+	public HashMap<String, FileObject> editFileMetricMap(HashMap<String, FileObject> existingFileMetricMap)
+	{
+		//Place the FileObjects from this directory into the map
+		for(String filename : fileMap.keySet())
+		{
+			//Merge the existing data (if it exists) with the newly computed data
+			FileObject existingData = existingFileMetricMap.get(filename); //what was passed in as a param
+			FileObject fileSizeData = fileMap.get(filename); //what this class computed
+			if (existingData == null)
+				existingData = fileSizeData;
+			existingData.setFileSize(fileSizeData.getFileSize());
+			existingData.setLineCount(fileSizeData.getLineCount());
+
+			existingFileMetricMap.put(filename, existingData);
+			System.out.println("Mapped file "+filename);
+		}
+
+		//Recur on the sub-directories
+		for( String folderPath : folderMap.keySet())
+		{
+			Folder folder = folderMap.get(folderPath);
+			folder.editFileMetricMap(existingFileMetricMap);
+		}
+
+		return existingFileMetricMap;
 	}
 }
