@@ -51,33 +51,4 @@ public class FileSizeCalculator
         File file = new File(fileObject.getFilePath());
         fileObject.setFileSize(file.length());
     }
-
-    /**
-     * Returns the level of heat caused by the fileObject's file size.
-     * @param fileObject this should have its lineCount already assigned
-     */
-    public static int calculateHeat(FileObject fileObject)
-    {
-        int heatLevel;
-
-        long lineCount = fileObject.getLineCount();
-        if (lineCount < 100)
-        {
-            heatLevel = HEAT_MIN;
-        }
-        //Give 1 point of heat for every hundred lines
-        else if (lineCount > 100 && lineCount < 1000)
-        {
-            heatLevel = (int) Math.round(lineCount / 100.0);
-        }
-        else
-        {
-            heatLevel = HEAT_MAX;
-        }
-
-        if (heatLevel > HEAT_MAX)
-            heatLevel = HEAT_MAX;
-
-        return heatLevel;
-    }
 }

@@ -1,10 +1,11 @@
 package intellij_extension.controllers;
 
-import intellij_extension.utility.HeatColorUtility;
-import intellij_extension.utility.filesize.Directory;
+import intellij_extension.utility.HeatCalculationUtility;
+import intellij_extension.models.Directory;
 import intellij_extension.models.CodeBase;
 import intellij_extension.models.Commit;
 import intellij_extension.models.FileObject;
+import intellij_extension.utility.commithistory.CommitCountCalculator;
 import intellij_extension.views.HeatMapPane;
 import intellij_extension.views.unused.HeatFileComponent;
 import javafx.scene.Node;
@@ -36,20 +37,23 @@ public class HeatMapController
 
     public void recalculateHeat()
     {
-        //todo: order the file size measurer to create a list of file objects that will replace the current model
-
+        //Order the file metrics calculators to analyze the code base
         try
         {
             //Compute file size
             //TODO We may need to have the user select the project root
             Directory rootDirectory = new Directory("C:\\Users\\Pete\\Desktop\\team3-project\\src\\main");
             rootDirectory.parseDirectory();
-            rootDirectory.displayDetails();//TEMP
-
             //Add the file size data to the map
             Commit activeCommit = codeBase.getActiveCommit();
             HashMap<String, FileObject> fileMetricMap = activeCommit.getFileMetricMap();
             rootDirectory.editFileMetricMap(fileMetricMap);
+
+            //Add number of commits data to the map
+            CommitCountCalculator commitCountCalculator = new CommitCountCalculator();
+            commitCountCalculator.editFileMetricMap(fileMetricMap);
+
+            //Now the activeCommit's fileMetricMap can be used to display the data
         }
         catch (IOException e)
         {
@@ -72,18 +76,18 @@ public class HeatMapController
         while (keyIterator.hasNext())
         {
             String fileName = keyIterator.next();
-            FileObject fileObject = fileMetricMap.get(fileName); //unused
-            fileObject.computeHeatLevel(); //TODO should be moved?
+            FileObject fileObject = fileMetricMap.get(fileName);
+            int heatLevel = fileObject.computeHeatLevel();
 
             //Generate color
-            String color = HeatColorUtility.colorOfHeat(fileObject.getHeatLevel());
+            String color = HeatCalculationUtility.colorOfHeat(heatLevel);
 
             //Add a pane (rectangle) to the screen
             HeatFileComponent heatFileComponent = new HeatFileComponent();
             heatFileComponent.setStyle("-fx-background-color: #" + color);
             heatMapPane.addNode(heatFileComponent);
 
-            System.out.println("Added a file pane for "+fileName +" with heat level "+fileObject.getHeatLevel());
+            System.out.println("Added a file pane for "+fileName +" with heat level "+heatLevel+" and color "+color);
         }
     }
 

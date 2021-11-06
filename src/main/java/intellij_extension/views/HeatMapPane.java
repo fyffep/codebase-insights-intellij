@@ -14,20 +14,11 @@ public class HeatMapPane extends FlowPane {
     public HeatMapPane() {
         super();
 
-        /*Text text = new Text();
-        text.setX(40);
-        text.setY(100);
-        text.setFont(new Font(25));
-        text.setText("HeatMapView");
-        getChildren().add(text);*/
-
-
         // Fill background with default
-        Color backgroundColor = Color.AQUAMARINE;
+        Color backgroundColor = Color.rgb(40, 40, 40); //IntelliJ dark background color
         BackgroundFill backgroundFill = new BackgroundFill(backgroundColor, null, null);
         Background background = new Background(backgroundFill);
         setBackground(background);
-
 
         //Set margin around the heat boxes.
         //The value 10 is arbitrary.
