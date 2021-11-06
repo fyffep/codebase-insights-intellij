@@ -12,10 +12,10 @@ public class TestData {
     public static long TEST_DEFAULT_FILELIST_SIZE=0;
     public static String TEST_ROOT_DEFAULT_PATH="src";
     public static String TEST_ROOT_PATH="abc";
-    public static String TEST_PARSE_FOLDER_PATH="src/test/java";
+    public static String TEST_PARSE_FOLDER_PATH="src/test/java/intellij_extension";
     public static String TEST_PARSE_FOLDER_NAME="java";
     public static int TEST_PARSE_FOLDER_COUNT=2;
-    public static String TEST_PARSE_FILE="src/test/java/testdata";
+    public static String TEST_PARSE_FILE="src/test/java/intellij_extension/models";
     public static int TEST_PARSE_FILE_COUNT=2;
     public static String TEST_FILEPATH="src/test/java/testdata/TestParseFile.java";
     public static String TEST_FILENAME="TestParseFile.java";
