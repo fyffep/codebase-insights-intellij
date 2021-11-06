@@ -1,4 +1,4 @@
-package testcase;
+/*package testcase;
 
 import intellij_extension.filesize.Folder;
 import intellij_extension.filesize.Folder;
@@ -15,7 +15,7 @@ import static testdata.TestData.*;
 
 /**
  * The following class contains the test cases of all the methods in the class Folder.java
- */
+ *
 
 
 public class FolderTest {
@@ -189,3 +189,4 @@ public class FolderTest {
     }
 
 }
+*/

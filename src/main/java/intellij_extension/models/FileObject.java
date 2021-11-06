@@ -1,10 +1,6 @@
 package intellij_extension.models;
 
 import intellij_extension.utility.HeatCalculationUtility;
-import intellij_extension.utility.commithistory.CommitCountCalculator;
-import intellij_extension.utility.filesize.FileSizeCalculator;
-
-import java.io.IOException;
 
 /**
 * filename
@@ -16,21 +12,20 @@ import java.io.IOException;
 */
 public class FileObject
 {
-	private String fileName;
+	private String fileName; //the file name and its extension
+	private String filePath; //the full path to the file, including the file name
+
 	private long lineCount;
 	private long fileSize;
 	private int numberOfCommits = 1;
-	private String filePath;
-	private String folderPath;
 	private int depth;
 
 	private int heatLevel = -1;
 
-	public FileObject(String fileName, String folderPath,int depth)
+	public FileObject(String fileName, String filePath, int depth)
 	{
 		this.fileName=fileName;
-		this.folderPath=folderPath;
-		setFilePath();
+		this.filePath = filePath;
 		this.depth=depth;
 	}
 
@@ -44,17 +39,11 @@ public class FileObject
 	{
 		return this.fileName;
 	}
-	
-	public String getFolderPath()
-	{
-		return this.folderPath;
+
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
 	}
 
-	public void setFilePath()
-	{
-		this.filePath=getFolderPath()+"/"+getFileName();	
-	}
-	
 	public String getFilePath()
 	{
 		return this.filePath;
@@ -83,6 +72,10 @@ public class FileObject
 	public int getDepth() {
 
 		return this.depth;
+	}
+
+	public void setDepth(int depth) {
+		this.depth = depth;
 	}
 
 	public int getNumberOfCommits() {
