@@ -35,8 +35,8 @@ public class TestToolWindowFactory implements ToolWindowFactory {
             CodeBase codeBase = new CodeBase();
 
             //Create the main heat map area
-            HeatMapController heatMapController = new HeatMapController(codeBase);
-            root.getItems().add(heatMapController.getView()); //show the view
+//            HeatMapController heatMapController = new HeatMapController(codeBase);
+//            root.getItems().add(heatMapController.getView()); //show the view
 
             // Left Half of Tools Windows
             HeatMapPane heatMapPane = new HeatMapPane();
