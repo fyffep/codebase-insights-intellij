@@ -4,16 +4,12 @@ import javafx.geometry.Orientation;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 
 public class CommitInfoSplitPane extends SplitPane
 {
     // Top half is Commit History for a single branch
-    private CommHistoryPane commitHistoryPane;
+    private CommitHistoryPane commitHistoryPane;
 
     // Bottom half is Commit Details for a single commit in the selected branch
     private CommitDetailsPane commitDetailsPane;
@@ -38,7 +34,7 @@ public class CommitInfoSplitPane extends SplitPane
 
 
         // Top half is Options/Commit Area
-        commitHistoryPane = new CommHistoryPane();
+        commitHistoryPane = new CommitHistoryPane();
         getItems().add(commitHistoryPane);
         System.out.println((commitHistoryPane.getWidth()));
         System.out.println((commitHistoryPane.getHeight()));

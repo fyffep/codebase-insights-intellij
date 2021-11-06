@@ -1,0 +1,12 @@
+We are considering the following for a CodeBase model object, but it is subject to change. The variables are listed.
+CodeBase
+    - List<String> branchName;
+    - String activeBranch;
+    - List<Commit> activeCommits;
+    //- int[number of commits] heatAccumulations;
+Commit
+    - RevCommit (from JGit)
+    - Map<File, FileObject>
+FileObject <--can be renamed to FileMetricObject
+    - File metrics
+    - Heat level
