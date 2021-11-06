@@ -112,7 +112,6 @@ public class CommitHistoryPane extends VBox {
         commitList.prefWidthProperty().bind(this.widthProperty());
         commitList.prefHeightProperty().bind(this.heightProperty());
 
-        // Set up row clicking action
         // Add click method to rows
         // I hate that I can't refactor this double lambda expression
         commitList.setRowFactory(tableView -> {
