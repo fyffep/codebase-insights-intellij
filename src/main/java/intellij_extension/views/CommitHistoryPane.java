@@ -1,6 +1,8 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
@@ -11,46 +13,81 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-/**
- * References on TableView:
- * https://stackoverflow.com/questions/25701087/javafx-tableview-resizeable-and-unresizeable-column
- * https://docs.oracle.com/javafx/2/ui_controls/table-view.htm
- * https://stackoverflow.com/questions/38049734/java-setcellvaluefactory-lambda-vs-propertyvaluefactory-advantages-disadvant/38050982#38050982
- * http://tutorials.jenkov.com/javafx/tableview.html
- * https://www.superglobals.net/remove-extra-column-tableview-javafx/
- * https://stackoverflow.com/questions/14650787/javafx-column-in-tableview-auto-fit-size
- */
+import java.util.ArrayList;
 
 public class CommitHistoryPane extends VBox {
 
     private final HBox topHorizontalBanner;
-    private final Text branchLabel;
+    private final Text headerText;
     private final ComboBox<String> branchComboBox; // This might have to change from String to something else.
     private final TableView<CommitHistoryLine> commitList;
+
+    // Will be used when Model is sending data
+    // This is all the lines we created so far - we should never remove from this list
+    private final ArrayList<CommitHistoryLine> commitLines = new ArrayList<>();
+    // These are active lines in the TableView
+    private final ObservableList<CommitHistoryLine> activeCommitLines = FXCollections.observableArrayList();
 
     public CommitHistoryPane() {
         super();
 
         // Create the top horizontal banner
-        topHorizontalBanner = ViewFactory.getInstance().createOrGetHBox(Constants.COMMIT_HISTORY_BANNER_ID);
+        topHorizontalBanner = ViewFactory.getInstance().createOrGetHBox(Constants.CH_BANNER_ID);
         setBannerProperties();
         ViewFactory.setPaneChild(this, topHorizontalBanner);
 
-        // Create the banner label
-        branchLabel = ViewFactory.getInstance().createOrGetText(Constants.COMMIT_HISTORY_BANNER_BRANCH_LABEL_ID);
-        setBranchLabelProperties();
-        ViewFactory.setPaneChild(topHorizontalBanner, branchLabel);
+        // Create the banner text
+        headerText = ViewFactory.getInstance().createOrGetText(Constants.CH_HEADER_TEXT_ID);
+        setHeaderTextProperties();
+        ViewFactory.setPaneChild(topHorizontalBanner, headerText);
 
         // Create the banner combo box
-        branchComboBox = ViewFactory.getInstance().createOrGetComboBox(Constants.COMMIT_HISTORY_BRANCH_COMBOBOX_ID);
+        branchComboBox = ViewFactory.getInstance().createOrGetComboBox(Constants.CH_BRANCH_COMBOBOX_ID);
         setBranchComboBoxProperties();
         ViewFactory.setPaneChild(topHorizontalBanner, branchComboBox);
 
         // Create Tableview with data
-        commitList = ViewFactory.getInstance().createOrGetTableView(Constants.COMMIT_HISTORY_BRANCH_TABLEVIEW_ID);
+        commitList = ViewFactory.getInstance().createOrGetTableView(Constants.CH_BRANCH_TABLEVIEW_ID);
         setCommitListProperties();
         setCommitListColumns();
         ViewFactory.setPaneChild(this, commitList);
+    }
+
+    /*
+        Newly Selected Branch
+            - Might be an observable update method call
+     */
+    public void branchUpdated(Object TheNewBranch) {
+        // We have to update each line with the new commit info,
+        // If we need extra lines we have to create and add them.
+        // Since we use an observableList...
+            // Should be able to clear it
+            // And only add the commit line objects we want to
+            // This should handle updating the TableView
+            // ...Let's see when it comes to implementation time.
+
+        // activeCommitLines.Clear()
+        // activeCommitLines.RemoveAll()
+
+        // Pseudocode
+
+        // int counter = 0;
+
+        // Foreach newCommit in TheNewBranch.getCommits()
+            // if counter < commitLines.size()
+                // This means we have a commitLine created already... so recycle it
+                // update commitLine[counter] with newCommit
+                // activeCommitLines.add(commitLine[counter])
+            // else
+                // This means we ran out of already created commit lines... so create a new one
+                // create new commit line with newCommit
+                // activeCommitLines.add(new commit line)
+            // counter++;
+
+        // if counter < commitLines.size()
+            // This means we have extra commit lines still active in the TableView
+            // But we are out of commits for this branch
+            // So remove them from the TableView
     }
 
     /*
@@ -61,23 +98,23 @@ public class CommitHistoryPane extends VBox {
 
         // We want this so the user can make the Commit Details view as big
         // as the right side if desirable
-        topHorizontalBanner.setMinHeight(Constants.CH_BANNER_MIN_HEIGHT);
+        topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT);
         // TODO We really want this to be a set, not a bind.
         // The header shouldn't grow with the window size
         // But it should be a percentage of the window size.
-        topHorizontalBanner.prefHeightProperty().bind(this.heightProperty().multiply(Constants.CH_BANNER_SIZE_MULTIPLER));
-        topHorizontalBanner.maxHeightProperty().bind(this.heightProperty().multiply(Constants.CH_BANNER_SIZE_MULTIPLER));
+        topHorizontalBanner.prefHeightProperty().bind(this.heightProperty().multiply(Constants.BANNER_SIZE_MULTIPLIER));
+        topHorizontalBanner.maxHeightProperty().bind(this.heightProperty().multiply(Constants.BANNER_SIZE_MULTIPLIER));
         topHorizontalBanner.prefWidthProperty().bind(this.widthProperty());
 
         // Child layout properties
-        topHorizontalBanner.setAlignment(Constants.CH_BANNER_ALIGNMENT);
-        topHorizontalBanner.setSpacing(Constants.CH_BANNER_SPACING);
-        topHorizontalBanner.setPadding(Constants.CH_BANNER_INSETS);
+        topHorizontalBanner.setAlignment(Constants.BANNER_ALIGNMENT);
+        topHorizontalBanner.setSpacing(Constants.BANNER_SPACING);
+        topHorizontalBanner.setPadding(Constants.BANNER_INSETS);
     }
 
-    private void setBranchLabelProperties() {
-        branchLabel.setFont(Font.font(Constants.LABEL_FONT, Constants.CH_BRANCH_LABEL_FONT_WEIGHT, Constants.CH_BRANCH_LABEL_SIZE));
-        branchLabel.setText(Constants.BRANCH_LABEL_TEXT);
+    private void setHeaderTextProperties() {
+        headerText.setFont(Font.font(Constants.HEADER_FONT, Constants.HEADER_TEXT_FONT_WEIGHT, Constants.HEADER_TEXT_SIZE));
+        headerText.setText(Constants.CH_HEADER_TEXT);
     }
 
     private void setBranchComboBoxProperties() {

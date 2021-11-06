@@ -15,7 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.awt.*;
 
-public class TestToolWindowFactory implements ToolWindowFactory {
+public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory {
+
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         final JFXPanel fxPanel = new JFXPanel();

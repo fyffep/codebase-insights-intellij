@@ -14,7 +14,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Codebase Heatmap" secondary="false" icon="AllIcons.General.ProjectStructure" anchor="left"
-                    factoryClass="intellij_extension.TestToolWindowFactory"/>
+                    factoryClass="intellij_extension.CodebaseInsightsToolWindowFactory"/>
     </extensions>
 
 <!--    <actions>-->

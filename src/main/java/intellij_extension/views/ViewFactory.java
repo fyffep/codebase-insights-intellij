@@ -2,9 +2,12 @@ package intellij_extension.views;
 
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
 import java.util.HashMap;
@@ -14,25 +17,38 @@ public class ViewFactory {
     private static ViewFactory instance;
 
     private HashMap<String, HBox> managedHBoxes;
+    private HashMap<String, VBox> managedVBoxes;
+    private HashMap<String, ScrollPane> managedScrollPanes;
     private HashMap<String, Text> managedTexts;
     private HashMap<String, ComboBox> managedComboBoxes;
     private HashMap<String, TableView> managedTableViews;
 
     private ViewFactory() {
-        // TODO
-        // initialize data structures as we add them.
         managedHBoxes = new HashMap<>();
+        managedVBoxes = new HashMap<>();
+        managedScrollPanes = new HashMap<>();
         managedTexts = new HashMap<>();
         managedComboBoxes = new HashMap<>();
         managedTableViews = new HashMap<>();
     }
 
     public static ViewFactory getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new ViewFactory();
         }
 
         return instance;
+    }
+
+    /*
+     *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * Children Management
+     *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * These methods might seem ridiculous
+     * But this will reduce SonarQube's duplication code count
+     */
+    public static void setPaneChild(Pane parent, Node child) {
+        parent.getChildren().add(child);
     }
 
     /*
@@ -48,11 +64,10 @@ public class ViewFactory {
     // So like text or hbox, but not tableview or combo box? (Assuming we only have one tableView and comboBox)
     public HBox createOrGetHBox(String id) {
         // Check if ViewFactory already created this object
-        if(managedHBoxes.containsKey(id)) {
+        if (managedHBoxes.containsKey(id)) {
             return managedHBoxes.get(id);
         }
-        // Completely new object
-        // Make it
+        // Completely new object so make it
         HBox newHBox = new HBox();
         // Set its id
         newHBox.setId(id);
@@ -62,9 +77,39 @@ public class ViewFactory {
         return newHBox;
     }
 
+    public VBox createOrGetVBox(String id) {
+        // Check if ViewFactory already created this object
+        if (managedVBoxes.containsKey(id)) {
+            return managedVBoxes.get(id);
+        }
+        // Completely new object so make it
+        VBox newVBox = new VBox();
+        // Set its id
+        newVBox.setId(id);
+        // Track it and put it in use
+        managedVBoxes.put(id, newVBox);
+        // Send back
+        return newVBox;
+    }
+
+    public ScrollPane createOrGetScrollPane(String id) {
+        // Check if ViewFactory already created this object
+        if (managedScrollPanes.containsKey(id)) {
+            return managedScrollPanes.get(id);
+        }
+        // Completely new object so make it
+        ScrollPane newScrollPane = new ScrollPane();
+        // Set its id
+        newScrollPane.setId(id);
+        // Track it and put it in use
+        managedScrollPanes.put(id, newScrollPane);
+        // Send back
+        return newScrollPane;
+    }
+
     public Text createOrGetText(String id) {
         // Check if ViewFactory already created this object
-        if(managedTexts.containsKey(id)) {
+        if (managedTexts.containsKey(id)) {
             return managedTexts.get(id);
         }
         // Completely new object so make it
@@ -79,7 +124,7 @@ public class ViewFactory {
 
     public ComboBox createOrGetComboBox(String id) {
         // Check if ViewFactory already created this object
-        if(managedComboBoxes.containsKey(id)) {
+        if (managedComboBoxes.containsKey(id)) {
             return managedComboBoxes.get(id);
         }
         // Completely new object so make it
@@ -94,7 +139,7 @@ public class ViewFactory {
 
     public TableView createOrGetTableView(String id) {
         // Check if ViewFactory already created this object
-        if(managedTableViews.containsKey(id)) {
+        if (managedTableViews.containsKey(id)) {
             return managedTableViews.get(id);
         }
         // Completely new object so make it
@@ -106,18 +151,4 @@ public class ViewFactory {
         // Send back
         return newTableView;
     }
-
-    /*
-    *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    * Children Management
-    *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    * These methods might seem ridiculous
-    * But this will reduce SonarQube's duplication code count
-     */
-    public static void setPaneChild(Pane parent, Node child) {
-        parent.getChildren().add(child);
-    }
-
-
-
 }
