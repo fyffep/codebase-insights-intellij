@@ -48,7 +48,7 @@ public class Directory implements HeatCalculator
             File verifyFolder = new File(subPath);
             if (verifyFolder.isFile())
             {
-                FileObject file = new FileObject(folderPath, getPath(),getDepth()+1);
+                FileObject file = new FileObject(verifyFolder.getName(), verifyFolder.getPath(),getDepth()+1);
                 //Calculate the file's size
                 FileSizeCalculator.assignFileSize(file);
                 FileSizeCalculator.assignLineCount(file);

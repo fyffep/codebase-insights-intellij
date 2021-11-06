@@ -88,6 +88,7 @@ public class HeatMapController
             heatMapPane.addNode(heatFileComponent);
 
             System.out.println("Added a file pane for "+fileName +" with heat level "+heatLevel+" and color "+color);
+            //System.out.println("file has name=`"+fileName+"` filepath=`"+fileObject.getFilePath()+"`");
         }
     }
 

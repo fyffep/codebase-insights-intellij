@@ -1,4 +1,4 @@
-package testcase;
+/*package testcase;
 
 import intellij_extension.filesize.Folder;
 import intellij_extension.filesize.RootDirectory;
@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 /**
  * The follwoing class contains the test cases of all the methods in the class RootDirectory.java
- */
+ *
 
 public class RootDirectoryTest {
 
@@ -167,5 +167,5 @@ public class RootDirectoryTest {
 
 }
 
-
+*/
 
