@@ -74,7 +74,7 @@ public class CommitDetailsPane extends VBox {
     Newly Selected Commit
         - Might be an observable update method call
     */
-    public void buildFileList(/*Object allFilesInCommitData*/) {
+    private void buildFileList(/*Object allFilesInCommitData*/) {
         activeFileTexts.clear();
         fileList.getChildren().clear();
 
