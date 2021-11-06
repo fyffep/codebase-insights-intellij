@@ -71,7 +71,7 @@ public class Directory implements HeatCalculator
     }
 
 
-    private int getDepth()
+    public int getDepth()
     {
         return this.depth;
     }
@@ -95,6 +95,26 @@ public class Directory implements HeatCalculator
     public long  getFolderCount()
     {
         return this.folderCount;
+    }
+
+    public HashMap<String, FileObject> getFileMap() {
+        return fileMap;
+    }
+
+    public void setFileMap(HashMap<String, FileObject> fileMap) {
+        this.fileMap = fileMap;
+    }
+
+    public HashMap<String, Directory> getFolderMap() {
+        return folderMap;
+    }
+
+    public void setFolderMap(HashMap<String, Directory> folderMap) {
+        this.folderMap = folderMap;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
     }
 
     public void displayDetails()
