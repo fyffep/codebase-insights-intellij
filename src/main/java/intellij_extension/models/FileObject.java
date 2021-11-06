@@ -1,6 +1,10 @@
 package intellij_extension.models;
 
+import intellij_extension.utility.HeatCalculationUtility;
+import intellij_extension.utility.commithistory.CommitCountCalculator;
 import intellij_extension.utility.filesize.FileSizeCalculator;
+
+import java.io.IOException;
 
 /**
 * filename
@@ -66,27 +70,33 @@ public class FileObject
 		return this.lineCount;
 	}
 	
-	
 	public void setFileSize(long length)
 	{
 		this.fileSize=length;
-		
 	}
 	
 	public long getFileSize()
 	{
 		return this.fileSize;
 	}
-	
+
+	public int getDepth() {
+
+		return this.depth;
+	}
+
+	public int getNumberOfCommits() {
+		return numberOfCommits;
+	}
+
+	public void setNumberOfCommits(int numberOfCommits) {
+		this.numberOfCommits = numberOfCommits;
+	}
+
 	public void displayFileDetails()
 	{
 		String output=getFileName()+",--->FileSize : "+getFileSize()+", LineCount : "+getLineCount();
 		System.out.println(String.format("%1$" + (output.length()+getDepth()) + "s", output));
-	}
-
-	public int getDepth() {
-		
-		return this.depth;
 	}
 
 	/**
@@ -98,15 +108,18 @@ public class FileObject
 		//Currently, this does not support accumulated heat
 
 		//Compute the heat of each metric
-		int sizeHeat = FileSizeCalculator.calculateHeat(this);
+		//File size
+		int sizeHeat = HeatCalculationUtility.calculateHeatForFileSize(this);
+		//Number of commits
+		int numberOfCommitsHeat = HeatCalculationUtility.calculateHeatForNumberOfCommits(this);
 
 		//Average all the metrics
-		heatLevel = sizeHeat; //should be changed when more metrics are added
+		this.heatLevel = Math.round(
+				sizeHeat +
+				numberOfCommitsHeat
+				//Add more metrics here...
+		) / 2;
 
 		return this.heatLevel;
-	}
-
-	public int getHeatLevel() {
-		return heatLevel;
 	}
 }

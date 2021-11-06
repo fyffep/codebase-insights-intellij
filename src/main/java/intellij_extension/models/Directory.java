@@ -1,12 +1,13 @@
-package intellij_extension.utility.filesize;
+package intellij_extension.models;
 
-import intellij_extension.models.FileObject;
+import intellij_extension.utility.HeatCalculator;
+import intellij_extension.utility.filesize.FileSizeCalculator;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class Directory
+public class Directory implements HeatCalculator
 {
     private String path;
     private HashMap<String, FileObject> fileMap = new HashMap<>();
@@ -138,7 +139,6 @@ public class Directory
             existingData.setLineCount(fileSizeData.getLineCount());
 
             existingFileMetricMap.put(filename, existingData);
-            System.out.println("Mapped file "+filename);
         }
 
         //Recur on the sub-directories

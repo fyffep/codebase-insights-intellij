@@ -1,8 +1,9 @@
-package intellij_extension.commithistory;
+package intellij_extension.utility.commithistory;
 
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -16,7 +17,8 @@ public class JGitHelper
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         return builder
                 .readEnvironment() // scan environment GIT_* variables
-                .findGitDir() // scan up the file system tree
+                //.findGitDir() // scan up the file system tree
+                .findGitDir(new File("C:\\Users\\Pete\\Desktop\\team3-project"))
                 .build();
     }
 }

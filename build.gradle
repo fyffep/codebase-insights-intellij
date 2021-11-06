@@ -37,9 +37,12 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     //JavaFX and Swing
     implementation 'org.openjfx:javafx-swing:11-ea+24'
-    //Log4J
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
+    //Log4J EXCLUSION -- This is because JGit's logger conflicts with IntelliJ's logger
+    configurations.implementation {
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+        exclude group: 'org.slf4j'
+    }
+
     //JGit
     implementation 'org.eclipse.jgit:org.eclipse.jgit:5.13.0.202109080827-r'
     implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:5.13.0.202109080827-r'
