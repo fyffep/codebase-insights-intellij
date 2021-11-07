@@ -10,9 +10,9 @@ public class SelectedFileVBox extends VBox {
     private Label fileName, packageName, authors;
 
     public SelectedFileVBox() {
-        fileName = new Label("File Name    :");
-        packageName = new Label("Package Name :");
-        authors = new Label("Authors      :");
+        fileName = new Label("File Name: ");
+        packageName = new Label("Package Name: ");
+        authors = new Label("Authors: ");
         this.getChildren().add(fileName);
         this.getChildren().add(packageName);
         this.getChildren().add(authors);
