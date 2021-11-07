@@ -118,4 +118,14 @@ public class FileObjectTest
         long expectedResult = file.getFileSize();  //method under  test
         assertEquals(TEST_FILE_SIZE, expectedResult);
     }
+
+    //Test computeHeatLevel()
+    @Test
+    public void computeHeatLevelTest() {
+        FileObject file = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH);
+        file.setLineCount(TEST_LINE_COUNT);
+        file.setNumberOfCommits(TEST_NUMBER_OF_COMMITS);
+        int heatLevel = file.computeHeatLevel(); //method under test
+        assertEquals(TEST_EXPECTED_HEAT, heatLevel);
+    }
 }

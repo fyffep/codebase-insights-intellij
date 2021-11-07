@@ -122,10 +122,12 @@ public class CommitCountCalculator implements HeatCalculator
     {
         try
         {
-            //Print the number of times each file was changed in the entire commit history
+            //Calculate the number of times each file was changed in the entire commit history
             HashMap<String, Integer> numberOfCommitsPerFile = this.calculateNumberOfCommitsPerFile(
                     this.getAllCommits());
             Iterator<String> timesUpdatedIterator = numberOfCommitsPerFile.keySet().iterator();
+
+            //Put the data onto the hash map
             while (timesUpdatedIterator.hasNext())
             {
                 String filePath = timesUpdatedIterator.next();

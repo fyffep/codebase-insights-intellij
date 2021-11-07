@@ -1,3 +1,8 @@
+# !!!   BEFORE CHANGING THIS FILE   !!!
+#There is a test variable called NUMBER_OF_COMMITS_IN_GITIGNORE in TestData.java
+#that checks how many times this file has been changed. Increment the test value 'NUMBER_OF_COMMITS_IN_GITIGNORE'
+#after you have changed this file so that the test can still pass.
+
 # From https://github.com/github/gitignore/blob/master/Gradle.gitignore
 .gradle
 /build/

@@ -2,6 +2,7 @@ package testdata;
 
 public class TestData {
 
+    public static final int NUMBER_OF_COMMITS_IN_GITIGNORE = 8; //has to be changed when our .gitignore is updated!
     public static long TEST_DEFAULT_FILE_COUNT=0;
     public static long TEST_FILE_COUNT=40;
     public static long TEST_DEFAULT_FOLDER_COUNT=0;
@@ -31,6 +32,9 @@ public class TestData {
     public static int TEST_NEW_FILE_2_COUNT=2;
     public static long TEST_LINE_COUNT=200;
     public static long TEST_FILE_SIZE=2000;
+    public static int TEST_NUMBER_OF_COMMITS = 8;
+    public static int TEST_EXPECTED_HEAT = 5;
+
 
 
 
