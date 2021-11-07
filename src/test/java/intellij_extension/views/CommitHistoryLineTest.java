@@ -1,4 +1,4 @@
-package testcase;
+package intellij_extension.views;
 
 import intellij_extension.views.CommitHistoryLine;
 import org.junit.Assert;
