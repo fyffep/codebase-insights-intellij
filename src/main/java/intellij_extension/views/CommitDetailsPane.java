@@ -7,16 +7,16 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-public class PackagesFilesPane extends Pane {
+public class CommitDetailsPane extends Pane {
 
-    public PackagesFilesPane() {
+    public CommitDetailsPane() {
         super();
 
         Text text = new Text();
         text.setX(40);
         text.setY(100);
         text.setFont(new Font(25));
-        text.setText("PackagesFilesView");
+        text.setText("Commit Details View");
         getChildren().add(text);
 
         // Fill background with default

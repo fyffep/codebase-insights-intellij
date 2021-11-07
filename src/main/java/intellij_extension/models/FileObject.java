@@ -1,126 +1,114 @@
 package intellij_extension.models;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import intellij_extension.utility.HeatCalculationUtility;
 
 /**
- * filename
- * filesize
- * linecount
- * no of commits
- * last edited date
- * setpath
- */
-public class FileObject {
-    //FileObject members
-    private String fileName;
-    private long lineCount;
-    private long fileSize;
-    private int noOfCommits;
-    private String filePath;
-    private int depth;
+* filename
+* filesize
+* linecount
+* no of commits 
+* last edited date
+* setpath 
+*/
+public class FileObject
+{
+	private String fileName; //the file name and its extension
+	private String filePath; //the full path to the file, including the file name
 
-    // default constructor
-    public FileObject() {
-        this.fileName = "";
-        this.filePath = "";
-        this.depth = 0;
-    }
+	private long lineCount;
+	private long fileSize;
+	private int numberOfCommits = 1;
+	private int depth;
 
-    //constructor
-    public FileObject(String fileName, String filePath, int depth) {
-        this.fileName = fileName;
-        this.filePath = filePath;
-        this.depth = depth;
-    }
+	public FileObject(String fileName, String filePath, int depth)
+	{
+		this.fileName=fileName;
+		this.filePath = filePath;
+		this.depth=depth;
+	}
 
-    //fileName getter and setter
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
+	
+	public void setFileName(String fileName)
+	{
+		this.fileName=fileName;
+	}
 
-    public String getFileName() {
-        return this.fileName;
-    }
+	public String getFileName()
+	{
+		return this.fileName;
+	}
 
-    //filePath getter and setter
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
+	}
 
-    public String getFilePath() {
-        return this.filePath;
-    }
+	public String getFilePath()
+	{
+		return this.filePath;
+	}
+	
+	public void setLineCount(long lineCount)
+	{
+		this.lineCount=lineCount;
+	}
+	
+	public long getLineCount()
+	{
+		return this.lineCount;
+	}
+	
+	public void setFileSize(long length)
+	{
+		this.fileSize=length;
+	}
+	
+	public long getFileSize()
+	{
+		return this.fileSize;
+	}
 
-    //lineCount getter and setter
-    public void setLineCount(long lineCount) {
-        this.lineCount = lineCount;
-    }
+	public int getDepth() {
 
-    public long getLineCount() {
-        return this.lineCount;
-    }
+		return this.depth;
+	}
 
-    // compute line count within a file
-    public void computeLineCount() {
-        long lineCount = 0;
-        try {
-            BufferedReader buffer = new BufferedReader(new FileReader(getFilePath()));
+	public void setDepth(int depth) {
+		this.depth = depth;
+	}
 
-            while (buffer.readLine() != null) {
-                lineCount++;
-            }
-            buffer.close();
-        } catch (Exception e) {
-            System.out.println("Unable to read:" + getFilePath());
-            System.exit(0);
-        }
+	public int getNumberOfCommits() {
+		return numberOfCommits;
+	}
 
-        setLineCount(lineCount);
-    }
+	public void setNumberOfCommits(int numberOfCommits) {
+		this.numberOfCommits = numberOfCommits;
+	}
 
+	public void displayFileDetails()
+	{
+		String output=getFileName()+",--->FileSize : "+getFileSize()+", LineCount : "+getLineCount();
+		System.out.println(String.format("%1$" + (output.length()+getDepth()) + "s", output));
+	}
 
-    //fileSize getter and setter
-    public void setFileSize(long length) {
-        this.fileSize = length;
+	/**
+	 * Assigns a heat level to this FileObject based on its metrics.
+	 * @return a value from 1 to 10, with 10 being the hottest
+	 */
+	public int computeHeatLevel() //maybe this class (a model) is not the best place for this method
+	{
+		//Currently, this does not support accumulated heat
 
-    }
+		//Compute the heat of each metric
+		//File size
+		int sizeHeat = HeatCalculationUtility.calculateHeatForFileSize(this);
+		//Number of commits
+		int numberOfCommitsHeat = HeatCalculationUtility.calculateHeatForNumberOfCommits(this);
 
-    public long getFileSize() {
-        return this.fileSize;
-    }
-
-    // compute file size in bytes
-    public void computeFileSize() throws IOException {
-        File file = new File(getFilePath());
-        setFileSize(file.length());
-    }
-
-
-    // read through the file and get its line count and file size
-    public void parseFile() throws IOException {
-        computeLineCount();
-        computeFileSize();
-    }
-
-    //display file details such as size and line count
-    public void displayFileDetails() {
-        String output = getFileName() + ",--->FileSize : " + getFileSize() + ", LineCount : " + getLineCount();
-        System.out.println(String.format("%1$" + (output.length() + getDepth()) + "s", output));
-    }
-
-    // to store the depth of a file with respect to parent. Used for display purpose
-    public int getDepth() {
-        return this.depth;
-    }
-
-    public void setDepth(int depth) {
-        this.depth = depth;
-    }
-
-    public int computeHeatLevel() {
-        return (int) (Math.random() * 10); //TODO
-    }
+		//Average all the metrics
+		return (
+				sizeHeat +
+				numberOfCommitsHeat
+				//Add more metrics here...
+		) / 2;
+	}
 }
