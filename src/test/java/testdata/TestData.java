@@ -35,7 +35,10 @@ public class TestData {
     public static int TEST_NUMBER_OF_COMMITS = 8;
     public static int TEST_EXPECTED_HEAT = 5;
 
-
-
-
+    // Commit History Test Data
+    public static String CHTD_ROW_NUMBER = "1";
+    public static String CHTD_DESCRIPTION = "This is a mock commit description.";
+    public static String CHTD_AUTHOR = "Ethan Behar";
+    public static String CHTD_DATE = "11/7/2021";
+    public static String CHTD_HASH = "xcv4x6d8f4e1xcv4ds64d";
 }

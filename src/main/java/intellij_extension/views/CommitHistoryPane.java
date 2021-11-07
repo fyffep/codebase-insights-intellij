@@ -1,152 +1,208 @@
 package intellij_extension.views;
 
+import intellij_extension.Constants;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-/**
- * References on TableView:
- * https://stackoverflow.com/questions/25701087/javafx-tableview-resizeable-and-unresizeable-column
- * https://docs.oracle.com/javafx/2/ui_controls/table-view.htm
- * https://stackoverflow.com/questions/38049734/java-setcellvaluefactory-lambda-vs-propertyvaluefactory-advantages-disadvant/38050982#38050982
- * http://tutorials.jenkov.com/javafx/tableview.html
- * https://www.superglobals.net/remove-extra-column-tableview-javafx/
- * https://stackoverflow.com/questions/14650787/javafx-column-in-tableview-auto-fit-size
- */
+import java.util.ArrayList;
 
 public class CommitHistoryPane extends VBox {
 
-    // TODO - MOVE TO TEST MOCK DATA EVENTUALLY
-    // MOCK/TESTING DATA
-    public static final ObservableList<CommitHistoryLine> mockCommitHistoryData = FXCollections.observableArrayList(
-            new CommitHistoryLine("1", "Commit 1's Description is middle size.", "Smith", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-            new CommitHistoryLine("2", "Commit 2's Description is middle size.", "Johnson", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-            new CommitHistoryLine("3", "Commit 3's Description a much longer description for testing is needed", "Williams", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-            new CommitHistoryLine("4", "A small description", "Jones", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-            new CommitHistoryLine("5000", "Commit 5's Description is middle size.", "Brown", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c")
-    );
-    public static final ObservableList<String> mockBranches = FXCollections.observableArrayList(
-            "master",
-            "development",
-            "major feature A",
-            "release 1.0",
-            "major feature B",
-            "hotfix 1.1hf",
-            "major feature C",
-            "major feature D",
-            "release 1.5",
-            "major feature F",
-            "release 2.0",
-            "major feature H"
-    );
+    private final HBox topHorizontalBanner;
+    private final Text headerText;
+    private final ComboBox<String> branchComboBox; // This might have to change from String to something else.
+    private final TableView<CommitHistoryLine> commitList;
 
-    private Pane topHoriztontalBanner;
-    private TableView<CommitHistoryLine> commitList;
+    // Will be used when Model is sending data
+    // This is all the lines we created so far - we should never remove from this list
+    private final ArrayList<CommitHistoryLine> commitLines = new ArrayList<>();
+    // These are active lines in the TableView
+    private final ObservableList<CommitHistoryLine> activeCommitLines = FXCollections.observableArrayList();
 
     public CommitHistoryPane() {
         super();
 
-        // TODO Extract to ViewFactory?
-        topHoriztontalBanner = new Pane();
-        Color backgroundColor = Color.DARKGREEN;
-        BackgroundFill backgroundFill = new BackgroundFill(backgroundColor, null, null);
-        Background background = new Background(backgroundFill);
-        topHoriztontalBanner.setBackground(background);
+        // Create the top horizontal banner
+        topHorizontalBanner = ViewFactory.getInstance().createOrGetHBox(Constants.CH_BANNER_ID);
+        setBannerProperties();
+        ViewFactory.setPaneChild(this, topHorizontalBanner);
+
+        // Create the banner text
+        headerText = ViewFactory.getInstance().createOrGetText(Constants.CH_HEADER_TEXT_ID);
+        setHeaderTextProperties();
+        ViewFactory.setPaneChild(topHorizontalBanner, headerText);
+
+        // Create the banner combo box
+        branchComboBox = ViewFactory.getInstance().createOrGetComboBox(Constants.CH_BRANCH_COMBOBOX_ID);
+        setBranchComboBoxProperties();
+        ViewFactory.setPaneChild(topHorizontalBanner, branchComboBox);
+
+        // Create Tableview with data
+        commitList = ViewFactory.getInstance().createOrGetTableView(Constants.CH_BRANCH_TABLEVIEW_ID);
+        setCommitListProperties();
+        setCommitListColumns();
+        ViewFactory.setPaneChild(this, commitList);
+    }
+
+    /*
+        Newly Selected Branch
+            - Might be an observable update method call
+     */
+    public void branchUpdated(Object TheNewBranch) {
+        // Look to CommitDetailsPane buildFileList method to get an idea of what has to happen here.
+
+        // We have to update each line with the new commit info,
+        // If we need extra lines we have to create and add them.
+        // Since we use an observableList...
+            // Should be able to clear it
+            // And only add the commit line objects we want to
+            // This should handle updating the TableView
+            // ...Let's see when it comes to implementation time.
+
+        // activeCommitLines.Clear()
+        // activeCommitLines.RemoveAll()
+
+        // Pseudocode
+
+        // int counter = 0;
+
+        // Foreach newCommit in TheNewBranch.getCommits()
+            // if counter < commitLines.size()
+                // This means we have a commitLine created already... so recycle it
+                // update commitLine[counter] with newCommit
+                // activeCommitLines.add(commitLine[counter])
+            // else
+                // This means we ran out of already created commit lines... so create a new one
+                // create new commit line with newCommit
+                // activeCommitLines.add(new commit line)
+            // counter++;
+
+        // if counter < commitLines.size()
+            // This means we have extra commit lines still active in the TableView
+            // But we are out of commits for this branch
+            // So remove them from the TableView
+    }
+
+    /*
+        UI Property Settings
+     */
+    private void setBannerProperties() {
+        // Banner layout properties
+
         // We want this so the user can make the Commit Details view as big
         // as the right side if desirable
-        topHoriztontalBanner.setMinHeight(0);
-        // TODO
-        // We really want this to be a set, not a bind.
+        topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT);
+        // TODO We really want this to be a set, not a bind.
         // The header shouldn't grow with the window size
         // But it should be a percentage of the window size.
-        topHoriztontalBanner.prefHeightProperty().bind(this.heightProperty().multiply(.25));
-        topHoriztontalBanner.maxHeightProperty().bind(this.heightProperty().multiply(.25));
-        topHoriztontalBanner.prefWidthProperty().bind(this.widthProperty());
-        this.getChildren().add(topHoriztontalBanner);
+        topHorizontalBanner.prefHeightProperty().bind(this.heightProperty().multiply(Constants.BANNER_SIZE_MULTIPLIER));
+        topHorizontalBanner.maxHeightProperty().bind(this.heightProperty().multiply(Constants.BANNER_SIZE_MULTIPLIER));
+        topHorizontalBanner.prefWidthProperty().bind(this.widthProperty());
 
-        // TODO Extract to ViewFactory?
-        // Create Tableview with data
-        commitList = new TableView(mockCommitHistoryData);
+        // Child layout properties
+        topHorizontalBanner.setAlignment(Constants.BANNER_ALIGNMENT);
+        topHorizontalBanner.setSpacing(Constants.BANNER_SPACING);
+        topHorizontalBanner.setPadding(Constants.BANNER_INSETS);
+    }
+
+    private void setHeaderTextProperties() {
+        headerText.setFont(Font.font(Constants.HEADER_FONT, Constants.HEADER_TEXT_FONT_WEIGHT, Constants.HEADER_TEXT_SIZE));
+        headerText.setText(Constants.CH_HEADER_TEXT);
+    }
+
+    // TODO figure out how this gets data or maybe an observable update populates the combobox
+    private void setBranchComboBoxProperties() {
+        branchComboBox.setItems(Constants.MOCK_BRANCHES);
+        // Select first entry by default... for now
+        branchComboBox.getSelectionModel().selectFirst();
+        // Set up the select action
+        branchComboBox.setOnAction(this::branchSelectedAction);
+    }
+
+    // TODO figure out how this gets data or maybe an observable update populates the combobox
+    private void setCommitListProperties() {
+        commitList.setItems(Constants.MOCK_COMMIT_HISTORY_DATA);
+
         // Turn off editable
         commitList.setEditable(false);
-        // Do not create n + 1 columns with n + 1 being empty... (Why is that default behavior?!)
-//        commitList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        commitList.setColumnResizePolicy((param) -> true);
 
-        //Background to see if its created/laid out properly
-        backgroundColor = Color.MEDIUMSPRINGGREEN;
-        backgroundFill = new BackgroundFill(backgroundColor, null, null);
-        background = new Background(backgroundFill);
-        commitList.setBackground(background);
+        // This forces columns to resize to their content
+        commitList.setColumnResizePolicy((param) -> true);
+        // Can't have both at the same time =/ so we get that extra column...
+        // Do not create n + 1 columns with n + 1 being empty... (Why is that default behavior?!)
+        // commitList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         // Set up constraints on width/height
         // We want this so the user can make the Commit Details view as big
         // as the right side if desirable
-        commitList.setMinHeight(0);
+        commitList.setMinHeight(Constants.CH_COMMIT_LIST_MIN_HEIGHT);
         // TODO set this based on a portion of the view
         // like the top banner should get 90% real estate
         // But it should also be dynamic shrink with the parent
         commitList.prefWidthProperty().bind(this.widthProperty());
         commitList.prefHeightProperty().bind(this.heightProperty());
 
-        // Set up columns
+        // Add click method to rows
+        // I hate that I can't refactor this double lambda expression
+        commitList.setRowFactory(tableView -> {
+            TableRow<CommitHistoryLine> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    CommitHistoryLine rowData = row.getItem();
+                    System.out.println("Commit " + rowData.getRowNumber().getValue() + " was double clicked! Update CommitDetails!");
+                }
+            });
+            return row;
+        });
+    }
+
+    private void setCommitListColumns() {
+        // Number Column
         TableColumn<CommitHistoryLine, String> rowColumn = new TableColumn("#");
+
+        // Description Column
         TableColumn<CommitHistoryLine, String> descriptionColumn = new TableColumn("Description");
-        // TODO get rid of Magic Number
-        descriptionColumn.setMaxWidth(200);
+        descriptionColumn.setMaxWidth(Constants.CH_DESCRIPTION_COLUMN_MAX_WIDTH);
         descriptionColumn.setSortable(false);
+
+        // Author Column
         TableColumn<CommitHistoryLine, String> authorColumn = new TableColumn("Author");
+
+        // Date Column
         TableColumn<CommitHistoryLine, String> dateColumn = new TableColumn("Date");
         dateColumn.setSortable(false);
+
+        // Hash Column
         TableColumn<CommitHistoryLine, String> hashColumn = new TableColumn("Hash");
         hashColumn.setSortable(false);
 
-        //Associate data with columns - don't really get this part
+        //Associate data with columns
         rowColumn.setCellValueFactory(cellData -> cellData.getValue().getRowNumber());
         descriptionColumn.setCellValueFactory(cellData -> cellData.getValue().getCommitDescription());
         authorColumn.setCellValueFactory(cellData -> cellData.getValue().getCommitAuthor());
         dateColumn.setCellValueFactory(cellData -> cellData.getValue().getCommitDate());
         hashColumn.setCellValueFactory(cellData -> cellData.getValue().getCommitHash());
 
-        // Add click method to rows
-        commitList.setRowFactory(tv -> {
-            TableRow<CommitHistoryLine> row = new TableRow<>();
-            row.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                    CommitHistoryLine rowData = row.getItem();
-                    System.out.println("Commit " + rowData.getRowNumber().getValue() + " was double clicked!");
-                }
-            });
-            return row;
-        });
-
         // Add columns to table
         commitList.getColumns().addAll(rowColumn, descriptionColumn, authorColumn, dateColumn, hashColumn);
+    }
 
-        // Add table view to CommitHistoryPane
-        this.getChildren().add(commitList);
-
-        Text text = new Text();
-        text.setFont(new Font(12));
-        text.setText("Commit History View");
-        topHoriztontalBanner.getChildren().add(text);
-        text.setX(0);
-        text.setY(10);
-
-        // Fill background with default
-        backgroundColor = Color.LAWNGREEN;
-        backgroundFill = new BackgroundFill(backgroundColor, null, null);
-        background = new Background(backgroundFill);
-        setBackground(background);
+    /*
+        UI Actions
+     */
+    private void branchSelectedAction(ActionEvent event) {
+        String selectedValue = branchComboBox.getValue();
+        System.out.println("The " + selectedValue + " branch was selected. Update HeatMap, CommitHistory, and CommitDetails, Hide SelectedFileTerminal Window");
     }
 }
+
 
