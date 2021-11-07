@@ -15,7 +15,7 @@ import static testdata.TestData.NUMBER_OF_COMMITS_IN_GITIGNORE;
  * Checks that the .gitignore file from this plugin is being measured with
  * the correct number of commits.
  */
-public class CommitCountCalculatorTest
+class CommitCountCalculatorTest
 {
     /**
      * Since it's a little tricky to test whether or not JGit is working,
@@ -23,7 +23,7 @@ public class CommitCountCalculatorTest
      * (which is caused by the repository not being opened correctly).
      */
     @Test
-    public void defaultConstructorTest()
+    void defaultConstructorTest()
     {
         assertDoesNotThrow(() -> {
             CommitCountCalculator commitCountCalculator = new CommitCountCalculator(); //method under test
@@ -34,7 +34,7 @@ public class CommitCountCalculatorTest
 
     //Ensure that the .gitignore has the expected number of commits
     @Test
-    public void calculateNumberOfCommitsPerFileTest() throws IOException, GitAPIException
+    void calculateNumberOfCommitsPerFileTest() throws IOException, GitAPIException
     {
         CommitCountCalculator commitCountCalculator = new CommitCountCalculator();
         //Method under test
@@ -46,7 +46,7 @@ public class CommitCountCalculatorTest
 
     //Ensure that the .gitignore has the expected number of commits, and also check that the data is placed onto a HashMap correctly
     @Test
-    public void editFileMetricMapTest() throws IOException, GitAPIException
+    void editFileMetricMapTest() throws IOException, GitAPIException
     {
         CommitCountCalculator commitCountCalculator = new CommitCountCalculator();
 

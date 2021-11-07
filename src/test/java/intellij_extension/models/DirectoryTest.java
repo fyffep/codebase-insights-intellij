@@ -10,14 +10,14 @@ import static testdata.TestData.*;
 /**
  * Test cases for the class Directory.java
  */
-public class DirectoryTest
+class DirectoryTest
 {
 
     //Default constructor removed
     /*
     // Test Default Constructor
     @Test
-    public void defaultConstructorTest() {
+    void defaultConstructorTest() {
         Directory root = new Directory();
         assertEquals(TEST_ROOT_DEFAULT_PATH, root.getBaseDir());
         assertEquals(TEST_DEFAULT_FILE_COUNT, root.getFileCount());
@@ -33,7 +33,7 @@ public class DirectoryTest
 
     // Test setBaseDir()
     @Test
-    public void setBaseDirTest() {
+    void setBaseDirTest() {
         Directory root = new Directory("initial value");
         root.setPath(TEST_ROOT_PATH);    //method under test
         assertEquals(TEST_ROOT_PATH, root.getPath());
@@ -42,7 +42,7 @@ public class DirectoryTest
 
     // Test getBaseDir()
     @Test
-    public void getBaseDirTest() {
+    void getBaseDirTest() {
         Directory root = new Directory(TEST_ROOT_PATH);
         String expectedResult = root.getPath();  //method under  test
         assertEquals(TEST_ROOT_PATH, expectedResult);
@@ -51,7 +51,7 @@ public class DirectoryTest
 
     // Test setFileCount()
     @Test
-    public void setFileCountTest() {
+    void setFileCountTest() {
         Directory root = new Directory(TEST_ROOT_PATH);
         root.setFileCount(TEST_FILE_COUNT); //method under  test
         assertEquals(TEST_FILE_COUNT, root.getFileCount());
@@ -59,7 +59,7 @@ public class DirectoryTest
 
     // Test getFileCount()
     @Test
-    public void getFileCountTest() {
+    void getFileCountTest() {
         Directory root = new Directory(TEST_ROOT_PATH);
         root.setFileCount(TEST_FILE_COUNT);
         long expectedResult = root.getFileCount(); //method under  test
@@ -68,7 +68,7 @@ public class DirectoryTest
 
     //Test getFolderCount()
     @Test
-    public void getFolderCountTest() {
+    void getFolderCountTest() {
         Directory root = new Directory(TEST_ROOT_PATH);
         root.setFolderCount(TEST_FOLDER_COUNT);
         long expectedResult = root.getFolderCount(); //method under  test
@@ -78,7 +78,7 @@ public class DirectoryTest
 
     //Test setFolderCount()
     @Test
-    public void setFolderCountTest() {
+    void setFolderCountTest() {
         Directory root = new Directory(TEST_ROOT_PATH);
         root.setFolderCount(TEST_FOLDER_COUNT);//method under  test
         assertEquals(TEST_FOLDER_COUNT, root.getFolderCount());
@@ -86,7 +86,7 @@ public class DirectoryTest
     }
     //Test setDepth();
     @Test
-    public void setDepthTest() {
+    void setDepthTest() {
         Directory root = new Directory(TEST_ROOT_PATH);
         root.setDepth(TEST_DEPTH);
         assertEquals(TEST_DEPTH, root.getDepth());
@@ -94,7 +94,7 @@ public class DirectoryTest
 
     //Test getDepth();
     @Test
-    public void getDepthTest() {
+    void getDepthTest() {
         Directory root = new Directory(TEST_ROOT_PATH);
         root.setDepth(TEST_DEPTH);
         int expectedDepth = root.getDepth();
@@ -103,7 +103,7 @@ public class DirectoryTest
 
     //Test parseDirectoryTest()
     @Test
-    public void parseDirectoryTest() throws IOException {
+    void parseDirectoryTest() throws IOException {
         Directory root = new Directory(TEST_PARSE_FOLDER_PATH);
         root.parseDirectory();
         assertEquals(TEST_PARSE_FOLDER_COUNT, root.getFolderCount());

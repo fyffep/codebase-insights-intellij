@@ -8,12 +8,12 @@ import static testdata.TestData.*;
 /**
  * The following class contains the test cases of all the methods in the class FileObject.java
  */
-public class FileObjectTest
+class FileObjectTest
 {
     //Default constructor was removed
     /*/ Test Default Constructor
     @Test
-    public void defaultConstructorTest() {
+    void defaultConstructorTest() {
         FileObject file = new FileObject();
         assertEquals("", file.getFileName());
         assertEquals("", file.getFilePath());
@@ -22,7 +22,7 @@ public class FileObjectTest
 
     // Test Constructor
     @Test
-    public void constructor1Test() {
+    void constructor1Test() {
         FileObject file = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH);
         assertEquals(TEST_FILENAME, file.getFileName());
         assertEquals(TEST_FILEPATH, file.getFilePath());
@@ -31,7 +31,7 @@ public class FileObjectTest
 
     //Test setDepth();
     @Test
-    public void setDepthTest() {
+    void setDepthTest() {
         FileObject file = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH * -1);
         file.setDepth(TEST_DEPTH);
         assertEquals(TEST_DEPTH, file.getDepth());
@@ -39,7 +39,7 @@ public class FileObjectTest
 
     //Test getDepth();
     @Test
-    public void getDepthTest() {
+    void getDepthTest() {
         FileObject file = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH * -1);
         file.setDepth(TEST_DEPTH);
         int expectedDepth = file.getDepth();
@@ -48,7 +48,7 @@ public class FileObjectTest
 
     // Test setFilePath()
     @Test
-    public void setFilePathTest() {
+    void setFilePathTest() {
         FileObject file = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH);
         file.setFilePath(TEST_FILEPATH);    //method under  test
         assertEquals(TEST_FILEPATH, file.getFilePath());
@@ -57,7 +57,7 @@ public class FileObjectTest
 
     // Test setFilePath()
     @Test
-    public void getFilePathTest() {
+    void getFilePathTest() {
         FileObject file = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH);
         file.setFilePath(TEST_FILEPATH);
         String expectedResult = file.getFilePath();  //method under  test
@@ -66,7 +66,7 @@ public class FileObjectTest
 
     // Test setFileName()
     @Test
-    public void setFileNameTest() {
+    void setFileNameTest() {
         FileObject file = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH);
         file.setFileName(TEST_NEW_FILE_1);    //method under  test
         assertEquals(TEST_NEW_FILE_1, file.getFileName());
@@ -75,7 +75,7 @@ public class FileObjectTest
 
     // Test getFileName()
     @Test
-    public void getFileNameTest() {
+    void getFileNameTest() {
         FileObject file = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH);
         file.setFileName(TEST_NEW_FILE_1);
         String expectedResult = file.getFileName();  //method under  test
@@ -84,7 +84,7 @@ public class FileObjectTest
 
     // Test setLineCount()
     @Test
-    public void setLineCountTest() {
+    void setLineCountTest() {
         FileObject file = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH);
         file.setLineCount(TEST_LINE_COUNT);    //method under  test
         assertEquals(TEST_LINE_COUNT, file.getLineCount());
@@ -93,7 +93,7 @@ public class FileObjectTest
 
     // Test getLineCount()
     @Test
-    public void getLineCountTest() {
+    void getLineCountTest() {
         FileObject file = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH);
         file.setLineCount(TEST_LINE_COUNT);
         long expectedResult = file.getLineCount();  //method under  test
@@ -103,7 +103,7 @@ public class FileObjectTest
 
     //Test setFileSize()
     @Test
-    public void setFileSizeTest() {
+    void setFileSizeTest() {
         FileObject file = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH);
         file.setFileSize(TEST_FILE_SIZE);    //method under  test
         assertEquals(TEST_FILE_SIZE, file.getFileSize());
@@ -112,7 +112,7 @@ public class FileObjectTest
 
     // Test getFileSize()
     @Test
-    public void getFileSizeTest() {
+    void getFileSizeTest() {
         FileObject file = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH);
         file.setFileSize(TEST_FILE_SIZE);
         long expectedResult = file.getFileSize();  //method under  test
@@ -121,7 +121,7 @@ public class FileObjectTest
 
     //Test computeHeatLevel()
     @Test
-    public void computeHeatLevelTest() {
+    void computeHeatLevelTest() {
         FileObject file = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH);
         file.setLineCount(TEST_LINE_COUNT);
         file.setNumberOfCommits(TEST_NUMBER_OF_COMMITS);

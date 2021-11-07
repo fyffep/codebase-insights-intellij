@@ -6,8 +6,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
-import static intellij_extension.Constants.HEAT_MAX;
-import static intellij_extension.Constants.HEAT_MIN;
 
 public class FileSizeCalculator
 {

@@ -1,6 +1,5 @@
 package intellij_extension.utility.commithistory;
 
-import intellij_extension.models.Directory;
 import intellij_extension.models.FileObject;
 import intellij_extension.utility.HeatCalculator;
 import org.eclipse.jgit.api.Git;
@@ -131,8 +130,6 @@ public class CommitCountCalculator implements HeatCalculator
             while (timesUpdatedIterator.hasNext())
             {
                 String filePath = timesUpdatedIterator.next();
-                int timesUpdated = numberOfCommitsPerFile.get(filePath);
-                //System.out.println("File `"+filePath+"` was updated "+timesUpdated+" times.");
 
                 //Merge the existing data (if it exists) with the newly computed data
                 FileObject existingData = existingFileMetricMap.get(filePath); //what was passed in as a param

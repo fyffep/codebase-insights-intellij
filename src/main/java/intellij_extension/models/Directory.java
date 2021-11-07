@@ -6,13 +6,15 @@ import intellij_extension.utility.filesize.FileSizeCalculator;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Directory implements HeatCalculator
 {
     private String path;
     private HashMap<String, FileObject> fileMap = new HashMap<>();
     private HashMap<String, Directory> folderMap = new HashMap<>();
-    private long fileCount, folderCount;
+    private long fileCount;
+    private long folderCount;
     private int depth;
 
     //constructor
@@ -40,7 +42,7 @@ public class Directory implements HeatCalculator
     public void parseDirectory() throws IOException
     {
         File directory = new File(path);
-        long fileCount = 0;
+        this.fileCount = 0;
         System.out.println("Listing files for "+directory);
         for (String folderPath : directory.list())
         {
@@ -122,16 +124,16 @@ public class Directory implements HeatCalculator
         String output= getPath() + "---> FileCount : " + getFileCount() + " Folder Count : " + getFolderCount();
         System.out.println(String.format("%1$" + (output.length()+getDepth()) + "s", output));
         //Print the details of files in this directory
-        for( String fileName : fileMap.keySet())
+        for (Map.Entry<String, FileObject> entry : fileMap.entrySet())
         {
-            FileObject file = fileMap.get(fileName);
+            FileObject file = entry.getValue();
             file.displayFileDetails();
         }
 
         //Recur on sub-directories
-        for(String folderName: folderMap.keySet())
+        for (Map.Entry<String, Directory> entry : folderMap.entrySet())
         {
-            Directory directory = folderMap.get(folderName);
+            Directory directory = entry.getValue();
             directory.displayDetails();
         }
     }
@@ -148,11 +150,12 @@ public class Directory implements HeatCalculator
     public HashMap<String, FileObject> editFileMetricMap(HashMap<String, FileObject> existingFileMetricMap)
     {
         //Place the FileObjects from this directory into the map
-        for(String filename : fileMap.keySet())
+        for (Map.Entry<String, FileObject> entry : fileMap.entrySet())
         {
             //Merge the existing data (if it exists) with the newly computed data
+            String filename = entry.getKey();
             FileObject existingData = existingFileMetricMap.get(filename); //what was passed in as a param
-            FileObject fileSizeData = fileMap.get(filename); //what this class computed
+            FileObject fileSizeData = entry.getValue(); //what this class computed
             if (existingData == null)
                 existingData = fileSizeData;
             existingData.setFileSize(fileSizeData.getFileSize());
@@ -162,9 +165,9 @@ public class Directory implements HeatCalculator
         }
 
         //Recur on the sub-directories
-        for( String folderPath : folderMap.keySet())
+        for (Map.Entry<String, Directory> entry : folderMap.entrySet())
         {
-            Directory directory = folderMap.get(folderPath);
+            Directory directory = entry.getValue();
             directory.editFileMetricMap(existingFileMetricMap);
         }
 

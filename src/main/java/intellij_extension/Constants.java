@@ -4,6 +4,10 @@ import javafx.scene.paint.Color;
 
 public class Constants
 {
+    private Constants() {
+        //Prevent instantiation
+    }
+
     public static final int HEAT_MIN = 1;
     public static final int HEAT_MAX = 10;
 

@@ -6,31 +6,31 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static testdata.TestData.*;
 
-public class HeatCalculationUtilityTest
+class HeatCalculationUtilityTest
 {
     @Test
-    public void defaultConstructorTest()
+    void defaultConstructorTest()
     {
         final int TEST_HEAT_LEVEL = 1;
         String colorString = HeatCalculationUtility.colorOfHeat(TEST_HEAT_LEVEL); //method under test
-        assertEquals(colorString, "50ff50");
+        assertEquals("50ff50", colorString);
     }
 
     @Test
-    public void calculateHeatForFileSizeTest()
+    void calculateHeatForFileSizeTest()
     {
         FileObject fileObject = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH);
         fileObject.setLineCount(200);
         int heatLevel = HeatCalculationUtility.calculateHeatForFileSize(fileObject); //method under test
-        assertEquals(heatLevel, 2);
+        assertEquals(2, heatLevel);
     }
 
     @Test
-    public void calculateHeatForNumberOfCommitsTest()
+    void calculateHeatForNumberOfCommitsTest()
     {
         FileObject fileObject = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH);
         fileObject.setNumberOfCommits(TEST_NUMBER_OF_COMMITS);
         int heatLevel = HeatCalculationUtility.calculateHeatForNumberOfCommits(fileObject); //method under test
-        assertEquals(heatLevel, TEST_NUMBER_OF_COMMITS);
+        assertEquals(TEST_NUMBER_OF_COMMITS, heatLevel);
     }
 }
