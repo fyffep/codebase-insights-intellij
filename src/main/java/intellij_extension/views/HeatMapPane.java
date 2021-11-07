@@ -1,10 +1,19 @@
 package intellij_extension.views;
 
+<<<<<<< HEAD
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.FlowPane;
+=======
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Orientation;
+import javafx.scene.control.Button;
+import javafx.scene.control.SplitPane;
+import javafx.scene.layout.*;
+>>>>>>> ui-development-selected-file-terminalview
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -20,7 +29,6 @@ public class HeatMapPane extends FlowPane {
         text.setFont(new Font(25));
         text.setText("HeatMapView");
         getChildren().add(text);*/
-
 
         // Fill background with default
         Color backgroundColor = Color.AQUAMARINE;
