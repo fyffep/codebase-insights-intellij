@@ -55,9 +55,12 @@ public class Constants {
     public static final FontWeight HEADER_TEXT_FONT_WEIGHT = FontWeight.BOLD;
 
     //Text Font properties in Selected File Pane
-    public static final String SELECTED_FILE_TEXT_FONT = "Veranda";
-    public static final int SELECTED_FILE_TEXT_SIZE = 14;
-    public static final FontWeight SELECTED_FILE_TEXT_FONT_WEIGHT = FontWeight.BOLD;
+    public static final String SF_TEXT_FONT = "Veranda";
+    public static final int SF_TEXT_SIZE = 14;
+    public static final FontWeight SF_TEXT_FONT_WEIGHT = FontWeight.BOLD;
+    public static final String SF_FILE_NAME_SPECIFIER = "%-20s";
+    public static final String SF_PACKAGE_NAME_SPECIFIER = "%-15s";
+    public static final String SF_FILE_AUTHOR_SPECIFIER = "%-22s";
 
     // Commit History Commit List
     public static final int CH_COMMIT_LIST_MIN_HEIGHT = 0;
@@ -81,10 +84,10 @@ public class Constants {
     public static final String CD_AUTHOR = "Author: ";
     public static final String CD_DATE = "Date: ";
     public static final String CD_HASH = "Hash: ";
-    public static final String SF_TEXT_FILENAME="File Name";
-    public static final String SF_TEXT_PACKAGENAME="Package Name";
-    public static final String SF_TEXT_AUTHORS="Authors";
-
+    public static final String SF_TEXT_FILENAME = "File Name";
+    public static final String SF_TEXT_PACKAGENAME = "Package Name";
+    public static final String SF_TEXT_AUTHORS = "Authors";
+    public static final String SF_TEXT_SEPERATOR = ":";
 
 
     // MOCK DATA
