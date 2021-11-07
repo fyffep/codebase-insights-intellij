@@ -33,6 +33,10 @@ public class Constants {
     public static final String CD_FILE_LIST_CONTAINER_ID = "CD_FILE_LIST_CONTAINER_01";
     public static final String CD_FILE_LIST_ID = "CD_FILE_LIST_01";
     public static final String CD_FILE_TEXT_PREFIX = "CD_FILE_TEXT_";
+    // Selected File Details Pane
+    public static final String SF_FILENAME_TEXT_ID = "SF_FILENAME_01";
+    public static final String SF_PACKAGENAME_TEXT_ID = "SF_PACKAGENAME_01";
+    public static final String SF_AUTHOR_TEXT_ID = "SF_AUTHOR_01";
 
 
     // UI Properties
@@ -49,6 +53,11 @@ public class Constants {
     public static final String HEADER_FONT = "Veranda";
     public static final int HEADER_TEXT_SIZE = 24;
     public static final FontWeight HEADER_TEXT_FONT_WEIGHT = FontWeight.BOLD;
+
+    //Text Font properties in Selected File Pane
+    public static final String SELECTED_FILE_TEXT_FONT = "Veranda";
+    public static final int SELECTED_FILE_TEXT_SIZE = 14;
+    public static final FontWeight SELECTED_FILE_TEXT_FONT_WEIGHT = FontWeight.BOLD;
 
     // Commit History Commit List
     public static final int CH_COMMIT_LIST_MIN_HEIGHT = 0;
@@ -72,6 +81,11 @@ public class Constants {
     public static final String CD_AUTHOR = "Author: ";
     public static final String CD_DATE = "Date: ";
     public static final String CD_HASH = "Hash: ";
+    public static final String SF_TEXT_FILENAME="File Name";
+    public static final String SF_TEXT_PACKAGENAME="Package Name";
+    public static final String SF_TEXT_AUTHORS="Authors";
+
+
 
     // MOCK DATA
     // TODO - MOVE TO TEST MOCK DATA FILE IN TEST DIRECTORY EVENTUALLY
