@@ -13,7 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.awt.*;
 
-public class TestToolWindowFactory implements ToolWindowFactory {
+public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory {
+
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         final JFXPanel fxPanel = new JFXPanel();
@@ -33,8 +34,12 @@ public class TestToolWindowFactory implements ToolWindowFactory {
             CodeBase codeBase = new CodeBase();
 
             //Create the main heat map area
-            HeatMapController heatMapController = new HeatMapController(codeBase);
-            root.getItems().add(heatMapController.getView()); //show the view
+//            HeatMapController heatMapController = new HeatMapController(codeBase);
+//            root.getItems().add(heatMapController.getView()); //show the view
+
+            // Left Half of Tools Windows
+            HeatMapSplitPane heatMapSplit = new HeatMapSplitPane();
+            root.getItems().add(heatMapSplit);;
 
             // Right Half of Tools Window
             // Will split into two sections

@@ -25,7 +25,9 @@ public class FileSizeCalculator
         try
         {
             BufferedReader buffer = new BufferedReader(new FileReader(fileObject.getFilePath()));
-            while(buffer.readLine() != null)
+            // SonarQube bug recommendation. "Use or store the value returned from "readLine" instead of throwing it away."
+            String line = buffer.readLine();
+            while(line != null)
             {
                 lineCount++;
             }
