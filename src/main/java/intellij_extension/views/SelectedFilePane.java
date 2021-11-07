@@ -9,14 +9,16 @@ import javafx.scene.layout.VBox;
  * It is a TitledPane . It offers a terminal kind view where the user can maximize and minimize the window
  */
 public class SelectedFilePane extends TitledPane {
+    private SelectedFileVBox selectedfilevbox;
 
-    public SelectedFilePane(VBox vBox) {
+    public SelectedFilePane() {
         super();
         setText("Selected File Details");
+        selectedfilevbox = new SelectedFileVBox();
         setPrefHeight(10);
         this.setExpanded(false);
         this.setCollapsible(true);
-        this.setContent(vBox);
+        this.setContent(selectedfilevbox);
         showPane();
 
     }

@@ -22,8 +22,7 @@ public class HeatMapSplitPane extends SplitPane {
 
 
         //Bottom half
-        SelectedFileVBox selectedFileVBox = new SelectedFileVBox();
-        selectedFileView = new SelectedFilePane(selectedFileVBox);
+        selectedFileView = new SelectedFilePane();
         this.getItems().add(selectedFileView);
     }
 }
