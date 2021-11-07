@@ -68,7 +68,10 @@ public class Constants {
     // UI Strings
     public static final String CH_HEADER_TEXT = "Commit History:";
     public static final String CD_HEADER_TEXT = "Commit Details:";
-
+    public static final String CD_DESCRIPTION = "Description: ";
+    public static final String CD_AUTHOR = "Author: ";
+    public static final String CD_DATE = "Date: ";
+    public static final String CD_HASH = "Hash: ";
 
     // MOCK DATA
     // TODO - MOVE TO TEST MOCK DATA FILE IN TEST DIRECTORY EVENTUALLY
