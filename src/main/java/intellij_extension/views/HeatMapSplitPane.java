@@ -5,10 +5,10 @@ import javafx.scene.control.SplitPane;
 
 public class HeatMapSplitPane extends SplitPane {
 
-    // Top half is Commit History for a single branch
+    // Top is Heat Map for a single commit + the history since the commit
     private HeatMapPane heatMapPane;
 
-    // Bottom half is Commit Details for a single commit in the selected branch
+    // Bottom is for a selected file
     private SelectedFilePane selectedFileView;
 
     public HeatMapSplitPane() {
@@ -22,7 +22,7 @@ public class HeatMapSplitPane extends SplitPane {
 
 
         //Bottom half
-        SelectedFileVBox selectedFileVBox=new SelectedFileVBox();
+        SelectedFileVBox selectedFileVBox = new SelectedFileVBox();
         selectedFileView = new SelectedFilePane(selectedFileVBox);
         this.getItems().add(selectedFileView);
     }

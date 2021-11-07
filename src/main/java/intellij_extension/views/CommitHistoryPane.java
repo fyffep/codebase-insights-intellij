@@ -58,6 +58,8 @@ public class CommitHistoryPane extends VBox {
             - Might be an observable update method call
      */
     public void branchUpdated(Object TheNewBranch) {
+        // Look to CommitDetailsPane buildFileList method to get an idea of what has to happen here.
+
         // We have to update each line with the new commit info,
         // If we need extra lines we have to create and add them.
         // Since we use an observableList...
@@ -117,8 +119,8 @@ public class CommitHistoryPane extends VBox {
         headerText.setText(Constants.CH_HEADER_TEXT);
     }
 
+    // TODO figure out how this gets data or maybe an observable update populates the combobox
     private void setBranchComboBoxProperties() {
-        // TODO figure out how this gets data or maybe an observable update populates the combobox
         branchComboBox.setItems(Constants.MOCK_BRANCHES);
         // Select first entry by default... for now
         branchComboBox.getSelectionModel().selectFirst();
@@ -126,8 +128,8 @@ public class CommitHistoryPane extends VBox {
         branchComboBox.setOnAction(this::branchSelectedAction);
     }
 
+    // TODO figure out how this gets data or maybe an observable update populates the combobox
     private void setCommitListProperties() {
-        // TODO figure out how this gets data or maybe an observable update populates the combobox
         commitList.setItems(Constants.MOCK_COMMIT_HISTORY_DATA);
 
         // Turn off editable

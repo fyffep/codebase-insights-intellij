@@ -2,28 +2,22 @@ package intellij_extension.views;
 
 import intellij_extension.Constants;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
 public class CommitDetailsPane extends VBox {
 
     private final VBox topHorizontalBanner;
-    private final Text headerText;
-
-    private final Text commitDescriptionText;
-    private final Text commitAuthorText;
-    private final Text commitDateText;
-    private final Text commitHashText;
-
-    private final ScrollPane fileListContainer;
     private final VBox fileList;
-    // This is all the lines we created so far - we should never remove from this list
-    private final ArrayList<Text> allFileTexts = new ArrayList<>();
+
     // These are active lines in the VBox fileList
+    // While the ViewFactory will hold reference to all created file text lines
+    // this class will hold reference to the ones that are currently displaying.
     private final ArrayList<Text> activeFileTexts = new ArrayList<>();
 
     public CommitDetailsPane() {
@@ -34,31 +28,18 @@ public class CommitDetailsPane extends VBox {
         setBannerProperties();
         ViewFactory.setPaneChild(this, topHorizontalBanner);
 
+        // If we need references we can ask the ViewFactory and supply the ID
         // Create the banner text
-        headerText = ViewFactory.getInstance().createOrGetText(Constants.CD_HEADER_TEXT_ID);
-        setHeaderTextProperties();
-        ViewFactory.setPaneChild(topHorizontalBanner, headerText);
-
+        createHeaderText(Constants.CD_HEADER_TEXT_ID, Constants.CD_HEADER_TEXT, topHorizontalBanner);
         // Create the commit details text
-        commitDescriptionText = ViewFactory.getInstance().createOrGetText(Constants.CD_DESCRIPTION_TEXT_ID);
-        commitDescriptionText.setText("Description: " + Constants.MOCK_COMMIT_DETAILS.getCommitDescription().getValue());
-        ViewFactory.setPaneChild(topHorizontalBanner, commitDescriptionText);
-
-        commitAuthorText = ViewFactory.getInstance().createOrGetText(Constants.CD_AUTHOR_TEXT_ID);
-        commitAuthorText.setText("Author: " + Constants.MOCK_COMMIT_DETAILS.getCommitAuthor().getValue());
-        ViewFactory.setPaneChild(topHorizontalBanner, commitAuthorText);
-
-        commitDateText = ViewFactory.getInstance().createOrGetText(Constants.CD_DATE_TEXT_ID);
-        commitDateText.setText("Date: " + Constants.MOCK_COMMIT_DETAILS.getCommitDate().getValue());
-        ViewFactory.setPaneChild(topHorizontalBanner, commitDateText);
-
-        commitHashText = ViewFactory.getInstance().createOrGetText(Constants.CD_HASH_TEXT_ID);
-        commitHashText.setText("Hash: " + Constants.MOCK_COMMIT_DETAILS.getCommitHash().getValue());
-        ViewFactory.setPaneChild(topHorizontalBanner, commitHashText);
+        createText(Constants.CD_DESCRIPTION_TEXT_ID, "Description: " + Constants.MOCK_COMMIT_DETAILS.getCommitDescription().getValue(), topHorizontalBanner);
+        createText(Constants.CD_AUTHOR_TEXT_ID, "Author: " + Constants.MOCK_COMMIT_DETAILS.getCommitAuthor().getValue(), topHorizontalBanner);
+        createText(Constants.CD_DATE_TEXT_ID, "Date: " + Constants.MOCK_COMMIT_DETAILS.getCommitDate().getValue(), topHorizontalBanner);
+        createText(Constants.CD_HASH_TEXT_ID, "Hash: " + Constants.MOCK_COMMIT_DETAILS.getCommitHash().getValue(), topHorizontalBanner);
 
         // Create the Commit Detail's file list container (i.e. scroll view)
-        fileListContainer = ViewFactory.getInstance().createOrGetScrollPane(Constants.CD_FILE_LIST_CONTAINER_ID);
-        setFileListContainerProperties();
+        ScrollPane fileListContainer = ViewFactory.getInstance().createOrGetScrollPane(Constants.CD_FILE_LIST_CONTAINER_ID);
+        setFileListContainerProperties(fileListContainer);
         ViewFactory.setPaneChild(this, fileListContainer);
 
         // Create the Commit Detail's file list
@@ -75,30 +56,50 @@ public class CommitDetailsPane extends VBox {
         - Might be an observable update method call
     */
     private void buildFileList(/*Object allFilesInCommitData*/) {
+        // Clear and start fresh
         activeFileTexts.clear();
         fileList.getChildren().clear();
 
-        int counter = 0;
-        for(String fileInfo: Constants.MOCK_COMMIT_FILE_DETAILS) {
-            Text fileText = ViewFactory.getInstance().createOrGetText(Constants.CD_FILE_TEXT_PREFIX + counter);
+        // Index is mainly for id
+        int fileIndex = 0;
+        for (String fileInfo : Constants.MOCK_COMMIT_FILE_DETAILS) {
+            // Create or get a text
+            Text fileText = ViewFactory.getInstance().createOrGetText(Constants.CD_FILE_TEXT_PREFIX + fileIndex);
+            // Set the properties
             setFileTextProperties(fileText);
+            // TODO make this proper with model data
+            // set it's file info
             fileText.setText(fileInfo);
-            if(!allFileTexts.contains(fileText)) {
-                allFileTexts.add(fileText);
-            }
+            // Track it as an active text
             activeFileTexts.add(fileText);
+            // Add it to the file list VBox
             ViewFactory.setPaneChild(fileList, fileText);
-
-            counter++;
+            // Increment index
+            fileIndex++;
         }
+    }
+
+    /*
+    Creation Methods
+        -These don't really 'create' text, that's the ViewFactory's job
+        -Their main purpose is to remove duplicated code.
+     */
+    private void createHeaderText(String id, String label, Pane parent) {
+        Text headerText = createText(id, label, parent);
+        setHeaderTextProperties(headerText);
+    }
+
+    private @NotNull Text createText(String id, String label, Pane parent) {
+        Text text = ViewFactory.getInstance().createOrGetText(id);
+        text.setText(label);
+        ViewFactory.setPaneChild(parent, text);
+        return text;
     }
 
     /*
     UI Property Settings
     */
     private void setBannerProperties() {
-        // Banner layout properties
-
         // We want this so the user can make the Commit Details view as big
         // as the right side if desirable
         topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT);
@@ -114,14 +115,12 @@ public class CommitDetailsPane extends VBox {
         topHorizontalBanner.setPadding(Constants.BANNER_INSETS);
     }
 
-    private void setHeaderTextProperties() {
+    private void setHeaderTextProperties(@NotNull Text headerText) {
         headerText.setFont(Font.font(Constants.HEADER_FONT, Constants.HEADER_TEXT_FONT_WEIGHT, Constants.HEADER_TEXT_SIZE));
-        headerText.setText(Constants.CD_HEADER_TEXT);
     }
 
-    private void setFileListContainerProperties() {
+    private void setFileListContainerProperties(@NotNull ScrollPane fileListContainer) {
         // Set up constraints on width/height
-
         // We want this so the user can make the Commit History view as big as the right side if desirable
         fileListContainer.setMinHeight(Constants.FILE_LIST_MIN_HEIGHT);
         fileListContainer.prefHeightProperty().bind(this.heightProperty().multiply(Constants.FILE_LIST_SIZE_MULTIPLIER));

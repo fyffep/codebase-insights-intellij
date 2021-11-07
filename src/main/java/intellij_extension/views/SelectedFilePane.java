@@ -21,8 +21,8 @@ public class SelectedFilePane extends TitledPane {
 
     }
 
-    // helps to control the visiblity of the pane  itself
-    public void toggleVisiblity() {
+    // helps to control the visibility of the pane  itself
+    public void toggleVisibility() {
         if (this.isVisible() == true) {
             hidePane();
         } else {
@@ -38,7 +38,11 @@ public class SelectedFilePane extends TitledPane {
         this.setVisible(false);
     }
 
-    // updates the pane with the given VBox object
+
+    // TODO this isn't a good method.
+    // TODO this implies we are re-creating the VBox every time.
+    // TODO Why do that, when we can reuse the VBox that is already there?
+    // Updates the pane with the given VBox object
     public void updateSelectedFileView(VBox vBox) {
         this.setContent(vBox);
     }
