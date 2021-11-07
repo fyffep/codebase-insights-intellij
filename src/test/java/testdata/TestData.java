@@ -2,6 +2,7 @@ package testdata;
 
 public class TestData {
 
+    public static final int NUMBER_OF_COMMITS_IN_GITIGNORE = 8; //has to be changed when our .gitignore is updated!
     public static long TEST_DEFAULT_FILE_COUNT=0;
     public static long TEST_FILE_COUNT=40;
     public static long TEST_DEFAULT_FOLDER_COUNT=0;
@@ -12,10 +13,10 @@ public class TestData {
     public static long TEST_DEFAULT_FILELIST_SIZE=0;
     public static String TEST_ROOT_DEFAULT_PATH="src";
     public static String TEST_ROOT_PATH="abc";
-    public static String TEST_PARSE_FOLDER_PATH="src/test/java";
+    public static String TEST_PARSE_FOLDER_PATH="src/test/java/intellij_extension";
     public static String TEST_PARSE_FOLDER_NAME="java";
     public static int TEST_PARSE_FOLDER_COUNT=2;
-    public static String TEST_PARSE_FILE="src/test/java/testdata";
+    public static String TEST_PARSE_FILE="src/test/java/intellij_extension/models";
     public static int TEST_PARSE_FILE_COUNT=2;
     public static String TEST_FILEPATH="src/test/java/testdata/TestParseFile.java";
     public static String TEST_FILENAME="TestParseFile.java";
@@ -31,6 +32,9 @@ public class TestData {
     public static int TEST_NEW_FILE_2_COUNT=2;
     public static long TEST_LINE_COUNT=200;
     public static long TEST_FILE_SIZE=2000;
+    public static int TEST_NUMBER_OF_COMMITS = 8;
+    public static int TEST_EXPECTED_HEAT = 5;
+
 
 
 

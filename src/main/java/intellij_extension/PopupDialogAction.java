@@ -3,7 +3,6 @@ package intellij_extension;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
-import javafx.application.Application;
 
 public class PopupDialogAction extends AnAction {
 
@@ -16,7 +15,8 @@ public class PopupDialogAction extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent event) {
-        /*// Using the event, create and show a dialog
+        /*/
+        / Using the event, create and show a dialog
         Project currentProject = event.getProject();
         StringBuilder dialogMessage = new StringBuilder(event.getPresentation().getText() + " Selected!");
         String dialogTitle = event.getPresentation().getDescription();
@@ -27,7 +27,5 @@ public class PopupDialogAction extends AnAction {
         }
         Messages.showMessageDialog(currentProject, dialogMessage.toString(), dialogTitle, Messages.getInformationIcon());*/
 
-        //Start the JavaFX window
-        Application.launch(RootWindow.class);
     }
 }
