@@ -8,8 +8,6 @@ import intellij_extension.models.CodeBase;
 import intellij_extension.views.*;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;

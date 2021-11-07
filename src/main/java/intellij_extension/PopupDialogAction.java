@@ -3,7 +3,6 @@ package intellij_extension;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
-import javafx.application.Application;
 
 public class PopupDialogAction extends AnAction {
 

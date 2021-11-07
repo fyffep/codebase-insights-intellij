@@ -2,9 +2,7 @@ package intellij_extension.models;
 
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import java.io.File;
 import java.util.HashMap;
-import java.util.Map;
 
 public class Commit
 {

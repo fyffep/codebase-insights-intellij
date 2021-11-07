@@ -12,13 +12,17 @@ import java.io.IOException;
  */
 public class JGitHelper
 {
+    private JGitHelper() {
+        //This is a utility class
+    }
+
     public static Repository openLocalRepository() throws IOException
     {
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         return builder
                 .readEnvironment() // scan environment GIT_* variables
                 //.findGitDir() // scan up the file system tree
-                .findGitDir(new File("C:\\Users\\Pete\\Desktop\\team3-project"))
+                .findGitDir(new File("C:\\Users\\Pete\\Desktop\\team3-project")) //TODO Should be changed when we can locate the user's project dir
                 .build();
     }
 }

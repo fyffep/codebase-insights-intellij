@@ -20,8 +20,6 @@ public class FileObject
 	private int numberOfCommits = 1;
 	private int depth;
 
-	private int heatLevel = -1;
-
 	public FileObject(String fileName, String filePath, int depth)
 	{
 		this.fileName=fileName;
@@ -107,12 +105,10 @@ public class FileObject
 		int numberOfCommitsHeat = HeatCalculationUtility.calculateHeatForNumberOfCommits(this);
 
 		//Average all the metrics
-		this.heatLevel = Math.round(
+		return (
 				sizeHeat +
 				numberOfCommitsHeat
 				//Add more metrics here...
 		) / 2;
-
-		return this.heatLevel;
 	}
 }

@@ -7,11 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static testdata.TestData.*;
 import static testdata.TestData.TEST_FILE_TESTDATA_SIZE;
 
-public class FileSizeCalculatorTest
+class FileSizeCalculatorTest
 {
     //Test assignLineCount()
     @Test
-    public void assignLineCountTest() {
+    void assignLineCountTest() {
         FileObject file = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH);
         file.setFilePath(TEST_FILEPATH);
         FileSizeCalculator.assignLineCount(file);
@@ -20,7 +20,7 @@ public class FileSizeCalculatorTest
 
     //Test assignFileSize()
     @Test
-    public void assignFileSizeTest() {
+    void assignFileSizeTest() {
         FileObject file = new FileObject(TEST_FILENAME, TEST_FILEPATH, TEST_DEPTH);
         file.setFilePath(TEST_FILEPATH);
         FileSizeCalculator.assignFileSize(file);

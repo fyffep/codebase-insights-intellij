@@ -9,6 +9,10 @@ import static intellij_extension.Constants.HEAT_MIN;
 
 public class HeatCalculationUtility //can be renamed if adding more methods
 {
+    private HeatCalculationUtility() {
+        //This is a utility class
+    }
+
     /**
      * Converts the input heat level to a color.
      * Higher heat levels are indicated by higher intensities of red.
