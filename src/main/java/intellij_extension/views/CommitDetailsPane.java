@@ -32,10 +32,10 @@ public class CommitDetailsPane extends VBox {
         // Create the banner text
         createHeaderText(Constants.CD_HEADER_TEXT_ID, Constants.CD_HEADER_TEXT, topHorizontalBanner);
         // Create the commit details text
-        createText(Constants.CD_DESCRIPTION_TEXT_ID, "Description: " + Constants.MOCK_COMMIT_DETAILS.getCommitDescription().getValue(), topHorizontalBanner);
-        createText(Constants.CD_AUTHOR_TEXT_ID, "Author: " + Constants.MOCK_COMMIT_DETAILS.getCommitAuthor().getValue(), topHorizontalBanner);
-        createText(Constants.CD_DATE_TEXT_ID, "Date: " + Constants.MOCK_COMMIT_DETAILS.getCommitDate().getValue(), topHorizontalBanner);
-        createText(Constants.CD_HASH_TEXT_ID, "Hash: " + Constants.MOCK_COMMIT_DETAILS.getCommitHash().getValue(), topHorizontalBanner);
+        createText(Constants.CD_DESCRIPTION_TEXT_ID, Constants.CD_DESCRIPTION + Constants.MOCK_COMMIT_DETAILS.getCommitDescription().getValue(), topHorizontalBanner);
+        createText(Constants.CD_AUTHOR_TEXT_ID, Constants.CD_AUTHOR + Constants.MOCK_COMMIT_DETAILS.getCommitAuthor().getValue(), topHorizontalBanner);
+        createText(Constants.CD_DATE_TEXT_ID, Constants.CD_DATE + Constants.MOCK_COMMIT_DETAILS.getCommitDate().getValue(), topHorizontalBanner);
+        createText(Constants.CD_HASH_TEXT_ID, Constants.CD_HASH + Constants.MOCK_COMMIT_DETAILS.getCommitHash().getValue(), topHorizontalBanner);
 
         // Create the Commit Detail's file list container (i.e. scroll view)
         ScrollPane fileListContainer = ViewFactory.getInstance().createOrGetScrollPane(Constants.CD_FILE_LIST_CONTAINER_ID);
