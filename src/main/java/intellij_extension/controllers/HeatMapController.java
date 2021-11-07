@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 
-public class HeatMapController
+public class HeatMapController implements IHeatMapController
 {
     private HeatMapPane heatMapPane;
     private CodeBase codeBase;
