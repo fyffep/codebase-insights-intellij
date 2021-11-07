@@ -79,7 +79,3 @@ runIde {
             'java.base/jdk.internal.vm=ALL-UNNAMED'
     ]
 }
-
-// For Bamboo
-// Create Gradle wrapper
-task createWrapper(type: Wrapper)
