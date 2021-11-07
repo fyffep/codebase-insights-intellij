@@ -9,9 +9,19 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
+
+/**
+ * Purpose of this class:
+ * 1) Remove and isolate view creation code out of other classes.
+ * This keeps the other classes a bit more clean.
+ * 2) Hold references for classes if they do not want to.
+ * Simply retrieve reference by calling createOrGet and supplying the proper id.
+ * 3) A pooling mechanism.
+ */
 public class ViewFactory {
 
     private static ViewFactory instance;
@@ -47,7 +57,7 @@ public class ViewFactory {
      * These methods might seem ridiculous
      * But this will reduce SonarQube's duplication code count
      */
-    public static void setPaneChild(Pane parent, Node child) {
+    public static void setPaneChild(@NotNull Pane parent, Node child) {
         parent.getChildren().add(child);
     }
 

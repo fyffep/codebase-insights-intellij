@@ -23,10 +23,8 @@ public class CommitHistoryPaneTest {
     private static JFXPanel fxPanel;
     private static CommitHistoryPane chp;
 
-
     @BeforeAll
     public static void setUpBeforeClass() {
-        System.out.println("Hello?");
         // Forces the JavaFX thread to start
         // Without tests will fail
         fxPanel = new JFXPanel();
@@ -40,7 +38,7 @@ public class CommitHistoryPaneTest {
     }
 
     @Test
-    public void constructorTest_BannerHBoxSuccessfullyCreated() {
+    public void constructor_BannerHBoxSuccessfullyCreated() {
         // Assert banner object was created
         List<Node> view = chp.getChildren().stream().filter(node -> node.getId() == Constants.CH_BANNER_ID).collect(Collectors.toList());
         assertNotNull(view);
@@ -48,7 +46,8 @@ public class CommitHistoryPaneTest {
         assertEquals(1, view.size());
     }
 
-    public void constructorTest_BannerHeaderTextSuccessfullyCreated() {
+    @Test
+    public void constructor_BannerHeaderTextSuccessfullyCreated() {
         // Grab banner HBox
         List<Node> view = chp.getChildren().stream().filter(node -> node.getId() == Constants.CH_BANNER_ID).collect(Collectors.toList());
         HBox header = (HBox) view.get(0);
@@ -60,7 +59,8 @@ public class CommitHistoryPaneTest {
         assertEquals(1, view.size());
     }
 
-    public void constructorTest_BannerComboBoxSuccessfullyCreated() {
+    @Test
+    public void constructor_BannerComboBoxSuccessfullyCreated() {
         // Grab banner HBox
         List<Node> view = chp.getChildren().stream().filter(node -> node.getId() == Constants.CH_BANNER_ID).collect(Collectors.toList());
         HBox header = (HBox) view.get(0);
@@ -72,7 +72,8 @@ public class CommitHistoryPaneTest {
         assertEquals(1, view.size());
     }
 
-    public void constructorTest_BannerTableViewSuccessfullyCreated() {
+    @Test
+    public void constructor_BannerTableViewSuccessfullyCreated() {
         // Grab banner HBox
         List<Node> view = chp.getChildren().stream().filter(node -> node.getId() == Constants.CH_BANNER_ID).collect(Collectors.toList());
         HBox header = (HBox) view.get(0);

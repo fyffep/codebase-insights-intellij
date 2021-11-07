@@ -36,7 +36,7 @@ public class CommitDetailsPaneTest {
     }
 
     @Test
-    public void constructorTest_BannerVBoxSuccessfullyCreated() {
+    public void constructor_BannerVBoxSuccessfullyCreated() {
         // Assert banner object was created
         List<Node> view = cdp.getChildren().stream().filter(node -> node.getId() == Constants.CD_BANNER_ID).collect(Collectors.toList());
         assertNotNull(view);
@@ -45,7 +45,7 @@ public class CommitDetailsPaneTest {
     }
 
     @Test
-    public void constructorTest_BannerHeaderTextSuccessfullyCreated() {
+    public void constructor_BannerHeaderTextSuccessfullyCreated() {
         // Grab banner VBox
         List<Node> view = cdp.getChildren().stream().filter(node -> node.getId() == Constants.CD_BANNER_ID).collect(Collectors.toList());
         VBox header = (VBox) view.get(0);
@@ -58,7 +58,7 @@ public class CommitDetailsPaneTest {
     }
 
     @Test
-    public void constructorTest_BannerDescriptionTextSuccessfullyCreated() {
+    public void constructor_BannerDescriptionTextSuccessfullyCreated() {
         // Grab banner VBox
         List<Node> view = cdp.getChildren().stream().filter(node -> node.getId() == Constants.CD_BANNER_ID).collect(Collectors.toList());
         VBox header = (VBox) view.get(0);
@@ -71,7 +71,7 @@ public class CommitDetailsPaneTest {
     }
 
     @Test
-    public void constructorTest_BannerAuthorTextSuccessfullyCreated() {
+    public void constructor_BannerAuthorTextSuccessfullyCreated() {
         // Grab banner VBox
         List<Node> view = cdp.getChildren().stream().filter(node -> node.getId() == Constants.CD_BANNER_ID).collect(Collectors.toList());
         VBox header = (VBox) view.get(0);
@@ -84,7 +84,7 @@ public class CommitDetailsPaneTest {
     }
 
     @Test
-    public void constructorTest_BannerDateTextSuccessfullyCreated() {
+    public void constructor_BannerDateTextSuccessfullyCreated() {
         // Grab banner VBox
         List<Node> view = cdp.getChildren().stream().filter(node -> node.getId() == Constants.CD_BANNER_ID).collect(Collectors.toList());
         VBox header = (VBox) view.get(0);
@@ -97,7 +97,7 @@ public class CommitDetailsPaneTest {
     }
 
     @Test
-    public void constructorTest_BannerHashTextSuccessfullyCreated() {
+    public void constructor_BannerHashTextSuccessfullyCreated() {
         // Grab banner VBox
         List<Node> view = cdp.getChildren().stream().filter(node -> node.getId() == Constants.CD_BANNER_ID).collect(Collectors.toList());
         VBox header = (VBox) view.get(0);
@@ -110,7 +110,7 @@ public class CommitDetailsPaneTest {
     }
 
     @Test
-    public void constructorTest_FileListContainerSuccessfullyCreated() {
+    public void constructor_FileListContainerSuccessfullyCreated() {
         // Assert File Scroll Pane
         List<Node> view = cdp.getChildren().stream().filter(node -> node.getId() == Constants.CD_FILE_LIST_CONTAINER_ID).collect(Collectors.toList());
         assertNotNull(view);
@@ -119,7 +119,7 @@ public class CommitDetailsPaneTest {
     }
 
     @Test
-    public void constructorTest_FileListVBoxSuccessfullyCreated() {
+    public void constructor_FileListVBoxSuccessfullyCreated() {
         // Grab details ScrollPane
         List<Node> view = cdp.getChildren().stream().filter(node -> node.getId() == Constants.CD_FILE_LIST_CONTAINER_ID).collect(Collectors.toList());
         ScrollPane fileListContainer = (ScrollPane) view.get(0);
@@ -132,7 +132,7 @@ public class CommitDetailsPaneTest {
     }
 
     @Test
-    public void constructorTest_FileListTextsSuccessfullyCreated() {
+    public void constructor_FileListTextsSuccessfullyCreated() {
         // Grab File List ScrollPane (Container)
         List<Node> view = cdp.getChildren().stream().filter(node -> node.getId() == Constants.CD_FILE_LIST_CONTAINER_ID).collect(Collectors.toList());
         ScrollPane fileListContainer = (ScrollPane) view.get(0);
