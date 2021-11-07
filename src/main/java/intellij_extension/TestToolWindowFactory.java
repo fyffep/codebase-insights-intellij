@@ -31,8 +31,8 @@ public class TestToolWindowFactory implements ToolWindowFactory {
             root.prefHeightProperty().bind(mainView.heightProperty());
 
             // Left Half of Tools Windows
-            HeatMapPane heatMapPane = new HeatMapPane();
-            root.getItems().add(heatMapPane);
+            HeatMapSplitPane heatmapsplit = new HeatMapSplitPane();
+            root.getItems().add(heatmapsplit);
 //            codebaseScene.getSplitBox().getChildren().add(heatMapPane);
 //            HBox.setHgrow(heatMapPane, Priority.ALWAYS);
 

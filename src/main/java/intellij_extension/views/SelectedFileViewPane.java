@@ -1,46 +1,53 @@
 package intellij_extension.views;
 
-import javafx.geometry.Orientation;
-import javafx.scene.control.Label;
-import javafx.scene.control.SplitPane;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-public class SelectedFileViewPane extends AnchorPane{
+
+public class SelectedFileViewPane extends Pane {
+    private double paneHeight;
+    private Color  backgroundColor;
+    private BackgroundFill backgroundFill;
+    private Background background;
+    private HBox headerHBox;
+    private Text headerText;
+
 
     public SelectedFileViewPane() {
         super();
+        this.backgroundColor = Color.YELLOW;
+        this.backgroundFill = new BackgroundFill(this.backgroundColor, null, null);
+        this.background = new Background(backgroundFill);
+        this.paneHeight = 100;
+        setMaxHeight(this.paneHeight);
+        setBackground(this.background);// Fill background with default
+        headerHBox=new HBox();
+//        headerText.setText("Selected File");
+        headerHBox.setMinHeight(30);
+//        headerHBox.getChildren().add(headerText);
+        getChildren().add(headerHBox);
 
-        Text text = new Text();
-        text.setX(40);
-        text.setY(100);
-        text.setFont(new Font(25));
-        text.setText("SelectedFileViewPane");
-        getChildren().add(text);
-
-        // Fill background with default
-        Color backgroundColor = Color.YELLOW;
-        BackgroundFill backgroundFill = new BackgroundFill(backgroundColor, null, null);
-        Background background = new Background(backgroundFill);
-        setBackground(background);
     }
-    public VBox createVBox()
+
+    public void setPaneHeight(double paneHeight) {
+        this.paneHeight = paneHeight;
+        setMaxHeight(this.paneHeight);
+    }
+
+    public double getPaneHeight() {
+        return this.paneHeight;
+    }
+
+    public  void setBackgroundColor(Color color)
     {
-        VBox vbox=new VBox();
-        Label label=new Label("Test");
-        vbox.getChildren().add(label);
-        return vbox;
-
+        this.backgroundColor=color;
     }
-
-    public void createAnchorPane()
+    public Color getBackgroundColor()
     {
-        SplitPane splitPane=new SplitPane();
-        VBox vbox=this.createVBox();
-        VBox.setVgrow(this, Priority.ALWAYS);
-        splitPane.getItems().add(vbox);
-        splitPane.setOrientation(Orientation.HORIZONTAL);
+        return this.backgroundColor;
     }
+
+
+
 }
