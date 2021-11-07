@@ -9,7 +9,7 @@ public class HeatMapSplitPane extends SplitPane {
     private HeatMapPane heatMapPane;
 
     // Bottom half is Commit Details for a single commit in the selected branch
-    private SelectedFileViewPane selectedFileView;
+    private SelectedFilePane selectedFileView;
 
     public HeatMapSplitPane() {
         super();
@@ -18,10 +18,12 @@ public class HeatMapSplitPane extends SplitPane {
 
         // Top half
         heatMapPane = new HeatMapPane();
-        this.getItems().add(heatMapPane); // SplitPane isn't a pane, so we cannot use ViewFactory.setPaneChild
+        this.getItems().add(heatMapPane);
+
 
         //Bottom half
-        selectedFileView = new SelectedFileViewPane();
-        this.getItems().add(selectedFileView); // SplitPane isn't a pane, so we cannot use ViewFactory.setPaneChild
+        SelectedFileVBox selectedFileVBox=new SelectedFileVBox();
+        selectedFileView = new SelectedFilePane(selectedFileVBox);
+        this.getItems().add(selectedFileView);
     }
 }
