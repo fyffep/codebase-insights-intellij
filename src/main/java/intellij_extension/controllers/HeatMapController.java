@@ -1,10 +1,11 @@
 package intellij_extension.controllers;
 
-import intellij_extension.utility.HeatCalculationUtility;
-import intellij_extension.models.Directory;
+import intellij_extension.Constants;
 import intellij_extension.models.CodeBase;
 import intellij_extension.models.Commit;
+import intellij_extension.models.Directory;
 import intellij_extension.models.FileObject;
+import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.utility.commithistory.CommitCountCalculator;
 import intellij_extension.views.HeatMapPane;
 import intellij_extension.views.unused.HeatFileComponent;
@@ -57,7 +58,8 @@ public class HeatMapController implements IHeatMapController
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            Constants.LOG.error(e);
+            Constants.LOG.error(e.getMessage());
         }
         System.out.println("Heat calculations complete.");
     }
