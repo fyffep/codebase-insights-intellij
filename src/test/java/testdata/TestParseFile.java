@@ -1,8 +1,10 @@
 package testdata;
 
+import intellij_extension.Constants;
+
 public class TestParseFile {
     public void sample()
     {
-        System.out.println("OOSD");
+        Constants.LOG.info("OOSD");
     }
 }

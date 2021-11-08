@@ -1,5 +1,6 @@
 package intellij_extension.utility.filesize;
 
+import intellij_extension.Constants;
 import intellij_extension.models.FileObject;
 
 import java.io.BufferedReader;
@@ -35,7 +36,8 @@ public class FileSizeCalculator
         }
         catch(Exception e)
         {
-            System.err.println("Unable to read file: " + fileObject.getFilePath());
+            Constants.LOG.error("Unable to read file: " + fileObject.getFilePath());
+            // TODO what does this mean for a plugin project??
             System.exit(0);
         }
         //Assign the line count

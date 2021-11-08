@@ -61,7 +61,7 @@ public class HeatMapController implements IHeatMapController
             Constants.LOG.error(e);
             Constants.LOG.error(e.getMessage());
         }
-        System.out.println("Heat calculations complete.");
+        Constants.LOG.info("Heat calculations complete.");
     }
 
     public void populateHeatMap()
@@ -69,7 +69,7 @@ public class HeatMapController implements IHeatMapController
         Commit activeCommit = codeBase.getActiveCommit();
         if (activeCommit == null)
         {
-            System.out.println("Cannot populate the heat map since no commit is selected.");
+            Constants.LOG.info("Cannot populate the heat map since no commit is selected.");
         }
         HashMap<String, FileObject> fileMetricMap = codeBase.getActiveCommit().getFileMetricMap();
 
@@ -89,8 +89,8 @@ public class HeatMapController implements IHeatMapController
             heatFileComponent.setStyle("-fx-background-color: #" + color);
             heatMapPane.addNode(heatFileComponent);
 
-            System.out.println("Added a file pane for "+fileName +" with heat level "+heatLevel+" and color "+color);
-            //System.out.println("file has name=`"+fileName+"` filepath=`"+fileObject.getFilePath()+"`");
+            Constants.LOG.info("Added a file pane for "+fileName +" with heat level "+heatLevel+" and color "+color);
+            // Constants.LOG.info("file has name=`"+fileName+"` filepath=`"+fileObject.getFilePath()+"`");
         }
     }
 

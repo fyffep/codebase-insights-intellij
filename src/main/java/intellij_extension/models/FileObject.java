@@ -1,5 +1,6 @@
 package intellij_extension.models;
 
+import intellij_extension.Constants;
 import intellij_extension.utility.HeatCalculationUtility;
 
 /**
@@ -87,7 +88,7 @@ public class FileObject
 	public void displayFileDetails()
 	{
 		String output=getFileName()+",--->FileSize : "+getFileSize()+", LineCount : "+getLineCount();
-		System.out.println(String.format("%1$" + (output.length()+getDepth()) + "s", output));
+		Constants.LOG.info(String.format("%1$" + (output.length()+getDepth()) + "s", output));
 	}
 
 	/**
