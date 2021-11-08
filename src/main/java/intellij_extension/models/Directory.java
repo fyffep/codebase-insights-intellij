@@ -1,5 +1,6 @@
 package intellij_extension.models;
 
+import intellij_extension.Constants;
 import intellij_extension.utility.HeatCalculator;
 import intellij_extension.utility.filesize.FileSizeCalculator;
 
@@ -47,7 +48,7 @@ public class Directory implements HeatCalculator {
     public void parseDirectory() throws IOException {
         File directory = new File(path);
         this.fileCount = 0;
-        System.out.println("Listing files for " + directory);
+        Constants.LOG.info("Listing files for " + directory);
         for (String folderPath : directory.list()) {
             String subPath = getPath() + "/" + folderPath;
             File verifyFolder = new File(subPath);
@@ -113,7 +114,7 @@ public class Directory implements HeatCalculator {
 
     public void displayDetails() {
         String output = getPath() + "---> FileCount : " + getFileCount() + " Folder Count : " + getFolderCount();
-        System.out.println(String.format("%1$" + (output.length() + getDepth()) + "s", output));
+        Constants.LOG.info(String.format("%1$" + (output.length() + getDepth()) + "s", output));
         //Print the details of files in this directory
         for (Map.Entry<String, FileObject> entry : fileMap.entrySet()) {
             FileObject file = entry.getValue();

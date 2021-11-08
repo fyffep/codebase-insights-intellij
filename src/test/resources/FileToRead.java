@@ -1,9 +1,11 @@
 package com.org.samplefiles;
 
+import intellij_extension.Constants;
+
 public class FileToRead {
 	public void sample()
 	{
-		System.out.println("Hello World");
+		Constants.LOG.info("Hello World");
 	}
 
 }

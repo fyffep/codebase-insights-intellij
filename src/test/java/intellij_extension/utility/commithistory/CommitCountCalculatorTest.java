@@ -1,5 +1,6 @@
 package intellij_extension.utility.commithistory;
 
+import intellij_extension.Constants;
 import intellij_extension.models.FileObject;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -27,7 +28,7 @@ class CommitCountCalculatorTest
     {
         assertDoesNotThrow(() -> {
             CommitCountCalculator commitCountCalculator = new CommitCountCalculator(); //method under test
-            System.out.println("Created a " + commitCountCalculator + " with a default constructor. " +
+            Constants.LOG.info("Created a " + commitCountCalculator + " with a default constructor. " +
                     "This print message prevents an unused variable code smell.");
         });
     }

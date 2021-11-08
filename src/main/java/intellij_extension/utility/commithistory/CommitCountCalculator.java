@@ -39,7 +39,7 @@ public class CommitCountCalculator implements HeatCalculator {
         while (timesUpdatedIterator.hasNext()) {
             String filePath = timesUpdatedIterator.next();
             int timesUpdated = numberOfCommitsPerFile.get(filePath);
-            System.out.println("File `" + filePath + "` was updated " + timesUpdated + " times.");
+            Constants.LOG.info("File `" + filePath + "` was updated " + timesUpdated + " times.");
         }
 
 
@@ -79,7 +79,7 @@ LogCommit: commit 0d124558bb1000395288d12299d7d290aec61521 1635171571 -----sp
             if (commitIterator.hasNext())
                 newerCommit = commitIterator.next();
             else {
-                System.err.println("There were not enough commits to compute the number of times each file was changed.");
+                Constants.LOG.error("There were not enough commits to compute the number of times each file was changed.");
                 return new HashMap<>();
             }
             while (commitIterator.hasNext()) {

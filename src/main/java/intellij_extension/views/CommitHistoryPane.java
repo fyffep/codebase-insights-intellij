@@ -158,7 +158,7 @@ public class CommitHistoryPane extends VBox {
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
                     CommitHistoryLine rowData = row.getItem();
-                    System.out.println("Commit " + rowData.getRowNumber().getValue() + " was double clicked! Update CommitDetails!");
+                    Constants.LOG.info("Commit " + rowData.getRowNumber().getValue() + " was double clicked! Update CommitDetails!");
                 }
             });
             return row;
@@ -201,7 +201,7 @@ public class CommitHistoryPane extends VBox {
      */
     private void branchSelectedAction(ActionEvent event) {
         String selectedValue = branchComboBox.getValue();
-        System.out.println("The " + selectedValue + " branch was selected. Update HeatMap, CommitHistory, and CommitDetails, Hide SelectedFileTerminal Window");
+        Constants.LOG.info("The " + selectedValue + " branch was selected. Update HeatMap, CommitHistory, and CommitDetails, Hide SelectedFileTerminal Window");
     }
 }
 

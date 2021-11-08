@@ -20,8 +20,8 @@ public class TestData {
     public static int TEST_PARSE_FILE_COUNT = 2;  //TODO has to be changed when a new file is added to TEST_PARSE_FILE
     public static String TEST_FILEPATH = "src/test/java/testdata/TestParseFile.java";
     public static String TEST_FILENAME = "TestParseFile.java";
-    public static long TEST_LINE_TESTDATA_COUNT = 8; // Value based on file TestParseFile.java
-    public static long TEST_FILE_TESTDATA_SIZE = 131; // Value based on file TestParseFile.java
+    public static long TEST_LINE_TESTDATA_COUNT = 10; // TODO has to be changed when TestParseFile.java is changed
+    public static long TEST_FILE_TESTDATA_SIZE = 169; // TODO has to be changed when TestParseFile.java is changed
     public static String TEST_NEW_FOLDER_1 = "Folder1";
     public static int TEST_NEW_FOLDER_1_COUNT = 1;
     public static String TEST_NEW_FOLDER_2 = "Folder2";
