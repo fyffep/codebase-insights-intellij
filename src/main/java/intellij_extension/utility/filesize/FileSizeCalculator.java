@@ -26,8 +26,9 @@ public class FileSizeCalculator
         {
             BufferedReader buffer = new BufferedReader(new FileReader(fileObject.getFilePath()));
             // SonarQube bug recommendation. "Use or store the value returned from "readLine" instead of throwing it away."
-            String line = buffer.readLine();
-            while(line != null)
+            // Well lesson learned... Sonarqube is not all knowing. Using the line variable causes an infinite loop.
+            // String line = buffer.readLine();
+            while(buffer.readLine() != null)
             {
                 lineCount++;
             }
