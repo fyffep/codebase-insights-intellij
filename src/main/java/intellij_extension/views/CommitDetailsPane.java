@@ -2,6 +2,7 @@ package intellij_extension.views;
 
 import intellij_extension.Constants;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -77,6 +78,13 @@ public class CommitDetailsPane extends VBox {
             // Increment index
             fileIndex++;
         }
+    }
+
+    private void updateHeatMapAction(MouseEvent event) {
+        // TODO Pseudo implementation of view communication with controller.
+        // MainView has the reference to controller so it officially talks to the controller.
+        // The children of the MainView tell the MainView when to talk to the controller.
+        // MainView.getInstance().changeHeatMapToCommit(ViewFactory.getInstance().createOrGetText(Constants.CD_HASH_TEXT_ID).getText());
     }
 
     /*

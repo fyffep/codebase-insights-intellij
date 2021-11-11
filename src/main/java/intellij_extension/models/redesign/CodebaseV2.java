@@ -2,7 +2,6 @@ package intellij_extension.models.redesign;
 
 import com.google.common.collect.HashBasedTable;
 import intellij_extension.models.Commit;
-import org.eclipse.jgit.revwalk.RevCommit;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -36,22 +35,39 @@ public class CodebaseV2 {
     // Is this the JGit object?
     public void buildBranchData(String branch) {
         // for (RevCommit rCommit : CommitCountCalculator.getCommitsByBranch(branch)) {
-            // CommitV2 newCommit = new CommitV2(rCommit);
-            // TODO - This does not exist - Might be looping over diff entry?
-            // for (File file: newCommit.files) {
-                // If File already exists in commitToFileAssocation
-                    // CalculateHeat with history taken into account
-                // Else
-                    // CalculateHeat without history
-                // BuildFileObject
-                // FileObjectV2 newFile = new FileObjectV2();
-                // activeFileOjbects.add(newFile);
-                // commitToFileAssociation.put(newFile.getFilename(), newCommit.getHash(), 1);
-            // }
-
-            // Fill out table with 0s for files that are not in commit.
-            // Foreach file NOT in new Commit
-                // commitToFileAssociation.put(newFile.getFilename(), newCommit.getHash(), 0);
+        // CommitV2 newCommit = new CommitV2(rCommit);
+        // TODO - This does not exist - Might be looping over diff entry?
+        // for (File file: newCommit.files) {
+        // If File already exists in commitToFileAssocation
+        // CalculateHeat with history taken into account
+        // Else
+        // CalculateHeat without history
+        // BuildFileObject
+        // FileObjectV2 newFile = new FileObjectV2();
+        // activeFileOjbects.add(newFile);
+        // commitToFileAssociation.put(newFile.getFilename(), newCommit.getHash(), 1);
         // }
+
+        // Fill out table with 0s for files that are not in commit.
+        // Foreach file NOT in new Commit
+        // commitToFileAssociation.put(newFile.getFilename(), newCommit.getHash(), 0);
+        // }
+    }
+
+    // Just made the definitions to remove errors
+    // These can change.
+    public void heatMapObjectSelected(String id) {
+    }
+
+    public void branchSelected(String branchName) {
+    }
+
+    public void commitSelected(String commitHash) {
+    }
+
+    public void changeHeatMapToCommit(String commitHash) {
+    }
+
+    public void openFile(String filename) {
     }
 }

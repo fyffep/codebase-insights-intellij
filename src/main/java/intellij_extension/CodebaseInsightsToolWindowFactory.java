@@ -3,7 +3,6 @@ package intellij_extension;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
-import intellij_extension.controllers.HeatMapController;
 import intellij_extension.models.CodeBase;
 import intellij_extension.views.*;
 import javafx.application.Platform;
@@ -43,7 +42,7 @@ public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory {
 
             // Right Half of Tools Window
             // Will split into two sections
-            CommitInfoSplitPane commitInfoSplitPane = new CommitInfoSplitPane();
+            InfoSplitPane commitInfoSplitPane = new InfoSplitPane();
             root.getItems().add(commitInfoSplitPane);
             fxPanel.setScene(mainScene);
         });
