@@ -1,8 +1,6 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
-import intellij_extension.views.CommitDetailsPane;
-import intellij_extension.views.CommitHistoryPane;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
@@ -21,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CommitHistoryPaneTest {
 
     private static JFXPanel fxPanel;
-    private static CommitHistoryPane chp;
+    private static FileHistoryPane chp;
 
     @BeforeAll
     public static void setUpBeforeClass() {
@@ -29,7 +27,7 @@ public class CommitHistoryPaneTest {
         // Without tests will fail
         fxPanel = new JFXPanel();
         // Create the main Pane
-        chp = new CommitHistoryPane();
+        chp = new FileHistoryPane();
     }
 
     @AfterAll
