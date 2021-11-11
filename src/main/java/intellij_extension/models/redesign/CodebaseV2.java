@@ -52,6 +52,6 @@ public class CodebaseV2 {
             // Fill out table with 0s for files that are not in commit.
             // Foreach file NOT in new Commit
                 // commitToFileAssociation.put(newFile.getFilename(), newCommit.getHash(), 0);
-        }
+        // }
     }
 }
