@@ -22,7 +22,7 @@ public class JGitHelper
         return builder
                 .readEnvironment() // scan environment GIT_* variables
                 //.findGitDir() // scan up the file system tree
-                .findGitDir(new File(".\\"))  // TODO Should be changed when we can locate the user's project dir
+                .findGitDir(new File("C:\\Users\\Pete\\Desktop\\team3-project"))  // TODO Should be changed when we can locate the user's project dir
                 .build();
     }
 }

@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import com.intellij.openapi.diagnostic.Logger;
 
@@ -75,6 +76,7 @@ public class Constants {
     public static final String SF_FILE_NAME_SPECIFIER = "%-20s";
     public static final String SF_PACKAGE_NAME_SPECIFIER = "%-15s";
     public static final String SF_FILE_AUTHOR_SPECIFIER = "%-22s";
+    public static final Font TOOLTIP_FONT = new Font(16);
     // Commit History Commit List
     public static final int CH_COMMIT_LIST_MIN_HEIGHT = 0;
     // Commit History Commit List Columns
