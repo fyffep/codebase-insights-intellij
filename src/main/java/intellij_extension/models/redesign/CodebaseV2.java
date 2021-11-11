@@ -7,7 +7,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class Codebase {
+public class CodebaseV2 {
 
     private String activeBranch;
     private ArrayList<String> branchNameList;
@@ -24,7 +24,7 @@ public class Codebase {
     // https://github.com/google/guava/wiki/NewCollectionTypesExplained#table
     private HashBasedTable<String, String, Integer> commitToFileAssociation;
 
-    public Codebase() {
+    public CodebaseV2() {
         activeBranch = "master";
         branchNameList = new ArrayList<>();
         activeCommits = new HashSet<>();
