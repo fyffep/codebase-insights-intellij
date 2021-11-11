@@ -15,20 +15,20 @@ import javafx.scene.text.Text;
 
 import java.util.ArrayList;
 
-public class CommitHistoryPane extends VBox {
+public class FileHistoryPane extends VBox {
 
     private final HBox topHorizontalBanner;
     private final Text headerText;
     private final ComboBox<String> branchComboBox; // This might have to change from String to something else.
-    private final TableView<CommitHistoryLine> commitList;
+    private final TableView<CommitInfoRow> commitList;
 
     // Will be used when Model is sending data
     // This is all the lines we created so far - we should never remove from this list
-    private final ArrayList<CommitHistoryLine> commitLines = new ArrayList<>();
+    private final ArrayList<CommitInfoRow> commitLines = new ArrayList<>();
     // These are active lines in the TableView
-    private final ObservableList<CommitHistoryLine> activeCommitLines = FXCollections.observableArrayList();
+    private final ObservableList<CommitInfoRow> activeCommitLines = FXCollections.observableArrayList();
 
-    public CommitHistoryPane() {
+    public FileHistoryPane() {
         super();
 
         // Create the top horizontal banner
@@ -54,7 +54,7 @@ public class CommitHistoryPane extends VBox {
     }
 
     /*
-        Newly Selected Branch
+        Newly Selected Branch DEPRECATED SINCE THIS IS NOW BASED ON A SELECTED FILE AND NOT FULL COMMIT HISTORY
             - Might be an observable update method call
      */
     public void branchUpdated(Object TheNewBranch) {
@@ -154,11 +154,16 @@ public class CommitHistoryPane extends VBox {
         // Add click method to rows
         // I hate that I can't refactor this double lambda expression
         commitList.setRowFactory(tableView -> {
-            TableRow<CommitHistoryLine> row = new TableRow<>();
+            TableRow<CommitInfoRow> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                    CommitHistoryLine rowData = row.getItem();
-                    Constants.LOG.info("Commit " + rowData.getRowNumber().getValue() + " was double clicked! Update CommitDetails!");
+                    CommitInfoRow rowData = row.getItem();
+                    Constants.LOG.info("Commit " + rowData.getCommitHash().getValue() + " was double clicked! Update CommitDetails!");
+
+                    // TODO Pseudo implementation of view communication with controller.
+                    // MainView has the reference to controller so it officially talks to the controller.
+                    // The children of the MainView tell the MainView when to talk to the controller.
+                    // MainView.getInstance().commitSelected(rowData.getCommitHash().getValue());
                 }
             });
             return row;
@@ -167,22 +172,22 @@ public class CommitHistoryPane extends VBox {
 
     private void setCommitListColumns() {
         // Number Column
-        TableColumn<CommitHistoryLine, String> rowColumn = new TableColumn("#");
+        TableColumn<CommitInfoRow, String> rowColumn = new TableColumn("#");
 
         // Description Column
-        TableColumn<CommitHistoryLine, String> descriptionColumn = new TableColumn("Description");
+        TableColumn<CommitInfoRow, String> descriptionColumn = new TableColumn("Description");
         descriptionColumn.setMaxWidth(Constants.CH_DESCRIPTION_COLUMN_MAX_WIDTH);
         descriptionColumn.setSortable(false);
 
         // Author Column
-        TableColumn<CommitHistoryLine, String> authorColumn = new TableColumn("Author");
+        TableColumn<CommitInfoRow, String> authorColumn = new TableColumn("Author");
 
         // Date Column
-        TableColumn<CommitHistoryLine, String> dateColumn = new TableColumn("Date");
+        TableColumn<CommitInfoRow, String> dateColumn = new TableColumn("Date");
         dateColumn.setSortable(false);
 
         // Hash Column
-        TableColumn<CommitHistoryLine, String> hashColumn = new TableColumn("Hash");
+        TableColumn<CommitInfoRow, String> hashColumn = new TableColumn("Hash");
         hashColumn.setSortable(false);
 
         //Associate data with columns
@@ -202,6 +207,11 @@ public class CommitHistoryPane extends VBox {
     private void branchSelectedAction(ActionEvent event) {
         String selectedValue = branchComboBox.getValue();
         Constants.LOG.info("The " + selectedValue + " branch was selected. Update HeatMap, CommitHistory, and CommitDetails, Hide SelectedFileTerminal Window");
+
+        // TODO Pseudo implementation of view communication with controller.
+        // MainView has the reference to controller so it officially talks to the controller.
+        // The children of the MainView tell the MainView when to talk to the controller.
+        // MainView.getInstance().branchSelected(selectedValue);
     }
 }
 

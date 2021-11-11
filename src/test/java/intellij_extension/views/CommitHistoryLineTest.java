@@ -1,6 +1,5 @@
 package intellij_extension.views;
 
-import intellij_extension.views.CommitHistoryLine;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.AfterAll;
@@ -9,11 +8,11 @@ import testdata.TestData;
 
 public class CommitHistoryLineTest {
 
-    private static CommitHistoryLine line;
+    private static CommitInfoRow line;
 
     @BeforeAll
     public static void setUpBeforeClass() {
-        line = new CommitHistoryLine(TestData.CHTD_ROW_NUMBER,
+        line = new CommitInfoRow(TestData.CHTD_ROW_NUMBER,
                 TestData.CHTD_DESCRIPTION, TestData.CHTD_AUTHOR,
                 TestData.CHTD_DATE, TestData.CHTD_HASH);
     }

@@ -3,22 +3,22 @@ package intellij_extension.views;
 import javafx.geometry.Orientation;
 import javafx.scene.control.SplitPane;
 
-public class CommitInfoSplitPane extends SplitPane {
+public class InfoSplitPane extends SplitPane {
 
     // Top half is Commit History for a single branch
-    private CommitHistoryPane commitHistoryPane;
+    private FileHistoryPane fileHistoryPane;
 
     // Bottom half is Commit Details for a single commit in the selected branch
     private CommitDetailsPane commitDetailsPane;
 
-    public CommitInfoSplitPane() {
+    public InfoSplitPane() {
         super();
 
         setOrientation(Orientation.VERTICAL);
 
         // Top half
-        commitHistoryPane = new CommitHistoryPane();
-        this.getItems().add(commitHistoryPane); // SplitPane isn't a pane, so we cannot use ViewFactory.setPaneChild
+        fileHistoryPane = new FileHistoryPane();
+        this.getItems().add(fileHistoryPane); // SplitPane isn't a pane, so we cannot use ViewFactory.setPaneChild
 
         //Bottom half
         commitDetailsPane = new CommitDetailsPane();

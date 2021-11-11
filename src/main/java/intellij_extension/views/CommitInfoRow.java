@@ -2,7 +2,7 @@ package intellij_extension.views;
 
 import javafx.beans.property.SimpleStringProperty;
 
-public class CommitHistoryLine
+public class CommitInfoRow
 {
     private final SimpleStringProperty rowNumber = new SimpleStringProperty();
     private final SimpleStringProperty commitDescription = new SimpleStringProperty();
@@ -10,7 +10,7 @@ public class CommitHistoryLine
     private final SimpleStringProperty commitDate = new SimpleStringProperty();
     private final SimpleStringProperty commitHash = new SimpleStringProperty();
 
-    public CommitHistoryLine(String rowNumber, String commitDescription, String commitAuthor, String commitDate, String commitHash) {
+    public CommitInfoRow(String rowNumber, String commitDescription, String commitAuthor, String commitDate, String commitHash) {
         this.rowNumber.set(rowNumber);
         this.commitDescription.set(commitDescription);
         this.commitAuthor.set(commitAuthor);
