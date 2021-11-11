@@ -6,7 +6,6 @@ CodeBase
     //- int[number of commits] heatAccumulations;
 Commit
     - RevCommit (from JGit)
-    - Map<File, FileObject>
+    - Map<String pathName, FileObject>
 FileObject <--can be renamed to FileMetricObject
     - File metrics
-    - Heat level

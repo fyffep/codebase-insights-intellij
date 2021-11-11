@@ -3,8 +3,6 @@ package intellij_extension;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
-import intellij_extension.controllers.HeatMapController;
-import intellij_extension.models.CodeBase;
 import intellij_extension.views.*;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -29,13 +27,6 @@ public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory {
             MainScene mainScene = new MainScene(root, componentWidth, componentHeight);
             root.prefWidthProperty().bind(mainScene.widthProperty());
             root.prefHeightProperty().bind(mainScene.heightProperty());
-
-            //Create the model
-            CodeBase codeBase = new CodeBase();
-
-            //Create the main heat map area
-//            HeatMapController heatMapController = new HeatMapController(codeBase);
-//            root.getItems().add(heatMapController.getView()); //show the view
 
             // Left Half of Tools Windows
             HeatMapSplitPane heatMapSplit = new HeatMapSplitPane();

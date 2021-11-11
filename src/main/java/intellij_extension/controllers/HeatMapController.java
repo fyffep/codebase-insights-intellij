@@ -1,39 +1,25 @@
 package intellij_extension.controllers;
 
+import com.intellij.openapi.application.PreloadingActivity;
+import com.intellij.openapi.progress.ProgressIndicator;
 import intellij_extension.Constants;
 import intellij_extension.models.CodeBase;
 import intellij_extension.models.Commit;
 import intellij_extension.models.Directory;
 import intellij_extension.models.FileObject;
-import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.utility.commithistory.CommitCountCalculator;
-import intellij_extension.views.HeatMapPane;
-import intellij_extension.views.unused.HeatFileComponent;
-import javafx.scene.Node;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 
-public class HeatMapController implements IHeatMapController
+public class HeatMapController extends PreloadingActivity implements IHeatMapController
 {
-    private HeatMapPane heatMapPane;
     private CodeBase codeBase;
 
-    public HeatMapController(CodeBase codeBase)
+    public HeatMapController()
     {
-        this.codeBase = codeBase;
-
-        //Create the view
-        heatMapPane = new HeatMapPane();
-
-        recalculateHeat();
-        populateHeatMap();
-    }
-
-    public void clearHeatContainer()
-    {
-        heatMapPane.clear();
+        this.codeBase = CodeBase.getInstance();
     }
 
     public void recalculateHeat()
@@ -61,41 +47,16 @@ public class HeatMapController implements IHeatMapController
             Constants.LOG.error(e);
             Constants.LOG.error(e.getMessage());
         }
-        Constants.LOG.info("Heat calculations complete.");
+        Constants.LOG.info("Heat calculations complete. Number of files: " + codeBase.getActiveCommit().getFileMetricMap().size());
     }
 
-    public void populateHeatMap()
+
+    @Override
+    public void preload(@NotNull ProgressIndicator indicator)
     {
-        Commit activeCommit = codeBase.getActiveCommit();
-        if (activeCommit == null)
-        {
-            Constants.LOG.info("Cannot populate the heat map since no commit is selected.");
-        }
-        HashMap<String, FileObject> fileMetricMap = codeBase.getActiveCommit().getFileMetricMap();
-
-        //Iterate through the files and add them to the screen
-        Iterator<String> keyIterator = fileMetricMap.keySet().iterator();
-        while (keyIterator.hasNext())
-        {
-            String fileName = keyIterator.next();
-            FileObject fileObject = fileMetricMap.get(fileName);
-            int heatLevel = fileObject.computeHeatLevel();
-
-            //Generate color
-            String color = HeatCalculationUtility.colorOfHeat(heatLevel);
-
-            //Add a pane (rectangle) to the screen
-            HeatFileComponent heatFileComponent = new HeatFileComponent();
-            heatFileComponent.setStyle("-fx-background-color: #" + color);
-            heatMapPane.addNode(heatFileComponent);
-
-            Constants.LOG.info("Added a file pane for "+fileName +" with heat level "+heatLevel+" and color "+color);
-            // Constants.LOG.info("file has name=`"+fileName+"` filepath=`"+fileObject.getFilePath()+"`");
-        }
-    }
-
-    public Node getView()
-    {
-        return this.heatMapPane;
+        System.out.println("Preloading HeatMapController..."); //logger fails here
+        recalculateHeat();
+        codeBase.notifyObservers();
+        System.out.println("Finished preloading HeatMapController.");
     }
 }

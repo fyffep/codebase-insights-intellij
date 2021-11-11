@@ -5,13 +5,15 @@ import javafx.scene.Node;
 /**
  * An interface intended to abstract controllers for the standard (grid)
  * heat map and the extended (char) heat map.
+ *
+ * NOTE: Many of these methods are now irrelevant as of moving the HeatMapPane view out of HeatMapController
  */
 public interface IHeatMapController
 {
     /**
      * Removes all view components from this controller's view.
      */
-    void clearHeatContainer();
+    //void clearHeatContainer();
 
     /**
      * Orders the file metrics calculators to analyze the current CodeBase.
@@ -24,10 +26,10 @@ public interface IHeatMapController
      * called, updates the view with the heat data.
      * Does not clear existing data.
      */
-    void populateHeatMap();
+    //void populateHeatMap(); //Moved to HeatMapPane
 
     /**
      * @return the outermost container for the controller's view
      */
-    Node getView();
+    //Node getView();
 }
