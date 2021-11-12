@@ -1,5 +1,6 @@
 package intellij_extension.utility.commithistory;
 
+import intellij_extension.CodebaseInsightsToolWindowFactory;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
@@ -18,11 +19,34 @@ public class JGitHelper
 
     public static Repository openLocalRepository() throws IOException
     {
+        final String projectRootPath = locateProjectRoot();
+        assert projectRootPath != null;
+
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         return builder
                 .readEnvironment() // scan environment GIT_* variables
                 //.findGitDir() // scan up the file system tree
-                .findGitDir(new File("C:\\Users\\Pete\\Desktop\\team3-project"))  // TODO Should be changed when we can locate the user's project dir
+                .findGitDir(new File(projectRootPath))
                 .build();
+    }
+
+    /**
+     * @return the path of the project that the user has open in IntelliJ or null
+     * as a default.
+     */
+    public static String locateProjectRoot()
+    {
+        //Pull the 'project' from CodebaseInsightsToolWindowFactory, and wait until it exists if necessary
+        synchronized (CodebaseInsightsToolWindowFactory.projectSynchronizer) {
+            if (CodebaseInsightsToolWindowFactory.project == null) {
+                try {
+                    //Wait until the 'project' is not-null
+                    CodebaseInsightsToolWindowFactory.projectSynchronizer.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return CodebaseInsightsToolWindowFactory.project.getBasePath();
     }
 }
