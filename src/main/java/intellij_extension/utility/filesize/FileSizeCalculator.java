@@ -3,9 +3,7 @@ package intellij_extension.utility.filesize;
 import intellij_extension.Constants;
 import intellij_extension.models.FileObject;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
 
 
 public class FileSizeCalculator
@@ -43,6 +41,31 @@ public class FileSizeCalculator
         //Assign the line count
         fileObject.setLineCount(lineCount);
     }
+
+    /**
+     * @param in an InputStream with a File open. This method does not close the InputStream when it is done.
+     * @return the number of lines in a file or -1 if there was an IOException.
+     */
+    public static long computeLineCount(InputStream in)
+    {
+        try
+        {
+            //Compute number of lines
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            long lineCount = 0;
+            while (reader.readLine() != null)
+                lineCount++;
+            reader.close();
+
+            return lineCount;
+        }
+        catch (IOException ex)
+        {
+            Constants.LOG.error(ex);
+            return -1;
+        }
+    }
+
 
     /**
      * Computes and assigns a file size (in bytes)

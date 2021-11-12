@@ -3,7 +3,11 @@ package intellij_extension.utility;
 import intellij_extension.Constants;
 import intellij_extension.models.CodeBase;
 import intellij_extension.models.FileObject;
+import intellij_extension.models.redesign.CodebaseV2;
+import intellij_extension.models.redesign.FileObjectV2;
+import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.utility.commithistory.JGitHelper;
+import intellij_extension.utility.filesize.FileSizeCalculator;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -58,7 +62,7 @@ public class RepositoryAnalyzer
     public InputStream obtainFileContents(String filePath, String commitHash) throws IOException
     {
         //Create a commit object from the commit hash
-        ObjectId commitId = repository.resolve(commitHash + "^");
+        ObjectId commitId = repository.resolve(commitHash);
         assert commitId != null;
         RevWalk revWalk = new RevWalk(repository);
         RevCommit commit = revWalk.parseCommit(commitId);
@@ -87,10 +91,19 @@ public class RepositoryAnalyzer
     }
 
 
-    public InputStream computeLineCounts(String filePath, String commitHash) throws IOException
+    /**
+     * Given a CodeBase, attaches all the file sizes (in bytes) and line counts of each file present
+     * at a particular commit of the Git repository. Each FileObject in the Codebase is given a new
+     * HeatObject that holds this file size and line count data. If a HeatObject already exists for the
+     * file at the given commit, this updates the existing HeatObject.
+     * @param codeBase represents the entire repository and history
+     * @param commitHash the Git commit hash representing the version of the repository to examine
+     * @throws IOException when there are problems opening the commit
+     */
+    public void attachLineCountToCodebase(CodebaseV2 codeBase, String commitHash) throws IOException
     {
         //Create a commit object from the commit hash
-        ObjectId commitId = repository.resolve(commitHash + "^");
+        ObjectId commitId = repository.resolve(commitHash);
         assert commitId != null;
         RevWalk revWalk = new RevWalk(repository);
         RevCommit commit = revWalk.parseCommit(commitId);
@@ -105,28 +118,22 @@ public class RepositoryAnalyzer
         //I couldn't get `treeWalk.setFilter(PathFilter.create(filePath));` to work, so this is an alternative approach.
         while (treeWalk.next()) {
             String path = treeWalk.getPathString();
-            if (path.endsWith(filePath))
-            {
-                //Return an input stream that has the old version of the file open
-                ObjectId objectId = treeWalk.getObjectId(0);
-                ObjectLoader loader = repository.open(objectId);
-                return loader.openStream();
 
-                /*BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                int lineCount = 0;
-                //while (reader.readLine() != null) lines++;
+            //Create an input stream that has the old version of the file open
+            ObjectId objectId = treeWalk.getObjectId(0);
+            ObjectLoader loader = repository.open(objectId);
+            InputStream inputStream = loader.openStream();
 
-                String line = null;
-                while ((line = reader.readLine()) != null)
-                {
-                    lineCount++;
-                    System.out.println(""+lineCount+". "+line);
-                }*/
-            }
+            //Get number of lines and file size
+            long lineCount = FileSizeCalculator.computeLineCount(inputStream);
+            long fileSize = loader.getSize();
+
+            //Attach data to the HeatObject associated with this version of the file
+            FileObjectV2 fileObject = codeBase.getFileObjectFromId(path);
+            HeatObject heatObject = fileObject.getHeatObjectAtCommit(commitHash);
+            heatObject.setLineCount(lineCount);
+            heatObject.setFileSize(fileSize);
         }
-
-        //Could not find the file on that commit
-        throw new IllegalStateException(String.format("The file `%s` could not be found in the commit `%s`.", filePath, commitHash));
     }
 
 

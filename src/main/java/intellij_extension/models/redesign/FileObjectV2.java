@@ -36,6 +36,18 @@ public class FileObjectV2 {
         return filename;
     }
 
+    /**
+     * Returns a HeatObject that measures the heat of a certain version of this file.
+     * If no HeatObject exists for this file, returns a new (blank) HeatObject.
+     * @param commitHash a Git commit hash, such as "1e589e61ef75003b1df88bdb738f9d9f4a4f5f8a" that the file is present in
+     */
+    public HeatObject getHeatObjectAtCommit(String commitHash) {
+        if (commitHashToHeatObjectMap.containsKey(commitHash))
+            return commitHashToHeatObjectMap.get(commitHash);
+        //else
+        return new HeatObject();
+    }
+
     // TODO - DECISION - Do we want to throw an exception or return null when commitHash not found?
     public HeatObject getHeatForCommit(String commitHash) {
         // commitHash not found

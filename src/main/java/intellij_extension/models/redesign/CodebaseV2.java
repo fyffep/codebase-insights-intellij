@@ -10,7 +10,7 @@ public class CodebaseV2 {
 
     private String activeBranch;
     private ArrayList<String> branchNameList;
-    private HashSet<Commit> activeCommits;
+    private HashSet<CommitV2> activeCommits;
     private HashSet<FileObjectV2> activeFileObjects;
 
     // TODO
@@ -29,6 +29,10 @@ public class CodebaseV2 {
         activeCommits = new HashSet<>();
         activeFileObjects = new HashSet<>();
         commitToFileAssociation = HashBasedTable.create();
+    }
+
+    public HashSet<FileObjectV2> getActiveFileObjects() {
+        return activeFileObjects;
     }
 
     // TODO
@@ -69,5 +73,33 @@ public class CodebaseV2 {
     }
 
     public void openFile(String filename) {
+    }
+
+    /**
+     * @param id the file's path
+     * @return a FileObject corresponding to the target path
+     */
+    public FileObjectV2 getFileObjectFromId(String id) {
+        FileObjectV2 selectedFile = activeFileObjects.stream()
+                .filter(file -> file.getFilename().equals(id)).findAny().orElse(null);
+
+        // Failed to find file associated with param id
+        if (selectedFile == null) {
+            throw new NullPointerException(String.format("Failed to find the proper file associated with the selected HeatMapObject. ID = %s", id));
+        }
+
+        return selectedFile;
+    }
+
+    public CommitV2 getCommitFromId(String id) {
+        CommitV2 selectedCommit = activeCommits.stream()
+                .filter(commit -> commit.getHash().equals(id)).findAny().orElse(null);
+
+        // Failed to find file associated with param id
+        if (selectedCommit == null) {
+            throw new NullPointerException(String.format("Failed to find the proper commit associated with the selected commit in the TableView. Hash = %s", id));
+        }
+
+        return selectedCommit;
     }
 }
