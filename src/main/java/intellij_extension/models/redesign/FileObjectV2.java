@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 public class FileObjectV2 {
 
     private Path path;
+    // Id = filename = id;
     private String filename;
     private LinkedHashMap<String, HeatObject> commitHashToHeatObjectMap;
 
@@ -48,7 +49,7 @@ public class FileObjectV2 {
     public HeatObject getHeatForCommit(String commitHash) {
         // commitHash not found
         if (!commitHashToHeatObjectMap.containsKey(commitHash)) {
-            throw new UnsupportedOperationException(String.format("Commit hash %s was not found in %s's commitHashToHeatObjectMap. How are we getting a untracked commit?", commitHash, filename));
+            throw new UnsupportedOperationException(String.format("Commit hash %s was not found in %s's commitHashToHeatObjectMap.", commitHash, filename));
         }
 
         //commitHash if not found would return null and the calling method would log accordingly
@@ -58,7 +59,7 @@ public class FileObjectV2 {
     public void setHeatForCommit(String commitHash, HeatObject heat) {
         // commitHash already present - was this intentional?
         if (commitHashToHeatObjectMap.putIfAbsent(commitHash, heat) != null) {
-            throw new UnsupportedOperationException(String.format("Commit hash %s is already present in %s's commitHashToHeatObjectMap. How is this happening?", commitHash, filename));
+            throw new UnsupportedOperationException(String.format("Commit hash %s is already present in %s's commitHashToHeatObjectMap.", commitHash, filename));
         }
 
         this.latestCommit = commitHash;

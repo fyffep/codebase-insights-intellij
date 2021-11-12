@@ -1,6 +1,7 @@
 package intellij_extension.models.redesign;
 
 import com.google.common.collect.HashBasedTable;
+import intellij_extension.Constants;
 import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.utility.commithistory.CommitCountCalculator;
 import intellij_extension.utility.filesize.FileSizeCalculator;
@@ -72,7 +73,7 @@ public class CodebaseV2 {
                         .filter(fileObjectV2 -> fileObject.equals(fileObjectV2)).findAny().orElse(null);
 
                 // First time adding this fileObject to the list.
-                if(existingFileObject == null) {
+                if (existingFileObject == null) {
                     activeFileObjects.add(fileObject);
                     existingFileObject = fileObject;
                 }
@@ -108,29 +109,104 @@ public class CodebaseV2 {
                 // TODO - Ethan's Comment - I prefer simplicity and to worry about size/slow down problems when that actually happens.
                 //  Ethan's Comment - Like Prof. Rawlins said during the Command Pattern talk, do worry about it being too much data until it becomes a problem.
                 //  Ethan's Comment - Another approach is to limit how far we go back in the history of a branch - Just an idea - Don't have to act on this.
-                newCommit.addFileToSet(fileName);
+                newCommit.addFileToSet(existingFileObject.getFilename());
             }
         }
     }
 
     public void heatMapObjectSelected(String id) {
+        FileObjectV2 selectedFile = getFileObjectFromId(id);
+
+        // Get commits associated with file
         ArrayList<CommitV2> associatedCommits = (ArrayList<CommitV2>) activeCommits.stream()
                 .filter(commit -> commit.getFileSet().contains(id))
                 .collect(Collectors.toList());
 
-        // Update FileCommitHistory pane with AssociatedCommits
-
+        // TODO need the observer relationship here
+        //  Update FileCommitHistory pane with associatedCommits
+        //  Clear CommitDetailsPane
+        //  Show SelectedFilePane with selectedFile's info
     }
 
     public void branchSelected(String branchName) {
+        // Branch doesn't exist - or we don't know about it some how...
+        if (!branchNameList.contains(branchName)) {
+            throw new UnsupportedOperationException(String.format("Branch %s was selected but is not present in branchNameList.", branchName));
+        }
+
+        // Dump old data and create new sets
+        activeCommits.clear();
+        activeCommits = null; // Yeah... I know probably overkill.
+        activeCommits = new LinkedHashSet<>();
+        activeFileObjects.clear();
+        activeFileObjects = null;
+        activeFileObjects = new LinkedHashSet<>();
+
+        commitToFileAssociation.clear();
+        commitToFileAssociation = null;
+        commitToFileAssociation = HashBasedTable.create();
+
+        try {
+            buildBranchData(branchName);
+        } catch (IOException e) {
+            Constants.LOG.error("Exception throwing when building branch data!");
+            Constants.LOG.error(e.getStackTrace());
+        }
+
+        // TODO need the observer relationship here
+        //  Update HeatMapPane with new data
+        //  Clear FileHistoryCommitPane
+        //  Clear CommitDetailsPane
+        //  Hide and Clear SelectedFilePane
+
     }
 
-    public void commitSelected(String commitHash) {
+    public void commitSelected(String id) {
+        CommitV2 selectedCommit = getCommitFromId(id);
+
+        // TODO need the observer relationship here
+        //  Update CommitDetailsPane with selectedCommit
     }
 
     public void changeHeatMapToCommit(String commitHash) {
+
     }
 
-    public void openFile(String filename) {
+    public void openFile(String id) {
+        FileObjectV2 selectedFile = getFileObjectFromId(id);
+
+//        VirtualFile virtualFile = VirtualFileManager.getInstance().findFileByNioPath(selectedFile.getPath());
+//
+//        FileEditorManager.getInstance(VirtualFileManager.getInstance().getProject()).openTextEditor(
+//                new OpenFileDescriptor(
+//                        virtualFile,
+//                        textOffset
+//                ),
+//                true // request focus to editor
+//        );
+    }
+
+    private FileObjectV2 getFileObjectFromId(String id) {
+        FileObjectV2 selectedFile = activeFileObjects.stream()
+                .filter(file -> file.getFilename().equals(id)).findAny().orElse(null);
+
+        // Failed to find file associated with param id
+        if (selectedFile == null) {
+            throw new NullPointerException(String.format("Failed to find the proper file associated with the selected HeatMapObject. ID = %s", id));
+        }
+
+        return selectedFile;
+    }
+
+    private CommitV2 getCommitFromId(String id) {
+        CommitV2 selectedCommit = activeCommits.stream()
+                .filter(commit -> commit.getHash().equals(id)).findAny().orElse(null);
+
+        // Failed to find file associated with param id
+        if (selectedCommit == null) {
+            throw new NullPointerException(String.format("Failed to find the proper commit associated with the selected commit in the TableView. Hash = %s", commitHash));
+        }
+
+        return selectedCommit;
     }
 }
