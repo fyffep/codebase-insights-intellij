@@ -1,19 +1,22 @@
 package intellij_extension.utility.commithistory;
 
+import com.google.common.collect.FluentIterable;
+import com.intellij.ui.treeStructure.Tree;
 import intellij_extension.Constants;
 import intellij_extension.models.FileObject;
 import intellij_extension.utility.HeatCalculator;
+import javafx.util.Pair;
+import org.apache.commons.collections.IteratorUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectReader;
-import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.TreeWalk;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -21,13 +24,22 @@ import java.util.Iterator;
 import java.util.List;
 
 public class CommitCountCalculator implements HeatCalculator {
-    private Repository repository;
-    private Git git;
+    private static Repository repository;
+    private static Git git;
+    private static TreeWalk treeWalk;
+
+    private static final FluentIterable<RevCommit> EMPTY_REV_COMMITS = new FluentIterable<>() {
+        @Override
+        public Iterator<RevCommit> iterator() {
+            return IteratorUtils.emptyIterator();
+        }
+    };
 
     public CommitCountCalculator() throws IOException {
         //Open the repos
         this.repository = JGitHelper.openLocalRepository();
         this.git = new Git(repository);
+        this.treeWalk = getTreeWalkFromRepository();
     }
 
     public static void main(String[] args) throws GitAPIException, IOException {
@@ -68,6 +80,15 @@ LogCommit: commit 27082ba11d8d812b31c82458a72ad9c48920fb21 1635351154 -----sp
 LogCommit: commit a49266a94e1f0960f7bb01a2aefc7d3ad37a076d 1635350953 -----sp
 LogCommit: commit 0d124558bb1000395288d12299d7d290aec61521 1635171571 -----sp
          */
+    }
+
+    public static ObjectLoader getObjectLoader(ObjectId objectId) {
+        try {
+            return repository.open(treeWalk.getObjectId(0));
+        } catch (IOException e) {
+            // TODO: What if the loader is not present?
+            return null;
+        }
     }
 
     public HashMap<String, Integer> calculateNumberOfCommitsPerFile(Iterable<RevCommit> commitList) {
@@ -134,11 +155,28 @@ LogCommit: commit 0d124558bb1000395288d12299d7d290aec61521 1635171571 -----sp
         return git.log().all().call();
     }
 
-    public Iterable<RevCommit> getCommitsByBranch(String branchName) throws IOException, GitAPIException {
+    private static Iterable<RevCommit> getCommitsByBranch(String branchName) {
         //Choose the branch
-        ObjectId branchId = repository.resolve(branchName);
+        ObjectId branchId;
+        try {
+            branchId = repository.resolve(branchName);
+            return git.log().add(branchId).call();
+        } catch (IOException | GitAPIException e) {
+            Constants.LOG.error(e);
+            Constants.LOG.error(e.getMessage());
+            return EMPTY_REV_COMMITS;
+        }
+    }
 
-        return git.log().add(branchId).call();
+    public static Pair<Iterable<RevCommit>, TreeWalk> getCommitsAndTreeByBranch(String branchName) {
+        return new Pair<>(getCommitsByBranch(branchName), treeWalk);
+    }
+
+    private static TreeWalk getTreeWalkFromRepository() {
+        TreeWalk treeWalk = new TreeWalk(repository);
+        treeWalk.setRecursive(true);
+        treeWalk.setPostOrderTraversal(false);
+        return treeWalk;
     }
 
     public HashMap<String, FileObject> editFileMetricMap(HashMap<String, FileObject> existingFileMetricMap) {
