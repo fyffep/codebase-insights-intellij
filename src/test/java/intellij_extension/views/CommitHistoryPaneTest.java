@@ -38,7 +38,7 @@ public class CommitHistoryPaneTest {
     @Test
     public void constructor_BannerHBoxSuccessfullyCreated() {
         // Assert banner object was created
-        List<Node> view = chp.getChildren().stream().filter(node -> node.getId() == Constants.CH_BANNER_ID).collect(Collectors.toList());
+        List<Node> view = chp.getChildren().stream().filter(node -> node.getId() == Constants.FCH_BANNER_ID).collect(Collectors.toList());
         assertNotNull(view);
         assertTrue(view.get(0) instanceof HBox);
         assertEquals(1, view.size());
@@ -47,11 +47,11 @@ public class CommitHistoryPaneTest {
     @Test
     public void constructor_BannerHeaderTextSuccessfullyCreated() {
         // Grab banner HBox
-        List<Node> view = chp.getChildren().stream().filter(node -> node.getId() == Constants.CH_BANNER_ID).collect(Collectors.toList());
+        List<Node> view = chp.getChildren().stream().filter(node -> node.getId() == Constants.FCH_BANNER_ID).collect(Collectors.toList());
         HBox header = (HBox) view.get(0);
 
         // Assert header text
-        view = header.getChildren().stream().filter(node -> node.getId() == Constants.CH_HEADER_TEXT_ID).collect(Collectors.toList());
+        view = header.getChildren().stream().filter(node -> node.getId() == Constants.FCH_HEADER_TEXT_ID).collect(Collectors.toList());
         assertNotNull(view);
         assertTrue(view.get(0) instanceof Text);
         assertEquals(1, view.size());
@@ -60,11 +60,11 @@ public class CommitHistoryPaneTest {
     @Test
     public void constructor_BannerComboBoxSuccessfullyCreated() {
         // Grab banner HBox
-        List<Node> view = chp.getChildren().stream().filter(node -> node.getId() == Constants.CH_BANNER_ID).collect(Collectors.toList());
+        List<Node> view = chp.getChildren().stream().filter(node -> node.getId() == Constants.FCH_BANNER_ID).collect(Collectors.toList());
         HBox header = (HBox) view.get(0);
 
         // Assert combo box
-        view = header.getChildren().stream().filter(node -> node.getId() == Constants.CH_BRANCH_COMBOBOX_ID).collect(Collectors.toList());
+        view = header.getChildren().stream().filter(node -> node.getId() == Constants.FCH_BRANCH_COMBOBOX_ID).collect(Collectors.toList());
         assertNotNull(view);
         assertTrue(view.get(0) instanceof ComboBox);
         assertEquals(1, view.size());
@@ -73,11 +73,11 @@ public class CommitHistoryPaneTest {
     @Test
     public void constructor_BannerTableViewSuccessfullyCreated() {
         // Grab banner HBox
-        List<Node> view = chp.getChildren().stream().filter(node -> node.getId() == Constants.CH_BANNER_ID).collect(Collectors.toList());
+        List<Node> view = chp.getChildren().stream().filter(node -> node.getId() == Constants.FCH_BANNER_ID).collect(Collectors.toList());
         HBox header = (HBox) view.get(0);
 
         // Assert TableView
-        view = chp.getChildren().stream().filter(node -> node.getId() == Constants.CH_BRANCH_TABLEVIEW_ID).collect(Collectors.toList());
+        view = chp.getChildren().stream().filter(node -> node.getId() == Constants.FCH_BRANCH_TABLEVIEW_ID).collect(Collectors.toList());
         assertNotNull(view);
         assertTrue(view.get(0) instanceof TableView);
         assertEquals(1, view.size());

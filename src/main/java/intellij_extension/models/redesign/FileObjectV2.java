@@ -1,9 +1,7 @@
 package intellij_extension.models.redesign;
 
-import intellij_extension.Constants;
-
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * FileObjectV2
@@ -15,17 +13,21 @@ import java.util.HashMap;
 public class FileObjectV2 {
 
     private Path path;
+    // Id = filename = id;
     private String filename;
-    private HashMap<String, HeatObject> commitHashToHeatObjectMap;
+    private LinkedHashMap<String, HeatObject> commitHashToHeatObjectMap;
+
+    // This would maintain the latest key commit hash added in the map to avoid any traversal again
+    private String latestCommit;
 
     public FileObjectV2() {
 
     }
 
-    public FileObjectV2(Path path, String filename, HashMap<String, HeatObject> commitHashToHeatObjectMap) {
+    public FileObjectV2(Path path, String filename) {
         this.path = path;
         this.filename = filename;
-        this.commitHashToHeatObjectMap = commitHashToHeatObjectMap;
+        this.commitHashToHeatObjectMap = new LinkedHashMap<>();
     }
 
     public Path getPath() {
@@ -49,25 +51,39 @@ public class FileObjectV2 {
     }
 
     // TODO - DECISION - Do we want to throw an exception or return null when commitHash not found?
+    public LinkedHashMap<String, HeatObject> getCommitHashToHeatObjectMap() {
+        return commitHashToHeatObjectMap;
+    }
+
+    public String getLatestCommit() {
+        return latestCommit;
+    }
+
     public HeatObject getHeatForCommit(String commitHash) {
         // commitHash not found
         if (!commitHashToHeatObjectMap.containsKey(commitHash)) {
-            Constants.LOG.error(
-                    String.format("Commit hash %s was not found in %s's commitHashToHeatObjectMap. Returning null.", commitHash, filename));
+            throw new UnsupportedOperationException(String.format("Commit hash %s was not found in %s's commitHashToHeatObjectMap.", commitHash, filename));
         }
 
-        //commitHash found
-        return commitHashToHeatObjectMap.get(commitHash);
+        //commitHash if not found would return null and the calling method would log accordingly
+        return commitHashToHeatObjectMap.getOrDefault(commitHash, null);
     }
 
     public void setHeatForCommit(String commitHash, HeatObject heat) {
         // commitHash already present - was this intentional?
-        if (commitHashToHeatObjectMap.containsKey(commitHash)) {
-            Constants.LOG.warn(
-                    String.format("Commit hash %s is already present in %s's commitHashToHeatObjectMap, was this intentional?. Overriding with new HeatObject.", commitHash, filename));
+        if (commitHashToHeatObjectMap.putIfAbsent(commitHash, heat) != null) {
+            throw new UnsupportedOperationException(String.format("Commit hash %s is already present in %s's commitHashToHeatObjectMap.", commitHash, filename));
         }
 
-        // Add or replace with new HeatObject
-        commitHashToHeatObjectMap.put(commitHash, heat);
+        this.latestCommit = commitHash;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object != null && object.getClass() == getClass()) {
+            FileObjectV2 fileObject = (FileObjectV2) object;
+            if (this.getFilename().equals(fileObject.getFilename())) return true;
+        }
+        return false;
     }
 }
