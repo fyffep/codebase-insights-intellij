@@ -8,6 +8,7 @@ import intellij_extension.models.Commit;
 import intellij_extension.models.Directory;
 import intellij_extension.models.FileObject;
 import intellij_extension.utility.commithistory.CommitCountCalculator;
+import intellij_extension.utility.commithistory.JGitHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -27,9 +28,13 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
         //Order the file metrics calculators to analyze the code base
         try
         {
+            //Locate project
+            final String projectRootPath = JGitHelper.locateProjectRoot();
+            assert projectRootPath != null;
+
             //Compute file size
             //TODO We may need to have the user select the project root
-            Directory rootDirectory = new Directory("C:\\Users\\Pete\\Desktop\\team3-project\\src\\main");
+            Directory rootDirectory = new Directory(projectRootPath);
             rootDirectory.parseDirectory();
             //Add the file size data to the map
             Commit activeCommit = codeBase.getActiveCommit();
