@@ -8,6 +8,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -17,7 +18,7 @@ import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -39,6 +40,105 @@ public class RepositoryAnalyzer
         this.git = new Git(repository);
     }
 
+    public RepositoryAnalyzer(File projectPath) throws IOException {
+        //Open the repos
+        this.repository = JGitHelper.openLocalRepository(projectPath);
+        this.git = new Git(repository);
+    }
+
+
+    /**
+     * Returns an InputStream with the old version of the file open.
+     * This is method is expensive because it has to search through the entire
+     * old version of the repository to find the file.
+     * @param filePath the path of the file to open relative to the project root dir (ex: "my-project/my-package/my-file.java")
+     * @param commitHash a commit hash, such as "1e589e61ef75003b1df88bdb738f9d9f4a4f5f8a" that the file is present on.
+     * @throws IOException when there are problems opening the commit
+     * @throws IllegalStateException if the file could not be found at that commit
+     */
+    public InputStream obtainFileContents(String filePath, String commitHash) throws IOException
+    {
+        //Create a commit object from the commit hash
+        ObjectId commitId = repository.resolve(commitHash + "^");
+        assert commitId != null;
+        RevWalk revWalk = new RevWalk(repository);
+        RevCommit commit = revWalk.parseCommit(commitId);
+
+        //Prepare a TreeWalk that can walk through the version of the repos at that commit
+        RevTree tree = commit.getTree();
+        TreeWalk treeWalk = new TreeWalk(repository);
+        treeWalk.addTree(tree);
+        treeWalk.setRecursive(true);
+
+        //Traverse through the old version of the project until the target file is found.
+        //I couldn't get `treeWalk.setFilter(PathFilter.create(filePath));` to work, so this is an alternative approach.
+        while (treeWalk.next()) {
+            String path = treeWalk.getPathString();
+            if (path.endsWith(filePath))
+            {
+                //Return an input stream that has the old version of the file open
+                ObjectId objectId = treeWalk.getObjectId(0);
+                ObjectLoader loader = repository.open(objectId);
+                return loader.openStream();
+            }
+        }
+
+        //Could not find the file on that commit
+        throw new IllegalStateException(String.format("The file `%s` could not be found in the commit `%s`.", filePath, commitHash));
+    }
+
+
+    public InputStream computeLineCounts(String filePath, String commitHash) throws IOException
+    {
+        //Create a commit object from the commit hash
+        ObjectId commitId = repository.resolve(commitHash + "^");
+        assert commitId != null;
+        RevWalk revWalk = new RevWalk(repository);
+        RevCommit commit = revWalk.parseCommit(commitId);
+
+        //Prepare a TreeWalk that can walk through the version of the repos at that commit
+        RevTree tree = commit.getTree();
+        TreeWalk treeWalk = new TreeWalk(repository);
+        treeWalk.addTree(tree);
+        treeWalk.setRecursive(true);
+
+        //Traverse through the old version of the project until the target file is found.
+        //I couldn't get `treeWalk.setFilter(PathFilter.create(filePath));` to work, so this is an alternative approach.
+        while (treeWalk.next()) {
+            String path = treeWalk.getPathString();
+            if (path.endsWith(filePath))
+            {
+                //Return an input stream that has the old version of the file open
+                ObjectId objectId = treeWalk.getObjectId(0);
+                ObjectLoader loader = repository.open(objectId);
+                return loader.openStream();
+
+                /*BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                int lineCount = 0;
+                //while (reader.readLine() != null) lines++;
+
+                String line = null;
+                while ((line = reader.readLine()) != null)
+                {
+                    lineCount++;
+                    System.out.println(""+lineCount+". "+line);
+                }*/
+            }
+        }
+
+        //Could not find the file on that commit
+        throw new IllegalStateException(String.format("The file `%s` could not be found in the commit `%s`.", filePath, commitHash));
+    }
+
+
+
+
+
+
+
+
+
+    ///////////////////// UNUSED METHODS /////////////////////
 
     public void populateModel(CodeBase codeBase)
     {
@@ -108,7 +208,6 @@ public class RepositoryAnalyzer
             {
                 String commitHash = revCommit.getName();
                 //table.put(filePath, commitHash, PRESENT_IN_TABLE);
-                //TODO waiting on Abhishek's code
             }
         }
     }
