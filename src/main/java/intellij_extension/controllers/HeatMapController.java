@@ -10,18 +10,17 @@ import intellij_extension.utility.commithistory.CommitCountCalculator;
 import intellij_extension.views.HeatMapPane;
 import intellij_extension.views.unused.HeatFileComponent;
 import javafx.scene.Node;
+import javafx.scene.paint.Color;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 
-public class HeatMapController implements IHeatMapController
-{
+public class HeatMapController implements IHeatMapController {
     private HeatMapPane heatMapPane;
     private CodeBase codeBase;
 
-    public HeatMapController(CodeBase codeBase)
-    {
+    public HeatMapController(CodeBase codeBase) {
         this.codeBase = codeBase;
 
         //Create the view
@@ -31,16 +30,13 @@ public class HeatMapController implements IHeatMapController
         populateHeatMap();
     }
 
-    public void clearHeatContainer()
-    {
+    public void clearHeatContainer() {
         heatMapPane.clear();
     }
 
-    public void recalculateHeat()
-    {
+    public void recalculateHeat() {
         //Order the file metrics calculators to analyze the code base
-        try
-        {
+        try {
             //Compute file size
             //TODO We may need to have the user select the project root
             Directory rootDirectory = new Directory("C:\\Users\\Pete\\Desktop\\team3-project\\src\\main");
@@ -55,47 +51,41 @@ public class HeatMapController implements IHeatMapController
             commitCountCalculator.editFileMetricMap(fileMetricMap);
 
             //Now the activeCommit's fileMetricMap can be used to display the data
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             Constants.LOG.error(e);
             Constants.LOG.error(e.getMessage());
         }
         Constants.LOG.info("Heat calculations complete.");
     }
 
-    public void populateHeatMap()
-    {
+    public void populateHeatMap() {
         Commit activeCommit = codeBase.getActiveCommit();
-        if (activeCommit == null)
-        {
+        if (activeCommit == null) {
             Constants.LOG.info("Cannot populate the heat map since no commit is selected.");
         }
         HashMap<String, FileObject> fileMetricMap = codeBase.getActiveCommit().getFileMetricMap();
 
         //Iterate through the files and add them to the screen
         Iterator<String> keyIterator = fileMetricMap.keySet().iterator();
-        while (keyIterator.hasNext())
-        {
+        while (keyIterator.hasNext()) {
             String fileName = keyIterator.next();
             FileObject fileObject = fileMetricMap.get(fileName);
             int heatLevel = fileObject.computeHeatLevel();
 
             //Generate color
-            String color = HeatCalculationUtility.colorOfHeat(heatLevel);
+            Color color = HeatCalculationUtility.colorOfHeat(heatLevel);
 
             //Add a pane (rectangle) to the screen
             HeatFileComponent heatFileComponent = new HeatFileComponent();
-            heatFileComponent.setStyle("-fx-background-color: #" + color);
+            heatFileComponent.setStyle("-fx-background-color: #" + color.toString().replace("0x", "#"));
             heatMapPane.addNode(heatFileComponent);
 
-            Constants.LOG.info("Added a file pane for "+fileName +" with heat level "+heatLevel+" and color "+color);
+            Constants.LOG.info("Added a file pane for " + fileName + " with heat level " + heatLevel + " and color " + color.toString());
             // Constants.LOG.info("file has name=`"+fileName+"` filepath=`"+fileObject.getFilePath()+"`");
         }
     }
 
-    public Node getView()
-    {
+    public Node getView() {
         return this.heatMapPane;
     }
 }

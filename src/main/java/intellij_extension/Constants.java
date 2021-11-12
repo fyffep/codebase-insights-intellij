@@ -1,5 +1,6 @@
 package intellij_extension;
 
+import com.intellij.openapi.diagnostic.Logger;
 import intellij_extension.models.CodeBase;
 import intellij_extension.views.CommitInfoRow;
 import javafx.collections.FXCollections;
@@ -8,7 +9,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.paint.Color;
 import javafx.scene.text.FontWeight;
-import com.intellij.openapi.diagnostic.Logger;
 
 import java.util.ArrayList;
 
@@ -16,30 +16,22 @@ public class Constants {
 
     public static final Logger LOG = Logger.getInstance(CodeBase.class); // TODO This should probably change to a more reasonable class?
 
+    // Heat
     public static final int HEAT_MIN = 1;
     public static final int HEAT_MAX = 10;
     //Heat Colors
-    public static final Color HEAT_COLOR_1 = Color.rgb(80, 255, 80); //green
-    public static final Color HEAT_COLOR_2 = Color.rgb(120, 255, 120); //green
-    public static final Color HEAT_COLOR_3 = Color.rgb(165, 212, 106); //green
-    public static final Color HEAT_COLOR_4 = Color.rgb(165, 212, 106); //light green
-    public static final Color HEAT_COLOR_5 = Color.rgb(255, 223, 128); //pale yellow
-    public static final Color HEAT_COLOR_6 = Color.rgb(255, 200, 80); //dark yellow
-    public static final Color HEAT_COLOR_7 = Color.rgb(255, 200, 40); //light orange
-    public static final Color HEAT_COLOR_8 = Color.rgb(229, 177, 52); //bright orange
-    public static final Color HEAT_COLOR_9 = Color.rgb(255, 50, 50); //red
-    public static final Color HEAT_COLOR_10 = Color.rgb(200, 20, 20); //dark red
-    /***************************/
-
-    // IDs
-    // Commit History Pane
-    public static final String CH_BANNER_ID = "CH_BANNER_01";
+    public static final Color HEAT_MIN_COLOR = Color.BLUE;
+    public static final Color HEAT_MAX_COLOR = Color.RED;
 
     /***************************/
     /* USER INTERFACE CONSTANTS*/
-    public static final String CH_HEADER_TEXT_ID = "CH_BRANCH_LABEL_01";
-    public static final String CH_BRANCH_COMBOBOX_ID = "CH_BRANCH_COMBOBOX_01";
-    public static final String CH_BRANCH_TABLEVIEW_ID = "CH_TABLEVIEW_01";
+    /***************************/
+    // IDs
+    // File Commit History Pane
+    public static final String FCH_BANNER_ID = "FCH_BANNER_01";
+    public static final String FCH_HEADER_TEXT_ID = "FCH_BRANCH_LABEL_01";
+    public static final String FCH_BRANCH_COMBOBOX_ID = "FCH_BRANCH_COMBOBOX_01";
+    public static final String FCH_BRANCH_TABLEVIEW_ID = "FCH_TABLEVIEW_01";
     // Commit Details Pane
     public static final String CD_BANNER_ID = "CD_BANNER_01";
     public static final String CD_HEADER_TEXT_ID = "CD_BANNER_01";
@@ -50,15 +42,17 @@ public class Constants {
     public static final String CD_FILE_LIST_CONTAINER_ID = "CD_FILE_LIST_CONTAINER_01";
     public static final String CD_FILE_LIST_ID = "CD_FILE_LIST_01";
     public static final String CD_FILE_TEXT_PREFIX = "CD_FILE_TEXT_";
-    // Selected File Details Pane
+    // Selected File Pane
     public static final String SF_FILENAME_TEXT_ID = "SF_FILENAME_01";
-    public static final String SF_PACKAGENAME_TEXT_ID = "SF_PACKAGENAME_01";
+    public static final String SF_PACKAGE_NAME_TEXT_ID = "SF_PACKAGE_NAME_01";
     public static final String SF_AUTHOR_TEXT_ID = "SF_AUTHOR_01";
     // Banners
     public static final int BANNER_MIN_HEIGHT = 0;
 
 
-    // UI Properties
+    /***************************/
+    /* UI Properties           */
+    /***************************/
     // General Properties
     public static final double BANNER_SIZE_MULTIPLIER = 0.20f;
     public static final Pos BANNER_ALIGNMENT = Pos.CENTER_LEFT;
@@ -68,18 +62,18 @@ public class Constants {
     public static final String HEADER_FONT = "Veranda";
     public static final int HEADER_TEXT_SIZE = 24;
     public static final FontWeight HEADER_TEXT_FONT_WEIGHT = FontWeight.BOLD;
-    //Text Font properties in Selected File Pane
+    // Text Font properties in Selected File Pane
     public static final String SF_TEXT_FONT = "Veranda";
     public static final int SF_TEXT_SIZE = 14;
     public static final FontWeight SF_TEXT_FONT_WEIGHT = FontWeight.BOLD;
     public static final String SF_FILE_NAME_SPECIFIER = "%-20s";
     public static final String SF_PACKAGE_NAME_SPECIFIER = "%-15s";
     public static final String SF_FILE_AUTHOR_SPECIFIER = "%-22s";
-    // Commit History Commit List
-    public static final int CH_COMMIT_LIST_MIN_HEIGHT = 0;
-    // Commit History Commit List Columns
-    public static final int CH_DESCRIPTION_COLUMN_MAX_WIDTH = 200;
-    //Commit Details Banner
+    // File Commit History Commit List
+    public static final int FCH_COMMIT_LIST_MIN_HEIGHT = 0;
+    // File Commit History Commit List Columns
+    public static final int FCH_DESCRIPTION_COLUMN_MAX_WIDTH = 200;
+    // Commit Details Banner
     public static final Pos CD_BANNER_ALIGNMENT = Pos.TOP_LEFT;
     public static final int CD_BANNER_SPACING = 5;
     // Commit Details File List

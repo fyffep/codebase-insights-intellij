@@ -103,4 +103,19 @@ public class CodebaseV2 {
             }
         }
     }
+
+    public void heatMapObjectSelected(String id) {
+    }
+
+    public void branchSelected(String branchName) {
+    }
+
+    public void commitSelected(String commitHash) {
+    }
+
+    public void changeHeatMapToCommit(String commitHash) {
+    }
+
+    public void openFile(String filename) {
+    }
 }
