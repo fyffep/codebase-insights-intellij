@@ -2,7 +2,14 @@ package intellij_extension.utility;
 
 import intellij_extension.Constants;
 import intellij_extension.models.FileObject;
+import intellij_extension.models.redesign.FileObjectV2;
+import intellij_extension.models.redesign.HeatObject;
+import intellij_extension.utility.filesize.FileSizeCalculator;
 import javafx.scene.paint.Color;
+import org.eclipse.jgit.lib.ObjectLoader;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.LinkedHashMap;
 
 import static intellij_extension.Constants.HEAT_MAX;
 import static intellij_extension.Constants.HEAT_MIN;
@@ -16,14 +23,13 @@ public class HeatCalculationUtility //can be renamed if adding more methods
     /**
      * Converts the input heat level to a color.
      * Higher heat levels are indicated by higher intensities of red.
+     *
      * @param heatLevel a number from 1 to 10
      * @return a hexadecimal String of the form "FFFFFF" representing a color
      */
-    public static String colorOfHeat(int heatLevel)
-    {
+    public static String colorOfHeat(int heatLevel) {
         Color choice;
-        switch (heatLevel)
-        {
+        switch (heatLevel) {
             case 1:
                 choice = Constants.HEAT_COLOR_1;
                 break;
@@ -58,30 +64,26 @@ public class HeatCalculationUtility //can be renamed if adding more methods
                 choice = Color.BLACK;
         }
         //Convert color to hex
-        return String.format("%02x%02x%02x", (int)(choice.getRed() * 255), (int)(choice.getGreen() * 255), (int)(choice.getBlue() * 255));
+        return String.format("%02x%02x%02x", (int) (choice.getRed() * 255), (int) (choice.getGreen() * 255), (int) (choice.getBlue() * 255));
     }
 
 
     /**
      * Returns the level of heat caused by the fileObject's file size.
+     *
      * @param fileObject this should have its lineCount already assigned
      */
-    public static int calculateHeatForFileSize(FileObject fileObject)
-    {
+    public static int calculateHeatForFileSize(@NotNull FileObject fileObject) {
         int heatLevel;
 
         long lineCount = fileObject.getLineCount();
-        if (lineCount < 100)
-        {
+        if (lineCount < 100) {
             heatLevel = HEAT_MIN;
         }
         //Give 1 point of heat for every hundred lines
-        else if (lineCount > 100 && lineCount < 1000)
-        {
+        else if (lineCount > 100 && lineCount < 1000) {
             heatLevel = (int) Math.round(lineCount / 100.0);
-        }
-        else
-        {
+        } else {
             heatLevel = HEAT_MAX;
         }
 
@@ -94,10 +96,10 @@ public class HeatCalculationUtility //can be renamed if adding more methods
 
     /**
      * Returns the level of heat caused by the fileObject's number of commits
+     *
      * @param fileObject this should have its lineCount already assigned
      */
-    public static int calculateHeatForNumberOfCommits(FileObject fileObject)
-    {
+    public static int calculateHeatForNumberOfCommits(@NotNull FileObject fileObject) {
         int heatLevel;
 
         //TODO this does not take commit **history** into account. It needs to consider how a file's heat should decrease as its commit frequency decreases
@@ -110,4 +112,16 @@ public class HeatCalculationUtility //can be renamed if adding more methods
 
         return heatLevel;
     }
+
+    /**
+     *
+     */
+    public static HeatObject computeHeatObjectFromHistory(LinkedHashMap<String, HeatObject> commitHashMap, FileObjectV2 existingFileObject, String fileName, String filePath, ObjectLoader loader) {
+        HeatObject previousHeat = commitHashMap.get(existingFileObject.getLatestCommit());
+        float latestHeatLevel = previousHeat.getHeatLevel();
+        int prevNumOfCommits = previousHeat.getNumberOfCommits();
+
+        return new HeatObject(++latestHeatLevel, fileName, FileSizeCalculator.getLineCount(filePath), loader.getSize(), ++prevNumOfCommits);
+    }
+
 }

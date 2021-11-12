@@ -2,7 +2,9 @@ package intellij_extension.models.redesign;
 
 import com.google.common.collect.HashBasedTable;
 import intellij_extension.models.Commit;
+import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.utility.commithistory.CommitCountCalculator;
+import intellij_extension.utility.filesize.FileSizeCalculator;
 import javafx.util.Pair;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -72,10 +74,10 @@ public class CodebaseV2 {
                 if (commitHashMap.isEmpty()) {
                     // TODO - A question from Ethan
                     //  Why aren't we calculating the heat here?
-                    heatObject = new HeatObject(1, fileName, getLineCount(filePath),
+                    heatObject = new HeatObject(1, fileName, FileSizeCalculator.getLineCount(filePath),
                             loader.getSize(), 1);
                 } else {
-                    heatObject = computeHeatObjectFromHistory(commitHashMap, existingFileObject,
+                    heatObject = HeatCalculationUtility.computeHeatObjectFromHistory(commitHashMap, existingFileObject,
                             fileName, filePath, loader);
                 }
                 existingFileObject.setHeatForCommit(newCommit.getHash(), heatObject);
@@ -100,25 +102,6 @@ public class CodebaseV2 {
                 //  Ethan's Comment - Another approach is to limit how far we go back in the history of a branch - Just an idea - Don't have to act on this.
                 newCommit.addFileToSet(fileName);
             }
-        }
-    }
-
-    private HeatObject computeHeatObjectFromHistory(LinkedHashMap<String, HeatObject> commitHashMap,
-                                                    FileObjectV2 existingFileObject, String fileName, String filePath, ObjectLoader loader) {
-        HeatObject previousHeat = commitHashMap.get(existingFileObject.getLatestCommit());
-        float latestHeatLevel = previousHeat.getHeatLevel();
-        int prevNumOfCommits = previousHeat.getNumberOfCommits();
-        return new HeatObject(++latestHeatLevel, fileName, getLineCount(filePath), loader.getSize(), ++prevNumOfCommits);
-    }
-
-    // TODO: Need to find a way to get the number of lines through commit history
-    //  The main question here is, is it required/worth to maintain the history of file per commit?
-    private long getLineCount(String filePath) {
-        try {
-            // This technique would return the lines of the file in the latest version of the repository
-            return Files.lines(Paths.get(filePath)).count();
-        } catch (IOException e) {
-            return 0;
         }
     }
 }
