@@ -1,7 +1,6 @@
 package intellij_extension.models.redesign;
 
 import com.google.common.collect.HashBasedTable;
-import intellij_extension.models.Commit;
 import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.utility.commithistory.CommitCountCalculator;
 import intellij_extension.utility.filesize.FileSizeCalculator;
@@ -12,14 +11,16 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
 
 public class CodebaseV2 {
 
     private String activeBranch;
     private LinkedHashSet<String> branchNameList;
-    private LinkedHashSet<Commit> activeCommits;
+    private LinkedHashSet<CommitV2> activeCommits;
     private LinkedHashSet<FileObjectV2> activeFileObjects;
 
     // TODO
@@ -48,6 +49,8 @@ public class CodebaseV2 {
             TreeWalk treeWalk = treeWalkCommitsPair.getValue();
             treeWalk.addTree(revCommit.getTree());
             CommitV2 newCommit = new CommitV2(revCommit);
+            // Track newCommit object
+            activeCommits.add(newCommit);
 
             while (treeWalk.next()) {
                 //This can be used if there's a need for the File object to be stored
@@ -66,7 +69,13 @@ public class CodebaseV2 {
                 // FindAny() = Give me any object that satisfies the filter
                 // OrElse() = If FindAny fails return the above fileObject (meaning there is no already created fileObject for this file)
                 FileObjectV2 existingFileObject = activeFileObjects.stream()
-                        .filter(fileObjectV2 -> fileObject.equals(fileObjectV2)).findAny().orElse(fileObject);
+                        .filter(fileObjectV2 -> fileObject.equals(fileObjectV2)).findAny().orElse(null);
+
+                // First time adding this fileObject to the list.
+                if(existingFileObject == null) {
+                    activeFileObjects.add(fileObject);
+                    existingFileObject = fileObject;
+                }
 
                 LinkedHashMap<String, HeatObject> commitHashMap = existingFileObject.getCommitHashToHeatObjectMap();
                 HeatObject heatObject;
@@ -105,6 +114,12 @@ public class CodebaseV2 {
     }
 
     public void heatMapObjectSelected(String id) {
+        ArrayList<CommitV2> associatedCommits = (ArrayList<CommitV2>) activeCommits.stream()
+                .filter(commit -> commit.getFileSet().contains(id))
+                .collect(Collectors.toList());
+
+        // Update FileCommitHistory pane with AssociatedCommits
+
     }
 
     public void branchSelected(String branchName) {
