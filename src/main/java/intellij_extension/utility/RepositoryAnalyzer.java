@@ -27,7 +27,6 @@ import java.util.List;
 
 /**
  * WIP from Pete -- trying to populate the model with file/commit/diff data.
- * Can be deleted since it is unused.
  */
 public class RepositoryAnalyzer
 {
