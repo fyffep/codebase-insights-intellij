@@ -48,13 +48,11 @@ public class FileObjectV2 {
         return latestCommit;
     }
 
-    // TODO - DECISION - Do we want to throw an exception or return null when commitHash not found?
     public HeatObject getHeatForCommit(String commitHash) {
         // commitHash not found
-//        if (!commitHashToHeatObjectMap.containsKey(commitHash)) {
-//            Constants.LOG.error(
-//                    String.format("Commit hash %s was not found in %s's commitHashToHeatObjectMap. Returning null.", commitHash, filename));
-//        }
+        if (!commitHashToHeatObjectMap.containsKey(commitHash)) {
+            throw new UnsupportedOperationException(String.format("Commit hash %s was not found in %s's commitHashToHeatObjectMap. How are we getting a untracked commit?", commitHash, filename));
+        }
 
         //commitHash if not found would return null and the calling method would log accordingly
         return commitHashToHeatObjectMap.getOrDefault(commitHash, null);
@@ -63,8 +61,7 @@ public class FileObjectV2 {
     public void setHeatForCommit(String commitHash, HeatObject heat) {
         // commitHash already present - was this intentional?
         if (commitHashToHeatObjectMap.putIfAbsent(commitHash, heat) != null) {
-            Constants.LOG.warn(
-                    String.format("Commit hash %s is already present in %s's commitHashToHeatObjectMap, was this intentional?. Overriding with new HeatObject.", commitHash, filename));
+            throw new UnsupportedOperationException(String.format("Commit hash %s is already present in %s's commitHashToHeatObjectMap. How is this happening?", commitHash, filename));
         }
 
         this.latestCommit = commitHash;
