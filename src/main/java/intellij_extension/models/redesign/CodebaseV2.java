@@ -43,10 +43,10 @@ public class CodebaseV2 {
     // Is this the JGit object?
     public void buildBranchData(String branch) throws IOException {
         Pair<Iterable<RevCommit>, TreeWalk> treeWalkCommitsPair = CommitCountCalculator.getCommitsAndTreeByBranch(branch);
-        for (RevCommit rCommit : treeWalkCommitsPair.getKey()) {
+        for (RevCommit revCommit : treeWalkCommitsPair.getKey()) {
             TreeWalk treeWalk = treeWalkCommitsPair.getValue();
-            treeWalk.addTree(rCommit.getTree());
-            CommitV2 newCommit = new CommitV2(rCommit);
+            treeWalk.addTree(revCommit.getTree());
+            CommitV2 newCommit = new CommitV2(revCommit);
 
             while (treeWalk.next()) {
                 //This can be used if there's a need for the File object to be stored
@@ -54,14 +54,24 @@ public class CodebaseV2 {
                 String fileName = treeWalk.getNameString();
                 String filePath = treeWalk.getPathString();
                 ObjectLoader loader = CommitCountCalculator.getObjectLoader(treeWalk.getObjectId(0));
-                FileObjectV2 fileObject = new FileObjectV2(Paths.get(filePath), fileName, new LinkedHashMap<>());
 
+                FileObjectV2 fileObject = new FileObjectV2(Paths.get(filePath), fileName);
+
+                // Nice, love me a good stream implementation
+                // For those unfamiliar
+                // Stream() = loop over all elements
+                // Filter() = while looping over all elements only give me objects that match my filter
+                    // In this case if the above fileObject = a fileObject in the list already
+                // FindAny() = Give me any object that satisfies the filter
+                // OrElse() = If FindAny fails return the above fileObject (meaning there is no already created fileObject for this file)
                 FileObjectV2 existingFileObject = activeFileObjects.stream()
                         .filter(fileObjectV2 -> fileObject.equals(fileObjectV2)).findAny().orElse(fileObject);
 
                 LinkedHashMap<String, HeatObject> commitHashMap = existingFileObject.getCommitHashToHeatObjectMap();
                 HeatObject heatObject;
                 if (commitHashMap.isEmpty()) {
+                    // TODO - A question from Ethan
+                    //  Why aren't we calculating the heat here?
                     heatObject = new HeatObject(1, fileName, getLineCount(filePath),
                             loader.getSize(), 1);
                 } else {
@@ -85,6 +95,9 @@ public class CodebaseV2 {
                  * Set of fileName string per CommitV2 object.
                  * If the above justification sounds OK, we can remove the HashBasedTable init.
                 **/
+                // TODO - Ethan's Comment - I prefer simplicity and to worry about size/slow down problems when that actually happens.
+                //  Ethan's Comment - Like Prof. Rawlins said during the Command Pattern talk, do worry about it being too much data until it becomes a problem.
+                //  Ethan's Comment - Another approach is to limit how far we go back in the history of a branch - Just an idea - Don't have to act on this.
                 newCommit.addFileToSet(fileName);
             }
         }
