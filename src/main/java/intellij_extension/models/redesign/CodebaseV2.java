@@ -11,7 +11,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -63,7 +62,7 @@ public class CodebaseV2 {
                 // For those unfamiliar
                 // Stream() = loop over all elements
                 // Filter() = while looping over all elements only give me objects that match my filter
-                    // In this case if the above fileObject = a fileObject in the list already
+                // In this case if the above fileObject = a fileObject in the list already
                 // FindAny() = Give me any object that satisfies the filter
                 // OrElse() = If FindAny fails return the above fileObject (meaning there is no already created fileObject for this file)
                 FileObjectV2 existingFileObject = activeFileObjects.stream()
@@ -96,7 +95,7 @@ public class CodebaseV2 {
                  * as a value, a simple HashMap would have done the job for us, However, it's better to just have a simple
                  * Set of fileName string per CommitV2 object.
                  * If the above justification sounds OK, we can remove the HashBasedTable init.
-                **/
+                 **/
                 // TODO - Ethan's Comment - I prefer simplicity and to worry about size/slow down problems when that actually happens.
                 //  Ethan's Comment - Like Prof. Rawlins said during the Command Pattern talk, do worry about it being too much data until it becomes a problem.
                 //  Ethan's Comment - Another approach is to limit how far we go back in the history of a branch - Just an idea - Don't have to act on this.

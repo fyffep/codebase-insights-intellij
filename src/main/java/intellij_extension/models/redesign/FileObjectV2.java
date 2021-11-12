@@ -1,9 +1,6 @@
 package intellij_extension.models.redesign;
 
-import intellij_extension.Constants;
-
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 /**
@@ -68,7 +65,7 @@ public class FileObjectV2 {
     }
 
     @Override
-    public boolean equals (Object object) {
+    public boolean equals(Object object) {
         if (object != null && object.getClass() == getClass()) {
             FileObjectV2 fileObject = (FileObjectV2) object;
             if (this.getFilename().equals(fileObject.getFilename())) return true;
