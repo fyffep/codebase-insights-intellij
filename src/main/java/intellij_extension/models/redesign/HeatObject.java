@@ -11,6 +11,10 @@ public class HeatObject {
     private long fileSize;
     private int numberOfCommits = 1;
 
+    public HeatObject() {
+        //This allows the metrics to be filled out gradually
+    }
+
     public HeatObject(float heatLevel, String filename, long lineCount, long fileSize, int numberOfCommits) {
         this.heatLevel = heatLevel;
         this.filename = filename;
