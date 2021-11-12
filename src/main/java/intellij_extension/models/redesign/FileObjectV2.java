@@ -26,10 +26,10 @@ public class FileObjectV2 {
 
     }
 
-    public FileObjectV2(Path path, String filename, LinkedHashMap<String, HeatObject> commitHashToHeatObjectMap) {
+    public FileObjectV2(Path path, String filename) {
         this.path = path;
         this.filename = filename;
-        this.commitHashToHeatObjectMap = commitHashToHeatObjectMap;
+        this.commitHashToHeatObjectMap = new LinkedHashMap<>();
     }
 
     public Path getPath() {
