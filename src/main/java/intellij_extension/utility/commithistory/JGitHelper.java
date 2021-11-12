@@ -30,6 +30,16 @@ public class JGitHelper
                 .build();
     }
 
+    //Same as above method, but requires a path parameter
+    public static Repository openLocalRepository(File projectPath) throws IOException
+    {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        return builder
+                .readEnvironment() // scan environment GIT_* variables
+                .findGitDir(projectPath)
+                .build();
+    }
+
     /**
      * @return the path of the project that the user has open in IntelliJ or null
      * as a default.

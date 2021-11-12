@@ -33,7 +33,6 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
             assert projectRootPath != null;
 
             //Compute file size
-            //TODO We may need to have the user select the project root
             Directory rootDirectory = new Directory(projectRootPath);
             rootDirectory.parseDirectory();
             //Add the file size data to the map
