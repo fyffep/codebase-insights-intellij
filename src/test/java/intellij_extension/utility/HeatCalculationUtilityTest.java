@@ -1,6 +1,7 @@
 package intellij_extension.utility;
 
 import intellij_extension.models.FileObject;
+import javafx.scene.paint.Color;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,11 +10,11 @@ import static testdata.TestData.*;
 class HeatCalculationUtilityTest
 {
     @Test
-    void defaultConstructorTest()
+    void calculateColorOfHeat()
     {
         final int TEST_HEAT_LEVEL = 1;
-        String colorString = HeatCalculationUtility.colorOfHeat(TEST_HEAT_LEVEL); //method under test
-        assertEquals("50ff50", colorString);
+        Color colorString = HeatCalculationUtility.colorOfHeat(TEST_HEAT_LEVEL); //method under test
+        assertEquals("0xff0000ff", colorString.toString());
     }
 
     @Test

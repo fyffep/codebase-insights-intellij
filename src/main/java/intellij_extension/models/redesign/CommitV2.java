@@ -5,6 +5,8 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Commit
@@ -27,6 +29,8 @@ public class CommitV2 {
     private String date;
     private String hash;
 
+    private Set<String> fileSet;
+
     public CommitV2(RevCommit revCommit) {
         PersonIdent authorIdent = revCommit.getAuthorIdent();
 
@@ -36,6 +40,8 @@ public class CommitV2 {
         this.shortMessage = revCommit.getShortMessage();
         this.date = authorIdent.getWhen().toString();
         this.hash = revCommit.getId().toString();
+
+        this.fileSet = new HashSet<>();
 
         // TODO - Resolve DiffEntry information
         // commitDiff = ??
@@ -68,4 +74,8 @@ public class CommitV2 {
     public String getHash() {
         return hash;
     }
+
+    public Set<String> getFileSet() { return fileSet; }
+
+    public void addFileToSet(String file) { fileSet.add(file); }
 }
