@@ -1,7 +1,6 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
-import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -23,7 +22,7 @@ public class SelectedFileVBox extends VBox {
         ViewFactory.setPaneChild(this, fileName); //add the Text Node to VBox
 
         //Package Name Node
-        packageName = ViewFactory.getInstance().createOrGetText(Constants.SF_PACKAGENAME_TEXT_ID);
+        packageName = ViewFactory.getInstance().createOrGetText(Constants.SF_PACKAGE_NAME_TEXT_ID);
         formattedFieldName = formatFieldName(Constants.SF_PACKAGE_NAME_SPECIFIER, Constants.SF_TEXT_PACKAGENAME); //format the  Text node
         setFileDetailsTextProperties(packageName);
         setSelectedFileText(packageName, formattedFieldName);

@@ -32,22 +32,22 @@ public class FileHistoryPane extends VBox {
         super();
 
         // Create the top horizontal banner
-        topHorizontalBanner = ViewFactory.getInstance().createOrGetHBox(Constants.CH_BANNER_ID);
+        topHorizontalBanner = ViewFactory.getInstance().createOrGetHBox(Constants.FCH_BANNER_ID);
         setBannerProperties();
         ViewFactory.setPaneChild(this, topHorizontalBanner);
 
         // Create the banner text
-        headerText = ViewFactory.getInstance().createOrGetText(Constants.CH_HEADER_TEXT_ID);
+        headerText = ViewFactory.getInstance().createOrGetText(Constants.FCH_HEADER_TEXT_ID);
         setHeaderTextProperties();
         ViewFactory.setPaneChild(topHorizontalBanner, headerText);
 
         // Create the banner combo box
-        branchComboBox = ViewFactory.getInstance().createOrGetComboBox(Constants.CH_BRANCH_COMBOBOX_ID);
+        branchComboBox = ViewFactory.getInstance().createOrGetComboBox(Constants.FCH_BRANCH_COMBOBOX_ID);
         setBranchComboBoxProperties();
         ViewFactory.setPaneChild(topHorizontalBanner, branchComboBox);
 
         // Create Tableview with data
-        commitList = ViewFactory.getInstance().createOrGetTableView(Constants.CH_BRANCH_TABLEVIEW_ID);
+        commitList = ViewFactory.getInstance().createOrGetTableView(Constants.FCH_BRANCH_TABLEVIEW_ID);
         setCommitListProperties();
         setCommitListColumns();
         ViewFactory.setPaneChild(this, commitList);
@@ -144,7 +144,7 @@ public class FileHistoryPane extends VBox {
         // Set up constraints on width/height
         // We want this so the user can make the Commit Details view as big
         // as the right side if desirable
-        commitList.setMinHeight(Constants.CH_COMMIT_LIST_MIN_HEIGHT);
+        commitList.setMinHeight(Constants.FCH_COMMIT_LIST_MIN_HEIGHT);
         // TODO set this based on a portion of the view
         // like the top banner should get 90% real estate
         // But it should also be dynamic shrink with the parent
@@ -176,7 +176,7 @@ public class FileHistoryPane extends VBox {
 
         // Description Column
         TableColumn<CommitInfoRow, String> descriptionColumn = new TableColumn("Description");
-        descriptionColumn.setMaxWidth(Constants.CH_DESCRIPTION_COLUMN_MAX_WIDTH);
+        descriptionColumn.setMaxWidth(Constants.FCH_DESCRIPTION_COLUMN_MAX_WIDTH);
         descriptionColumn.setSortable(false);
 
         // Author Column
