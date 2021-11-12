@@ -11,10 +11,20 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.awt.*;
 
-public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory {
+public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory
+{
+    public static Project project;
+    public static final Boolean projectSynchronizer = false; //used for accessing `project` on other threads
 
     @Override
-    public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
+    public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow)
+    {
+        //Store the project parameter so that the calculation thread can access it
+        synchronized (CodebaseInsightsToolWindowFactory.projectSynchronizer) {
+            CodebaseInsightsToolWindowFactory.project = project;
+            projectSynchronizer.notifyAll();
+        }
+
         final JFXPanel fxPanel = new JFXPanel();
         fxPanel.setBackground(Color.BLACK);
         JComponent component = toolWindow.getComponent();
@@ -30,11 +40,11 @@ public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory {
 
             // Left Half of Tools Windows
             HeatMapSplitPane heatMapSplit = new HeatMapSplitPane();
-            root.getItems().add(heatMapSplit);;
+            root.getItems().add(heatMapSplit);
 
             // Right Half of Tools Window
             // Will split into two sections
-            CommitInfoSplitPane commitInfoSplitPane = new CommitInfoSplitPane();
+            InfoSplitPane commitInfoSplitPane = new InfoSplitPane();
             root.getItems().add(commitInfoSplitPane);
             fxPanel.setScene(mainScene);
         });
