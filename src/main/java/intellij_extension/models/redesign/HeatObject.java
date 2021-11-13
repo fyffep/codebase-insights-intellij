@@ -1,5 +1,7 @@
 package intellij_extension.models.redesign;
 
+import intellij_extension.utility.HeatCalculationUtility;
+
 /**
  * filename acts as ID
  */
@@ -23,6 +25,7 @@ public class HeatObject {
         this.numberOfCommits = numberOfCommits;
     }
 
+    //TODO this should be deleted in favor of computeHeatLevel()
     public float getHeatLevel() {
         return heatLevel;
     }
@@ -53,5 +56,29 @@ public class HeatObject {
 
     public void setNumberOfCommits(int numberOfCommits) {
         this.numberOfCommits = numberOfCommits;
+    }
+
+
+    /**
+     * Assigns a heat level to this HeatObject based on its metrics.
+     * @return a value from 1 to 10, with 10 being the hottest
+     */
+    public int computeHeatLevel() //maybe this class (a model) is not the best place for this method
+    {
+        //Currently, this does not support accumulated heat FIXME
+
+        //Compute the heat of each metric
+        //File size
+        int sizeHeat = HeatCalculationUtility.calculateHeatForFileSize(this);
+        //Number of commits
+        int numberOfCommitsHeat = HeatCalculationUtility.calculateHeatForNumberOfCommits(this);
+        System.out.println("sizeHeat="+sizeHeat+" for linecount2="+lineCount+" and numberOfCommitsHeat="+numberOfCommitsHeat);
+
+        //Average all the metrics
+        return (
+                sizeHeat +
+                numberOfCommitsHeat
+                //Add more metrics here...
+        ) / 2;
     }
 }
