@@ -20,7 +20,54 @@ public class HeatCalculationUtility //can be renamed if adding more methods
     /**
      * Converts the input heat level to a color.
      * Higher heat levels are indicated by higher intensities of red.
-     *
+     * @param heatLevel a number from 1 to 10
+     * @return a hexadecimal String of the form "FFFFFF" representing a color
+     */
+    /*public static String colorOfHeat(int heatLevel)
+    {
+        Color choice;
+        switch (heatLevel)
+        {
+            case 1:
+                choice = Constants.HEAT_COLOR_1;
+                break;
+            case 2:
+                choice = Constants.HEAT_COLOR_2;
+                break;
+            case 3:
+                choice = Constants.HEAT_COLOR_3;
+                break;
+            case 4:
+                choice = Constants.HEAT_COLOR_4;
+                break;
+            case 5:
+                choice = Constants.HEAT_COLOR_5;
+                break;
+            case 6:
+                choice = Constants.HEAT_COLOR_6;
+                break;
+            case 7:
+                choice = Constants.HEAT_COLOR_7;
+                break;
+            case 8:
+                choice = Constants.HEAT_COLOR_8;
+                break;
+            case 9:
+                choice = Constants.HEAT_COLOR_9;
+                break;
+            case 10:
+                choice = Constants.HEAT_COLOR_10;
+                break;
+            default:
+                choice = Color.BLACK;
+        }
+        //Convert color to hex
+        return String.format("%02x%02x%02x", (int)(choice.getRed() * 255), (int)(choice.getGreen() * 255), (int)(choice.getBlue() * 255));
+    }*/ //UNUSED UNTIL FURTHER NOTICE
+
+    /**
+     * Converts the input heat level to a color.
+     * Higher heat levels are indicated by higher intensities of red.
      * @param heatLevel a number from 1 to 10
      * @return a hexadecimal String of the form "FFFFFF" representing a color
      */
@@ -31,7 +78,6 @@ public class HeatCalculationUtility //can be renamed if adding more methods
         // Get color based on percentage 0 = completely BLUE 1 = Completely RED
         Color heatColor = Constants.HEAT_MAX_COLOR.interpolate(Constants.HEAT_MIN_COLOR, heatPercentage);
 
-//        return String.format("%02x%02x%02x", (int) (heatColor.getRed() * 255), (int) (heatColor.getGreen() * 255), (int) (heatColor.getBlue() * 255));
         return heatColor;
     }
 

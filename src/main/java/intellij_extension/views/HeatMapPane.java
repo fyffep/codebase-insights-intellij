@@ -12,6 +12,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.paint.Color;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -74,7 +75,7 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver
                 int heatLevel = fileObject.computeHeatLevel();
 
                 //Generate color
-                String color = HeatCalculationUtility.colorOfHeat(heatLevel);
+                Color color = HeatCalculationUtility.colorOfHeat(heatLevel);
 
                 //Add a pane (rectangle) to the screen
                 HeatFileComponent heatFileComponent = new HeatFileComponent();

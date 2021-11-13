@@ -46,8 +46,10 @@ public class FileObjectV2 {
     public HeatObject getHeatObjectAtCommit(String commitHash) {
         if (commitHashToHeatObjectMap.containsKey(commitHash))
             return commitHashToHeatObjectMap.get(commitHash);
-        //else
-        return new HeatObject();
+        //else: create a new HeatObject
+        HeatObject newHeatObject = new HeatObject();
+        commitHashToHeatObjectMap.put(commitHash, newHeatObject);
+        return newHeatObject;
     }
 
     // TODO - DECISION - Do we want to throw an exception or return null when commitHash not found?
