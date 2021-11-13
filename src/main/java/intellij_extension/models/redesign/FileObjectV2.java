@@ -48,6 +48,7 @@ public class FileObjectV2 {
             return commitHashToHeatObjectMap.get(commitHash);
         //else: create a new HeatObject
         HeatObject newHeatObject = new HeatObject();
+        //System.out.println("Put HeatObject for file "+filename+" at commit "+commitHash);
         commitHashToHeatObjectMap.put(commitHash, newHeatObject);
         return newHeatObject;
     }
