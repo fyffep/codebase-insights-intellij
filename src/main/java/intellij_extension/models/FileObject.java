@@ -101,7 +101,7 @@ public class FileObject
 
 		//Compute the heat of each metric
 		//File size
-		int sizeHeat = HeatCalculationUtility.calculateHeatForFileSize(this);
+		/*int sizeHeat = HeatCalculationUtility.calculateHeatForFileSize(this);
 		//Number of commits
 		int numberOfCommitsHeat = HeatCalculationUtility.calculateHeatForNumberOfCommits(this);
 
@@ -110,6 +110,7 @@ public class FileObject
 				sizeHeat +
 				numberOfCommitsHeat
 				//Add more metrics here...
-		) / 2;
+		) / 2;*/
+		return 0;
 	}
 }

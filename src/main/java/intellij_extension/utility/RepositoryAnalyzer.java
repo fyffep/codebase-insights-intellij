@@ -97,6 +97,7 @@ public class RepositoryAnalyzer
     }
 
 
+
     /**
      * Given a CodeBase, attaches all the file sizes (in bytes) and line counts of each file present
      * at a particular commit of the Git repository. Each FileObject in the Codebase is given a new
@@ -112,34 +113,9 @@ public class RepositoryAnalyzer
         ObjectId commitId = repository.resolve(commitHash);
         assert commitId != null;
         RevWalk revWalk = new RevWalk(repository);
-        RevCommit commit = revWalk.parseCommit(commitId);
+        RevCommit revCommit = revWalk.parseCommit(commitId);
 
-        //Prepare a TreeWalk that can walk through the version of the repos at that commit
-        RevTree tree = commit.getTree();
-        TreeWalk treeWalk = new TreeWalk(repository);
-        treeWalk.addTree(tree);
-        treeWalk.setRecursive(true);
-
-        //Traverse through the old version of the project until the target file is found.
-        //I couldn't get `treeWalk.setFilter(PathFilter.create(filePath));` to work, so this is an alternative approach.
-        while (treeWalk.next()) {
-            String path = treeWalk.getPathString();
-
-            //Create an input stream that has the old version of the file open
-            ObjectId objectId = treeWalk.getObjectId(0);
-            ObjectLoader loader = repository.open(objectId);
-            InputStream inputStream = loader.openStream();
-
-            //Get number of lines and file size
-            long lineCount = FileSizeCalculator.computeLineCount(inputStream);
-            long fileSize = loader.getSize();
-
-            //Attach data to the HeatObject associated with this version of the file
-            FileObjectV2 fileObject = codeBase.getFileObjectFromId(path);
-            HeatObject heatObject = fileObject.getHeatObjectAtCommit(commitHash);
-            heatObject.setLineCount(lineCount);
-            heatObject.setFileSize(fileSize);
-        }
+        attachLineCountToCodebase(codeBase, revCommit);
     }
 
     /**
@@ -178,6 +154,7 @@ public class RepositoryAnalyzer
             HeatObject heatObject = fileObject.getHeatObjectAtCommit(revCommit.getName());
             heatObject.setLineCount(lineCount);
             heatObject.setFileSize(fileSize);
+            //System.out.println("Gave "+fileObject.getFilename()+" lineCount="+lineCount+" at commit="+revCommit.getName());
         }
     }
 

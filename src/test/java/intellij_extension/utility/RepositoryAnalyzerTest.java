@@ -43,7 +43,7 @@ public class RepositoryAnalyzerTest
     }
 
     @Test
-    void attachLineCountToCodebase() throws IOException
+    void attachLineCountToCodebaseTest() throws IOException
     {
         //final String TEST_FILE_PATH = "src\\main\\java\\intellij_extension\\CodebaseInsightsToolWindowFactory.java";
         final String TEST_FILE_NAME = "CodebaseInsightsToolWindowFactory.java";

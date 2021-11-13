@@ -83,14 +83,14 @@ public class HeatCalculationUtility //can be renamed if adding more methods
 
 
     /**
-     * Returns the level of heat caused by the fileObject's file size.
+     * Returns the level of heat caused by the HeatObject's file size.
      *
      * @param fileObject this should have its lineCount already assigned
      */
-    public static int calculateHeatForFileSize(@NotNull FileObject fileObject) {
+    public static int calculateHeatForFileSize(@NotNull HeatObject heatObject) {
         int heatLevel;
 
-        long lineCount = fileObject.getLineCount();
+        long lineCount = heatObject.getLineCount();
         if (lineCount < 100) {
             heatLevel = Constants.HEAT_MIN;
         }
@@ -109,16 +109,16 @@ public class HeatCalculationUtility //can be renamed if adding more methods
 
 
     /**
-     * Returns the level of heat caused by the fileObject's number of commits
+     * Returns the level of heat caused by the HeatObject's number of commits
      *
-     * @param fileObject this should have its lineCount already assigned
+     * @param heatObject this should have its lineCount already assigned
      */
-    public static int calculateHeatForNumberOfCommits(@NotNull FileObject fileObject) {
+    public static int calculateHeatForNumberOfCommits(@NotNull HeatObject heatObject) {
         int heatLevel;
 
         //TODO this does not take commit **history** into account. It needs to consider how a file's heat should decrease as its commit frequency decreases
 
-        int commitCount = fileObject.getNumberOfCommits();
+        int commitCount = heatObject.getNumberOfCommits();
         heatLevel = commitCount; //TEMP
 
         if (heatLevel > Constants.HEAT_MAX)

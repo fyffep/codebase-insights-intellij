@@ -61,16 +61,6 @@ public class FileObjectV2 {
         return latestCommit;
     }
 
-    public HeatObject getHeatForCommit(String commitHash) {
-        // commitHash not found
-        if (!commitHashToHeatObjectMap.containsKey(commitHash)) {
-            throw new UnsupportedOperationException(String.format("Commit hash %s was not found in %s's commitHashToHeatObjectMap.", commitHash, filename));
-        }
-
-        //commitHash if not found would return null and the calling method would log accordingly
-        return commitHashToHeatObjectMap.getOrDefault(commitHash, null);
-    }
-
     public void setHeatForCommit(String commitHash, HeatObject heat) {
         // commitHash already present - was this intentional?
         if (commitHashToHeatObjectMap.putIfAbsent(commitHash, heat) != null) {
@@ -78,6 +68,15 @@ public class FileObjectV2 {
         }
 
         this.latestCommit = commitHash;
+    }
+
+    /**
+     * Returns the total heat
+     * @return
+     */
+    public int getOverallHeat()
+    {
+        return (int) (Math.random() % 10); //TODO calculate overall heat here (this is a placeholder)
     }
 
     @Override
