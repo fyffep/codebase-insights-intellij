@@ -10,12 +10,10 @@ import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.utility.commithistory.JGitHelper;
 import intellij_extension.utility.filesize.FileSizeCalculator;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectLoader;
-import org.eclipse.jgit.lib.ObjectReader;
-import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -184,6 +182,13 @@ public class RepositoryAnalyzer
     }
 
 
+    /**
+     * Computes line count, file size, and number of commits for every file at every commit.
+     * This places FileObjects in the given Codebase, and each of these FielObjects has its
+     * map of commit hashes to HeatObjects filled out.
+     * These new HeatObjects contain the newly computed metrics.
+     * @param codebase the Codebase to modify. It should have its active branch set.
+     */
     public void attachCodebaseData(CodebaseV2 codebase)
     {
         try
@@ -220,14 +225,13 @@ public class RepositoryAnalyzer
                 {
                     String filePath = diffEntry.getNewPath(); //arbitrarily choose the newer path of the file since its name may have changed
 
-                    //Process the olderCommit (can be moved to another method?)
-                    attachLineCountToCodebase(codebase, olderCommit);
-                    codebase.getActiveCommits().add(new CommitV2(olderCommit));
-
                     //Count the number of times the file was changed
                     String newCommitHash = newerCommit.getName();
                     incrementNumberOfTimesChanged(codebase, filePath, newCommitHash);
                 }
+				//Process the olderCommit (can be moved to another method?)
+				attachLineCountToCodebase(codebase, olderCommit);
+				codebase.getActiveCommits().add(new CommitV2(olderCommit));
 
                 newerCommit = olderCommit;
             }
@@ -254,23 +258,38 @@ public class RepositoryAnalyzer
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    private void populateBranchNameList(CodeBase codeBase)
+    /**
+     * Finds the list of all LOCAL branch names and adds them
+     * to the list inside the provided Codebase.
+     */
+    public void attachBranchNameList(CodebaseV2 codebase) throws GitAPIException
     {
-        //TODO
+        //Get the list of all LOCAL branches
+        List<Ref> call = git.branchList().call();
+        //Alternatively: Get the list of all branches, both local and REMOTE --> call = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
+
+        //Add all branch names to the Codebase
+        for (Ref ref : call)
+        {
+            String branchName = new File(ref.getName()).getName(); //quick-and-dirty way to convert a branch name from format "refs/heads/retire-old-model" to "retire-old-model"
+            codebase.getBranchNameList().add(branchName);
+        }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     /**

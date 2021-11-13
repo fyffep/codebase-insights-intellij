@@ -27,54 +27,21 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
 
     public void recalculateHeat()
     {
-        /*/Order the file metrics calculators to analyze the code base
+        //Obtain file metrics by analyzing the code base
         try
         {
-            //Locate project
-            final String projectRootPath = JGitHelper.locateProjectRoot();
-            assert projectRootPath != null;
-
-            //Compute file size
-            Directory rootDirectory = new Directory(projectRootPath);
-            rootDirectory.parseDirectory();
-            //Add the file size data to the map
-            Commit activeCommit = codeBase.getActiveCommit();
-            HashMap<String, FileObject> fileMetricMap = activeCommit.getFileMetricMap();
-            rootDirectory.editFileMetricMap(fileMetricMap);
-
-            //Add number of commits data to the map
-            CommitCountCalculator commitCountCalculator = new CommitCountCalculator();
-            commitCountCalculator.editFileMetricMap(fileMetricMap);
-
-            //Now the activeCommit's fileMetricMap can be used to display the data
-        }
-        catch (IOException e)
-        {
-            Constants.LOG.error(e);
-            Constants.LOG.error(e.getMessage());
-        }
-        Constants.LOG.info("Heat calculations complete. Number of files: " + codeBase.getActiveCommit().getFileMetricMap().size());*/
-
-
-        //Order the file metrics calculators to analyze the code base
-        try
-        {
-            //Locate project
-            final String projectRootPath = JGitHelper.locateProjectRoot();
-            assert projectRootPath != null;
-
-            //Retrieve all commits
-
             //Calculate file sizes for every commit
             RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer();
             repositoryAnalyzer.attachCodebaseData(codeBase);
+
+            //Now the Codebase contains all the data it needs
         }
         catch (IOException e)
         {
             Constants.LOG.error(e);
             Constants.LOG.error(e.getMessage());
         }
-        Constants.LOG.info("Heat calculations complete. Number of files: "); //TODO
+        Constants.LOG.info("Heat calculations complete. Number of files: " + codeBase.getActiveFileObjects().size());
     }
 
 

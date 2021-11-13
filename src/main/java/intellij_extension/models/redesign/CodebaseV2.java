@@ -80,10 +80,6 @@ public class CodebaseV2 implements CodeBaseObservable
         return activeCommits;
     }
 
-    public void setActiveBranch(String activeBranch) { //FIXME from Pete-- this is just a quick fix so that I can test non-master branches, but it seems that there's another method for branch selection
-        this.activeBranch = activeBranch;
-    }
-
 
     // TODO
     // Is this the JGit object?
@@ -176,6 +172,7 @@ public class CodebaseV2 implements CodeBaseObservable
         if (!branchNameList.contains(branchName)) {
             throw new UnsupportedOperationException(String.format("Branch %s was selected but is not present in branchNameList.", branchName));
         }
+        this.activeBranch = branchName;
 
         // Dump old data and create new sets
         activeCommits.clear();
@@ -189,12 +186,12 @@ public class CodebaseV2 implements CodeBaseObservable
         commitToFileAssociation = null;
         commitToFileAssociation = HashBasedTable.create();
 
-        try {
+        /*try {
             buildBranchData(branchName);
         } catch (IOException e) {
             Constants.LOG.error("Exception throwing when building branch data!");
             Constants.LOG.error(e.getStackTrace());
-        }
+        }*/
 
         // TODO need the observer relationship here
         //  Update HeatMapPane with new data
