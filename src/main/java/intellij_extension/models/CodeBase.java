@@ -79,7 +79,7 @@ public class CodeBase implements CodeBaseObservable
     {
         for (CodeBaseObserver observer : observerList)
         {
-            observer.refresh(this);
+            //observer.refresh(this);
         }
     }
 

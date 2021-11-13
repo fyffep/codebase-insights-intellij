@@ -4,6 +4,7 @@ import intellij_extension.Constants;
 import intellij_extension.models.CodeBase;
 import intellij_extension.models.FileObject;
 import intellij_extension.models.redesign.CodebaseV2;
+import intellij_extension.models.redesign.CommitV2;
 import intellij_extension.models.redesign.FileObjectV2;
 import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.utility.commithistory.JGitHelper;
@@ -30,13 +31,20 @@ import java.util.List;
 
 
 /**
- * WIP from Pete -- trying to populate the model with file/commit/diff data.
+ * This class gathers all data from JGit and stores it in a Codebase model.
+ * The attachCodebaseData(CodebaseV2 codebase) method is meant to do everything at once, including
+ * file size computation and the number of commits per file for all commits in a Git repository.
  */
 public class RepositoryAnalyzer
 {
+    //The class needs to have a Git repos open to analyze
     private Repository repository;
     private Git git;
 
+    /**
+     * Automatically locates the Git project according to what project
+     * the user has open in IntelliJ.
+     */
     public RepositoryAnalyzer() throws IOException {
         //Open the repos
         this.repository = JGitHelper.openLocalRepository();
@@ -136,168 +144,144 @@ public class RepositoryAnalyzer
         }
     }
 
-
-
-
-
-
-
-
-
-    ///////////////////// UNUSED METHODS /////////////////////
-
-    public void populateModel(CodeBase codeBase)
+    /**
+     * Given a CodeBase, attaches all the file sizes (in bytes) and line counts of each file present
+     * at a particular commit of the Git repository. Each FileObject in the Codebase is given a new
+     * HeatObject that holds this file size and line count data. If a HeatObject already exists for the
+     * file at the given commit, this updates the existing HeatObject.
+     * @param codeBase represents the entire repository and history
+     * @param revCommit the state of the Git repository to examine
+     * @throws IOException when there are problems opening the commit
+     */
+    public void attachLineCountToCodebase(CodebaseV2 codeBase, RevCommit revCommit) throws IOException
     {
-        String branchName = codeBase.getActiveBranch();
+        //Prepare a TreeWalk that can walk through the version of the repos at that commit
+        RevTree tree = revCommit.getTree();
+        TreeWalk treeWalk = new TreeWalk(repository);
+        treeWalk.addTree(tree);
+        treeWalk.setRecursive(true);
+
+        //Traverse through the old version of the project until the target file is found.
+        //I couldn't get `treeWalk.setFilter(PathFilter.create(filePath));` to work, so this is an alternative approach.
+        while (treeWalk.next()) {
+            String path = treeWalk.getPathString();
+
+            //Create an input stream that has the old version of the file open
+            ObjectId objectId = treeWalk.getObjectId(0);
+            ObjectLoader loader = repository.open(objectId);
+            InputStream inputStream = loader.openStream();
+
+            //Get number of lines and file size
+            long lineCount = FileSizeCalculator.computeLineCount(inputStream);
+            long fileSize = loader.getSize();
+
+            //Attach data to the HeatObject associated with this version of the file
+            FileObjectV2 fileObject = codeBase.getFileObjectFromId(path);
+            HeatObject heatObject = fileObject.getHeatObjectAtCommit(revCommit.getName());
+            heatObject.setLineCount(lineCount);
+            heatObject.setFileSize(fileSize);
+        }
+    }
+
+
+    public void attachCodebaseData(CodebaseV2 codebase)
+    {
         try
         {
-            Iterable<RevCommit> revCommitsIterable = getCommitsByBranch(branchName);
-            //HashBasedTable<String, String, Integer> table = codeBase.getCommitToFileAssociation();
+            //Get all commits in the repos for one branch
+            Iterable<RevCommit> commitIterable = getCommitsByBranch(codebase.getActiveBranch());
 
-
-            //Iterate through the commits two-at-a-time
-            Iterator<RevCommit> commitIterator = revCommitsIterable.iterator();
+            //Extract the first commit
+            Iterator<RevCommit> commitIterator = commitIterable.iterator();
             RevCommit newerCommit;
             if (commitIterator.hasNext())
                 newerCommit = commitIterator.next();
             else {
-                Constants.LOG.error("There were not enough commits to compute the number of times each file was changed.");
-                return; //TODO needs changed?
+                Constants.LOG.info("There were not enough commits to compute the number of times each file was changed.");
+                return;
             }
-            while (commitIterator.hasNext()) {
-                RevCommit olderCommit = commitIterator.next();
+            //Process the first commit (can be moved to another method?)
+            attachLineCountToCodebase(codebase, newerCommit); //computes line count and file size data!
+            codebase.getActiveCommits().add(new CommitV2(newerCommit)); //extracts data from the RevCommit and stores it in our codebase model
 
+
+            //Iterate through the commits two-at-a-time
+            while (commitIterator.hasNext())
+            {
+                RevCommit olderCommit = commitIterator.next();
+                //Find the difference between the olderCommit and newerCommit
                 final List<DiffEntry> diffs = git.diff()
                         .setOldTree(prepareTreeParser(olderCommit.getName()))
                         .setNewTree(prepareTreeParser(newerCommit.getName()))
                         .call();
 
+                //For each file modified in the commit...
+                for (DiffEntry diffEntry : diffs)
+                {
+                    String filePath = diffEntry.getNewPath(); //arbitrarily choose the newer path of the file since its name may have changed
 
+                    //Process the olderCommit (can be moved to another method?)
+                    attachLineCountToCodebase(codebase, olderCommit);
+                    codebase.getActiveCommits().add(new CommitV2(olderCommit));
 
-
-                //Count the number of times each file was changed
-                /*for (DiffEntry diffEntry : diffs) {
-                    String filePath = diffEntry.getOldPath(); //arbitrarily choose the older name of the file even if its name changed in the commit
-                    if (filePathToChangeCountMap.containsKey(filePath)) {
-                        //Increment hash map value since it exists
-                        int timesChanged = filePathToChangeCountMap.get(filePath);
-                        filePathToChangeCountMap.put(filePath, timesChanged + 1);
-                    } else {
-                        filePathToChangeCountMap.put(filePath, 1);
-                    }
-                }*/
+                    //Count the number of times the file was changed
+                    String newCommitHash = newerCommit.getName();
+                    incrementNumberOfTimesChanged(codebase, filePath, newCommitHash);
+                }
 
                 newerCommit = olderCommit;
             }
-
         }
         catch (IOException | GitAPIException e) {
-            e.printStackTrace();
+            Constants.LOG.error(e);
+            Constants.LOG.error(e.getMessage());
         }
     }
+
+    /**
+     * Adds 1 to the number of commits associated with a file.
+     * @param filePath the file's path or name (can be either)
+     * @param commitHash the state of the Git repos that the number should be recorded at.
+    *  Example: On commit #3, a file has a commit count of 2 because it was modified in the previous two commits.
+     */
+    private static void incrementNumberOfTimesChanged(CodebaseV2 codebase, String filePath, String commitHash)
+    {
+        //Retrieve the HeatObject that holds the number of commits for the target file
+        FileObjectV2 fileObjectV2 = codebase.getFileObjectFromId(filePath);
+        HeatObject heatObject = fileObjectV2.getHeatObjectAtCommit(commitHash);
+        //Increment the HeatObject's number of commits
+        heatObject.setNumberOfCommits(heatObject.getNumberOfCommits() + 1);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private void populateBranchNameList(CodeBase codeBase)
     {
         //TODO
     }
 
-    public void populateCommitToFileAssociationTable(CodeBase codeBase) throws IOException, GitAPIException
-    {
-        String branchName = codeBase.getActiveBranch();
-        Iterable<RevCommit> revCommitsIterable = getCommitsByBranch(branchName);
-        //HashBasedTable<String, String, Integer> table = codeBase.getCommitToFileAssociation();
 
-        for (RevCommit revCommit : revCommitsIterable)
-        {
-            List<String> filesPresentInCommit = getFilePathsFromCommit(revCommit);
-            for (String filePath : filesPresentInCommit)
-            {
-                String commitHash = revCommit.getName();
-                //table.put(filePath, commitHash, PRESENT_IN_TABLE);
-            }
-        }
-    }
-
-    public List<String> getFilePathsFromCommit(RevCommit revCommit)
-    {
-        LinkedList<String> pathLinkedList = new LinkedList<>();
-
-        // a RevWalk allows to walk over commits based on some filtering that is defined
-        try (RevWalk walk = new RevWalk(repository))
-        {
-            RevTree tree = revCommit.getTree();
-            // now use a TreeWalk to iterate over all files in the Tree
-            // you can set Filters to narrow down the results if needed
-            TreeWalk treeWalk = new TreeWalk(repository);
-            treeWalk.addTree(tree);
-            treeWalk.setRecursive(true);
-            while (treeWalk.next()) {
-                pathLinkedList.add(treeWalk.getPathString());
-            }
-        }
-        catch (IOException ex)
-        {
-            ex.printStackTrace();
-        }
-
-        return pathLinkedList;
-    }
-
-
-
-
-
-
-
-
-
-    public HashMap<String, Integer> calculateNumberOfCommitsPerFile(Iterable<RevCommit> commitList) {
-        HashMap<String, Integer> filePathToChangeCountMap = new HashMap<>();
-        try {
-            //Iterate through the commits two-at-a-time
-            Iterator<RevCommit> commitIterator = commitList.iterator();
-            RevCommit newerCommit;
-            if (commitIterator.hasNext())
-                newerCommit = commitIterator.next();
-            else {
-                Constants.LOG.error("There were not enough commits to compute the number of times each file was changed.");
-                return new HashMap<>();
-            }
-            while (commitIterator.hasNext()) {
-                RevCommit olderCommit = commitIterator.next();
-
-                final List<DiffEntry> diffs = git.diff()
-                        .setOldTree(prepareTreeParser(olderCommit.getName()))
-                        .setNewTree(prepareTreeParser(newerCommit.getName()))
-                        .call();
-
-
-                //Count the number of times each file was changed
-                for (DiffEntry diffEntry : diffs) {
-                    String filePath = diffEntry.getOldPath(); //arbitrarily choose the older name of the file even if its name changed in the commit
-                    if (filePathToChangeCountMap.containsKey(filePath)) {
-                        //Increment hash map value since it exists
-                        int timesChanged = filePathToChangeCountMap.get(filePath);
-                        filePathToChangeCountMap.put(filePath, timesChanged + 1);
-                    } else {
-                        filePathToChangeCountMap.put(filePath, 1);
-                    }
-                }
-
-                newerCommit = olderCommit;
-            }
-        } catch (IOException | GitAPIException e) {
-            Constants.LOG.error(e);
-            Constants.LOG.error(e.getMessage());
-        }
-        return filePathToChangeCountMap;
-    }
-
-    private AbstractTreeIterator prepareTreeParser(String objectId) throws IOException {
+    /**
+     * A helper method from the JGit Cookbook...I actually have no idea what it does.
+     * However, it's necessary for finding diffs.
+     */
+    private AbstractTreeIterator prepareTreeParser(String commitHash) throws IOException {
         // from the commit we can build the tree which allows us to construct the TreeParser
         //noinspection Duplicates
         try (RevWalk walk = new RevWalk(repository)) {
-            RevCommit commit = walk.parseCommit(repository.resolve(objectId));
+            RevCommit commit = walk.parseCommit(repository.resolve(commitHash));
             RevTree tree = walk.parseTree(commit.getTree().getId());
 
             CanonicalTreeParser treeParser = new CanonicalTreeParser();
@@ -320,34 +304,5 @@ public class RepositoryAnalyzer
         ObjectId branchId = repository.resolve(branchName);
 
         return git.log().add(branchId).call();
-    }
-
-    public HashMap<String, FileObject> editFileMetricMap(HashMap<String, FileObject> existingFileMetricMap) {
-        try {
-            //Calculate the number of times each file was changed in the entire commit history
-            HashMap<String, Integer> numberOfCommitsPerFile = this.calculateNumberOfCommitsPerFile(
-                    this.getAllCommits());
-            Iterator<String> timesUpdatedIterator = numberOfCommitsPerFile.keySet().iterator();
-
-            //Put the data onto the hash map
-            while (timesUpdatedIterator.hasNext()) {
-                String filePath = timesUpdatedIterator.next();
-
-                //Merge the existing data (if it exists) with the newly computed data
-                FileObject existingData = existingFileMetricMap.get(filePath); //what was passed in as a param
-                int numberOfCommits = numberOfCommitsPerFile.get(filePath); //what this class computed
-                if (existingData == null)
-                    existingData = new FileObject(filePath, filePath, -1);
-                existingData.setNumberOfCommits(numberOfCommits);
-
-                existingFileMetricMap.put(filePath, existingData);
-            }
-
-            return existingFileMetricMap;
-        } catch (IOException | GitAPIException e) {
-            Constants.LOG.error(e);
-            Constants.LOG.error(e.getMessage());
-            return new HashMap<>();
-        }
     }
 }

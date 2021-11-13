@@ -4,6 +4,7 @@ import intellij_extension.Constants;
 import intellij_extension.models.CodeBase;
 import intellij_extension.models.Commit;
 import intellij_extension.models.FileObject;
+import intellij_extension.models.redesign.CodebaseV2;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.views.unused.HeatFileComponent;
@@ -90,5 +91,10 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver
                 System.out.println("Added a file pane for " + fileName + " with heat level " + heatLevel); //logger only works sometimes here
             }
         });
+    }
+
+    @Override
+    public void refresh(CodebaseV2 codeBase) {
+        //TODO
     }
 }
