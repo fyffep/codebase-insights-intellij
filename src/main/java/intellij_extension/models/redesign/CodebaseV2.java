@@ -10,9 +10,11 @@ import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
@@ -191,28 +193,37 @@ public class CodebaseV2 {
     }
 
     /**
-     * @param id the file's path
+     * @param id the file name
      * @return a FileObject corresponding to the target path
      */
-    public FileObjectV2 getFileObjectFromId(String id) {
+    public FileObjectV2 getFileObjectFromId(String id)
+    {
+        String fileName = new File(id).getName(); //convert file path to file name
+
         FileObjectV2 selectedFile = activeFileObjects.stream()
-                .filter(file -> file.getFilename().equals(id)).findAny().orElse(null);
+                .filter(file -> file.getFilename().equals(fileName)).findAny().orElse(null);
 
         // Failed to find file associated with param id
         if (selectedFile == null) {
-            throw new NullPointerException(String.format("Failed to find the proper file associated with the selected HeatMapObject. ID = %s", id));
+            //Create and return new FileObject
+            selectedFile = new FileObjectV2(Paths.get(id), fileName);
+            activeFileObjects.add(selectedFile);
         }
 
         return selectedFile;
     }
 
+    /**
+     * @param id a Git commit hash
+     * @return a Commit corresponding to the target commit hash
+     */
     public CommitV2 getCommitFromId(String id) {
         CommitV2 selectedCommit = activeCommits.stream()
                 .filter(commit -> commit.getHash().equals(id)).findAny().orElse(null);
 
         // Failed to find file associated with param id
         if (selectedCommit == null) {
-            throw new NullPointerException(String.format("Failed to find the proper commit associated with the selected commit in the TableView. Hash = %s", commitHash));
+            throw new NullPointerException(String.format("Failed to find the proper commit associated with the selected commit in the TableView. Hash = %s", id));
         }
 
         return selectedCommit;
