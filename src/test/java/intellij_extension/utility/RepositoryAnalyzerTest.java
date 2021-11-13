@@ -12,20 +12,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RepositoryAnalyzerTest
 {
+    public static final File PROJECT_ROOT = new File(".");
+
     @Test
     void defaultConstructorTest()
     {
         assertDoesNotThrow(() -> {
-            File projectPath = new File("C:\\Users\\Pete\\Desktop\\team3-project");
-            RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(projectPath);
+            RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(PROJECT_ROOT);
         });
     }
 
     @Test
     void obtainFileContentsTest() throws IOException
     {
-        File projectPath = new File("C:\\Users\\Pete\\Desktop\\team3-project"); //FIXME
-        RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(projectPath);
+        RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(PROJECT_ROOT);
 
         final String TEST_FILE = "intellij_extension/CodebaseInsightsToolWindowFactory.java";
         final String TEST_HASH = "1e589e61ef75003b1df88bdb738f9d9f4a4f5f8a";
@@ -45,24 +45,48 @@ public class RepositoryAnalyzerTest
     @Test
     void attachLineCountToCodebase() throws IOException
     {
-        final String TEST_FILE_PATH = "src\\main\\java\\intellij_extension\\CodebaseInsightsToolWindowFactory.java";
+        //final String TEST_FILE_PATH = "src\\main\\java\\intellij_extension\\CodebaseInsightsToolWindowFactory.java";
         final String TEST_FILE_NAME = "CodebaseInsightsToolWindowFactory.java";
         final String TEST_HASH = "1e589e61ef75003b1df88bdb738f9d9f4a4f5f8a";
-        File projectPath = new File("C:\\Users\\Pete\\Desktop\\team3-project"); //FIXME
-        RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(projectPath);
+        RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(PROJECT_ROOT);
 
-        //Build a dummy model
-        CodebaseV2 codebase = new CodebaseV2();
+        CodebaseV2 codebase = CodebaseV2.getInstance();
 
         //Compute the size of an old version of a file
         final long EXPECTED_LINE_COUNT = 55;
         final long EXPECTED_FILE_SIZE = 2135;
         repositoryAnalyzer.attachLineCountToCodebase(codebase, TEST_HASH); //method being tested
 
-        //Assert the output
+        //Verify the result
         FileObjectV2 fileObject = codebase.getFileObjectFromId(TEST_FILE_NAME);
         HeatObject heatObject = fileObject.getHeatObjectAtCommit(TEST_HASH);
         assertEquals(EXPECTED_LINE_COUNT, heatObject.getLineCount());
         assertEquals(EXPECTED_FILE_SIZE, heatObject.getFileSize());
+    }
+
+    @Test
+    void attachCodebaseDataTest() throws IOException
+    {
+        //final String TEST_FILE_PATH = "src\\main\\java\\intellij_extension\\CodebaseInsightsToolWindowFactory.java";
+        final String TEST_FILE_NAME = "CodebaseInsightsToolWindowFactory.java";
+        final String TEST_HASH = "1e589e61ef75003b1df88bdb738f9d9f4a4f5f8a";
+        final long EXPECTED_LINE_COUNT = 55;
+        final long EXPECTED_FILE_SIZE = 2135;
+        final int EXPECTED_NUMBER_OF_COMMITS = 2;
+
+
+        //Create test objects
+        CodebaseV2 codebase = CodebaseV2.getInstance();
+        codebase.setActiveBranch("development");
+        RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(PROJECT_ROOT);
+
+        repositoryAnalyzer.attachCodebaseData(codebase); //method being tested
+
+        //Verify the result
+        FileObjectV2 fileObject = codebase.getFileObjectFromId(TEST_FILE_NAME);
+        HeatObject heatObject = fileObject.getHeatObjectAtCommit(TEST_HASH);
+        assertEquals(EXPECTED_LINE_COUNT, heatObject.getLineCount());
+        assertEquals(EXPECTED_FILE_SIZE, heatObject.getFileSize());
+        assertEquals(EXPECTED_NUMBER_OF_COMMITS, heatObject.getNumberOfCommits());
     }
 }

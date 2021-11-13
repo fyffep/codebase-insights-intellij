@@ -2,6 +2,8 @@ package intellij_extension.models.redesign;
 
 import com.google.common.collect.HashBasedTable;
 import intellij_extension.Constants;
+import intellij_extension.observer.CodeBaseObservable;
+import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.utility.commithistory.CommitCountCalculator;
 import intellij_extension.utility.filesize.FileSizeCalculator;
@@ -13,13 +15,13 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class CodebaseV2 {
+public class CodebaseV2 implements CodeBaseObservable
+{
+    private static CodebaseV2 instance; //singleton
+    private final List<CodeBaseObserver> observerList = new LinkedList<>();
 
     private String activeBranch;
     private LinkedHashSet<String> branchNameList;
@@ -44,9 +46,44 @@ public class CodebaseV2 {
         commitToFileAssociation = HashBasedTable.create();
     }
 
+    /**
+     * @return a singleton instance of this class.
+     */
+    public static CodebaseV2 getInstance()
+    {
+        if (instance == null) {
+            //synchronized block to remove overhead
+            synchronized (CodebaseV2.class) {
+                if (instance == null) {
+                    // if instance is null, initialize
+                    instance = new CodebaseV2();
+                }
+            }
+        }
+        System.out.println("Model (Codebase) has been created"); //logger doesn't work here
+        return instance;
+    }
+
     public HashSet<FileObjectV2> getActiveFileObjects() {
         return activeFileObjects;
     }
+
+    public String getActiveBranch() {
+        return activeBranch;
+    }
+
+    public LinkedHashSet<String> getBranchNameList() {
+        return branchNameList;
+    }
+
+    public LinkedHashSet<CommitV2> getActiveCommits() {
+        return activeCommits;
+    }
+
+    public void setActiveBranch(String activeBranch) { //FIXME from Pete-- this is just a quick fix so that I can test non-master branches, but it seems that there's another method for branch selection
+        this.activeBranch = activeBranch;
+    }
+
 
     // TODO
     // Is this the JGit object?
@@ -227,5 +264,27 @@ public class CodebaseV2 {
         }
 
         return selectedCommit;
+    }
+
+
+    @Override
+    public void notifyObservers()
+    {
+        for (CodeBaseObserver observer : observerList)
+        {
+            observer.refresh(this);
+        }
+    }
+
+    @Override
+    public void registerObserver(CodeBaseObserver observer)
+    {
+        observerList.add(observer);
+    }
+
+    @Override
+    public void unregisterObserver(CodeBaseObserver observer)
+    {
+        observerList.remove(observer);
     }
 }

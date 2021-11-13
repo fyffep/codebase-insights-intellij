@@ -1,8 +1,9 @@
 package intellij_extension.observer;
 
-import intellij_extension.models.CodeBase;
+
+import intellij_extension.models.redesign.CodebaseV2;
 
 public interface CodeBaseObserver
 {
-    void refresh(CodeBase codeBase);
+    void refresh(CodebaseV2 codeBase);
 }
