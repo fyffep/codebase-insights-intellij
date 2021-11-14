@@ -3,7 +3,6 @@ package intellij_extension.models.redesign;
 import intellij_extension.Constants;
 import intellij_extension.observer.CodeBaseObservable;
 import intellij_extension.observer.CodeBaseObserver;
-import org.eclipse.jgit.diff.DiffEntry;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -13,9 +12,8 @@ import java.util.stream.Collectors;
 public class Codebase implements CodeBaseObservable {
     private static Codebase instance; //singleton
     private final List<CodeBaseObserver> observerList = new LinkedList<>();
-
+    private final LinkedHashSet<String> branchNameList;
     private String activeBranch;
-    private final  LinkedHashSet<String> branchNameList;
     private LinkedHashSet<Commit> activeCommits;
     private LinkedHashSet<FileObject> activeFileObjects;
 
@@ -54,15 +52,15 @@ public class Codebase implements CodeBaseObservable {
 
     public void selectDefaultBranch() {
         String branch = "";
-        for(String defaultBranch: Constants.DEFAULT_BRANCHES) {
-            if(branchNameList.contains(defaultBranch.toLowerCase())) {
+        for (String defaultBranch : Constants.DEFAULT_BRANCHES) {
+            if (branchNameList.contains(defaultBranch.toLowerCase())) {
                 branch = defaultBranch;
                 break;
             }
         }
 
         // Means no default branches are in branchNameList
-        if(branch.equals("")) {
+        if (branch.equals("")) {
             // So, just grab the first branch
             branch = branchNameList.stream().findFirst().get();
         }
@@ -183,9 +181,7 @@ public class Codebase implements CodeBaseObservable {
     public void commitSelected(String id) {
         Commit selectedCommit = getCommitFromId(id);
 
-        ArrayList<DiffEntry> diffs = new ArrayList<>();
-
-        notifyObserversOfRefreshCommitDetails(selectedCommit, diffs);
+        notifyObserversOfRefreshCommitDetails(selectedCommit);
     }
 
     public void changeHeatMapToCommit(String commitHash) {
@@ -222,9 +218,9 @@ public class Codebase implements CodeBaseObservable {
     }
 
     @Override
-    public void notifyObserversOfRefreshCommitDetails(Commit commit, ArrayList<DiffEntry> fileDiffs) {
+    public void notifyObserversOfRefreshCommitDetails(Commit commit) {
         for (CodeBaseObserver observer : observerList) {
-            observer.commitSelected(commit, fileDiffs.iterator());
+            observer.commitSelected(commit);
         }
     }
 

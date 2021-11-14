@@ -10,7 +10,6 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import org.eclipse.jgit.diff.DiffEntry;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -159,7 +158,7 @@ public class SelectedFileTitledPane extends TitledPane implements CodeBaseObserv
     }
 
     @Override
-    public void commitSelected(Commit commit, Iterator<DiffEntry> fileDiffs) {
+    public void commitSelected(Commit commit) {
         // Nothing to do for this action
     }
 }

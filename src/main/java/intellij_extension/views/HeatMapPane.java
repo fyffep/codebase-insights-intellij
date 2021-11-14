@@ -12,7 +12,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
-import org.eclipse.jgit.diff.DiffEntry;
 
 import java.util.Iterator;
 
@@ -107,7 +106,7 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
         // Nothing to do for this action
     }
 
-    public void commitSelected(Commit commit, Iterator<DiffEntry> fileDiffs) {
+    public void commitSelected(Commit commit) {
         // Nothing to do for this action
     }
 }

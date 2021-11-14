@@ -17,7 +17,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import org.eclipse.jgit.diff.DiffEntry;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -197,7 +196,7 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
         System.out.println("Updating branch combo box.");
         activeBranchList.clear();
 
-        while(branchList.hasNext()) {
+        while (branchList.hasNext()) {
             String branchName = branchList.next();
 
             System.out.println("CB: " + branchName);
@@ -215,20 +214,14 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
 
     @Override
     public void fileSelected(FileObject selectedFile, Iterator<Commit> filesCommits) {
-//        Constants.LOG.info("CLI: FileHistoryPane received new data.");
-//        System.out.println("SOP: FileHistoryPane received new data.");
         // Clear out the tableView's observable list
         activeCommitLines.clear();
 
-        System.out.println("Selected File: " + selectedFile.getPath());
-
         int rowIndex = 0;
         while (filesCommits.hasNext()) {
-//            System.out.println(rowIndex + " VS " + commitLines.size());
 
             // Grab commit and make a null row
             Commit commit = filesCommits.next();
-//            System.out.println("Commit: " + commit.getHash());
             CommitInfoRow row;
 
             // Populate row based on if it exists or not
@@ -236,11 +229,9 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
                 // Recycling an old row
                 row = commitLines.get(rowIndex);
                 row.update(commit);
-//                System.out.println("Recycling new CIR. " + row.toString());
             } else {
                 // Create a new row b/c all the old rows are used up
                 row = new CommitInfoRow(String.valueOf(rowIndex + 1), commit.getShortMessage(), commit.getAuthor(), commit.getDate(), commit.getHash());
-//                System.out.println("Creating new CIR. " + row.toString());
                 commitLines.add(row);
             }
 
@@ -248,13 +239,10 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
             activeCommitLines.add(row);
             rowIndex++;
         }
-
-//        System.out.println(commitLines.size());
-//        System.out.println(activeCommitLines.size());
     }
 
     @Override
-    public void commitSelected(Commit commit, Iterator<DiffEntry> fileDiffs) {
+    public void commitSelected(Commit commit) {
         // Nothing to do for this action
     }
 }
