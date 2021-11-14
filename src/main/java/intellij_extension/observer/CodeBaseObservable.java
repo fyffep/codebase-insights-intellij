@@ -5,9 +5,12 @@ import intellij_extension.models.redesign.FileObject;
 import org.eclipse.jgit.diff.DiffEntry;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 public interface CodeBaseObservable {
     void notifyObserversOfRefreshHeatMap();
+
+    void notifyObserversOfBranchList();
 
     void notifyObserversOfRefreshFileCommitHistory(FileObject selectedFile, ArrayList<Commit> filesCommits);
 

@@ -153,6 +153,11 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
     }
 
     @Override
+    public void branchListRequested(String activeBranch, Iterator<String> branchList) {
+        // Nothing to do for this action
+    }
+
+    @Override
     public void branchSelected() {
         // Clear
         descriptionText.setText(Constants.CD_DESCRIPTION);

@@ -11,6 +11,8 @@ import java.util.Iterator;
 public interface CodeBaseObserver {
     void refreshHeatMap(Codebase codeBase);
 
+    void branchListRequested(String activeBranch, Iterator<String> branchList);
+
     void branchSelected();
 
     void fileSelected(FileObject selectedFile, Iterator<Commit> filesCommits);

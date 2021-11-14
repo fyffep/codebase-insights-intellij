@@ -92,6 +92,11 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
     }
 
     @Override
+    public void branchListRequested(String activeBranch, Iterator<String> branchList) {
+        // Nothing to do for this action
+    }
+
+    @Override
     public void branchSelected() {
         // TODO
         //  Update heat map with latest commit in branch
@@ -99,7 +104,7 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
 
     @Override
     public void fileSelected(FileObject selectedFile, Iterator<Commit> filesCommits) {
-        // Do nothing, method not for this view.
+        // Nothing to do for this action
     }
 
     public void commitSelected(Commit commit, Iterator<DiffEntry> fileDiffs) {

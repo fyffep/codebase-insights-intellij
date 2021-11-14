@@ -33,7 +33,7 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
             //Calculate file sizes for every commit
             RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer();
             repositoryAnalyzer.attachBranchNameList(codeBase); // FIXME bad place to obtain the list of branches for a Codebase?
-            codeBase.branchSelected("main"); // FIXME this should select the first branch it finds, whether "master" or "main"
+            codeBase.selectDefaultBranch();
             repositoryAnalyzer.attachCodebaseData(codeBase);
 
             //Now the Codebase contains all the data it needs
@@ -60,9 +60,12 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
     // We need to tell model about this so the model can send the CommitHistory of that associated file to the view.
     // I.e. Update the FileHistoryPane and Update SelectedFileTerminalPane
     public void heatMapComponentSelected(String id) {
-//        Constants.LOG.info("CLI: View told Controller " + id + " was clicked. Relaying to model.");
-//        System.out.println/("SOP: View told Controller " + id + " was clicked. Relaying to model.");
         codeBase.heatMapComponentSelected(id);
+    }
+
+    // A way for FileHistoryDetails to get the branch list.
+    public void branchListRequested() {
+        codeBase.branchListRequested();
     }
 
     // Where did this action occur in the View?
