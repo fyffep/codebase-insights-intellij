@@ -61,8 +61,8 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
     // We need to tell model about this so the model can send the CommitHistory of that associated file to the view.
     // I.e. Update the FileHistoryPane and Update SelectedFileTerminalPane
     public void heatMapComponentSelected(String id) {
-        Constants.LOG.info("CLI: View told Controller " + id + " was clicked. Relaying to model.");
-        System.out.println("SOP: View told Controller " + id + " was clicked. Relaying to model.");
+//        Constants.LOG.info("CLI: View told Controller " + id + " was clicked. Relaying to model.");
+//        System.out.println/("SOP: View told Controller " + id + " was clicked. Relaying to model.");
         codeBase.heatMapComponentSelected(id);
     }
 

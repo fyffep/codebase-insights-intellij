@@ -201,8 +201,8 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
 
     @Override
     public void fileSelected(FileObjectV2 selectedFile, Iterator<CommitV2> filesCommits) {
-        Constants.LOG.info("CLI: FileHistoryPane received new data.");
-        System.out.println("SOP: FileHistoryPane received new data.");
+//        Constants.LOG.info("CLI: FileHistoryPane received new data.");
+//        System.out.println("SOP: FileHistoryPane received new data.");
         // Clear out the tableView's observable list
         activeCommitLines.clear();
 
@@ -210,11 +210,11 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
 
         int rowIndex = 0;
         while (filesCommits.hasNext()) {
-            System.out.println(rowIndex + " VS " + commitLines.size());
+//            System.out.println(rowIndex + " VS " + commitLines.size());
 
             // Grab commit and make a null row
             CommitV2 commit = filesCommits.next();
-            System.out.println("Commit: " + commit.getHash());
+//            System.out.println("Commit: " + commit.getHash());
             CommitInfoRow row;
 
             // Populate row based on if it exists or not
@@ -222,11 +222,11 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
                 // Recycling an old row
                 row = commitLines.get(rowIndex);
                 row.update(commit);
-                System.out.println("Recycling new CIR. " + row.toString());
+//                System.out.println("Recycling new CIR. " + row.toString());
             } else {
                 // Create a new row b/c all the old rows are used up
                 row = new CommitInfoRow(String.valueOf(rowIndex + 1), commit.getShortMessage(), commit.getAuthor(), commit.getDate(), commit.getHash());
-                System.out.println("Creating new CIR. " + row.toString());
+//                System.out.println("Creating new CIR. " + row.toString());
                 commitLines.add(row);
             }
 
