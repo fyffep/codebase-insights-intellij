@@ -1,20 +1,30 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
+import intellij_extension.models.redesign.CodebaseV2;
+import intellij_extension.models.redesign.CommitV2;
+import intellij_extension.models.redesign.FileObjectV2;
+import intellij_extension.observer.CodeBaseObserver;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import org.eclipse.jgit.diff.DiffEntry;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
-public class CommitDetailsPane extends VBox {
+public class CommitDetailsPane extends VBox implements CodeBaseObserver {
 
     private final VBox topHorizontalBanner;
     private final VBox fileList;
+    private final Text descriptionText;
+    private final Text authorText;
+    private final Text dateText;
+    private final Text hashText;
 
     // These are active lines in the VBox fileList
     // While the ViewFactory will hold reference to all created file text lines
@@ -33,10 +43,10 @@ public class CommitDetailsPane extends VBox {
         // Create the banner text
         createHeaderText(Constants.CD_HEADER_TEXT_ID, Constants.CD_HEADER_TEXT, topHorizontalBanner);
         // Create the commit details text
-        createText(Constants.CD_DESCRIPTION_TEXT_ID, Constants.CD_DESCRIPTION + Constants.MOCK_COMMIT_DETAILS.getCommitDescription().getValue(), topHorizontalBanner);
-        createText(Constants.CD_AUTHOR_TEXT_ID, Constants.CD_AUTHOR + Constants.MOCK_COMMIT_DETAILS.getCommitAuthor().getValue(), topHorizontalBanner);
-        createText(Constants.CD_DATE_TEXT_ID, Constants.CD_DATE + Constants.MOCK_COMMIT_DETAILS.getCommitDate().getValue(), topHorizontalBanner);
-        createText(Constants.CD_HASH_TEXT_ID, Constants.CD_HASH + Constants.MOCK_COMMIT_DETAILS.getCommitHash().getValue(), topHorizontalBanner);
+        descriptionText = createText(Constants.CD_DESCRIPTION_TEXT_ID, Constants.CD_DESCRIPTION, topHorizontalBanner);
+        authorText = createText(Constants.CD_AUTHOR_TEXT_ID, Constants.CD_AUTHOR, topHorizontalBanner);
+        dateText = createText(Constants.CD_DATE_TEXT_ID, Constants.CD_DATE, topHorizontalBanner);
+        hashText = createText(Constants.CD_HASH_TEXT_ID, Constants.CD_HASH, topHorizontalBanner);
 
         // Create the Commit Detail's file list container (i.e. scroll view)
         ScrollPane fileListContainer = ViewFactory.getInstance().createOrGetScrollPane(Constants.CD_FILE_LIST_CONTAINER_ID);
@@ -48,36 +58,9 @@ public class CommitDetailsPane extends VBox {
         setFileListProperties();
         fileListContainer.setContent(fileList);
 
-        // Create the texts for the files
-        buildFileList();
-    }
-
-    /*
-    Newly Selected Commit
-        - Might be an observable update method call
-    */
-    private void buildFileList(/*Object allFilesInCommitData*/) {
-        // Clear and start fresh
-        activeFileTexts.clear();
-        fileList.getChildren().clear();
-
-        // Index is mainly for id
-        int fileIndex = 0;
-        for (String fileInfo : Constants.MOCK_COMMIT_FILE_DETAILS) {
-            // Create or get a text
-            Text fileText = ViewFactory.getInstance().createOrGetText(Constants.CD_FILE_TEXT_PREFIX + fileIndex);
-            // Set the properties
-            setFileTextProperties(fileText);
-            // TODO make this proper with model data
-            // set it's file info
-            fileText.setText(fileInfo);
-            // Track it as an active text
-            activeFileTexts.add(fileText);
-            // Add it to the file list VBox
-            ViewFactory.setPaneChild(fileList, fileText);
-            // Increment index
-            fileIndex++;
-        }
+        //Register self as an observer of the model
+        CodebaseV2 model = CodebaseV2.getInstance();
+        model.registerObserver(this);
     }
 
     private void updateHeatMapAction(MouseEvent event) {
@@ -88,7 +71,7 @@ public class CommitDetailsPane extends VBox {
     }
 
     /*
-    Creation Methods
+        Creation Methods
         -These don't really 'create' text, that's the ViewFactory's job
         -Their main purpose is to remove duplicated code.
      */
@@ -105,7 +88,7 @@ public class CommitDetailsPane extends VBox {
     }
 
     /*
-    UI Property Settings
+        UI Property Settings
     */
     private void setBannerProperties() {
         // We want this so the user can make the Commit Details view as big
@@ -151,5 +134,69 @@ public class CommitDetailsPane extends VBox {
 
     private void setFileTextProperties(Text fileText) {
         // Any formatting for text goes here.
+    }
+
+    /*
+        Codebase Observer Implementation
+    */
+    @Override
+    public void refreshHeatMap(CodebaseV2 codeBase) {
+        // Nothing to do for this action
+    }
+
+    @Override
+    public void branchSelected() {
+        // Clear
+        descriptionText.setText(Constants.CD_DESCRIPTION);
+        authorText.setText(Constants.CD_AUTHOR);
+        dateText.setText(Constants.CD_DATE);
+        hashText.setText(Constants.CD_HASH);
+
+        // Clear
+        activeFileTexts.clear();
+        fileList.getChildren().clear();
+    }
+
+    @Override
+    public void fileSelected(FileObjectV2 selectedFile, Iterator<CommitV2> filesCommits) {
+        // Nothing to do for this action
+    }
+
+    @Override
+    public void commitSelected(CommitV2 commit, Iterator<DiffEntry> fileDiffs) {
+        // Update Commit detail texts
+        descriptionText.setText(Constants.CD_DESCRIPTION + commit.getFullMessage());
+        authorText.setText(Constants.CD_AUTHOR + commit.getAuthor());
+        dateText.setText(Constants.CD_DATE + commit.getDate());
+        hashText.setText(Constants.CD_HASH + commit.getHash());
+
+        // Clear and start fresh
+        activeFileTexts.clear();
+        fileList.getChildren().clear();
+
+        // Index is mainly for id
+        int fileIndex = 0;
+        while (fileDiffs.hasNext()) {
+            // Grab the diff for a file
+            DiffEntry diffEntry = fileDiffs.next();
+
+            // Create or get a text
+            Text fileText = ViewFactory.getInstance().createOrGetText(Constants.CD_FILE_TEXT_PREFIX + fileIndex);
+            // Set the properties
+            setFileTextProperties(fileText);
+
+            // Set text with diff info
+            // TODO This probably needs to be update
+            //  But let's see what this does first.
+            fileText.setText(diffEntry.getNewPath() + ": " + diffEntry.getChangeType());
+
+            // Track it as an active text
+            activeFileTexts.add(fileText);
+            // Add it to the file list VBox
+            ViewFactory.setPaneChild(fileList, fileText);
+
+            // Increment index
+            fileIndex++;
+        }
     }
 }

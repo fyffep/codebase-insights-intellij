@@ -3,22 +3,23 @@ package intellij_extension;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
-import intellij_extension.views.*;
+import intellij_extension.views.HeatMapSplitPane;
+import intellij_extension.views.InfoSplitPane;
+import intellij_extension.views.MainScene;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
+import javafx.scene.control.SplitPane;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory
-{
-    public static Project project;
+public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory {
     public static final Boolean projectSynchronizer = false; //used for accessing `project` on other threads
+    public static Project project;
 
     @Override
-    public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow)
-    {
+    public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         //Store the project parameter so that the calculation thread can access it
         synchronized (CodebaseInsightsToolWindowFactory.projectSynchronizer) {
             CodebaseInsightsToolWindowFactory.project = project;
@@ -33,7 +34,7 @@ public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory
 
         Platform.setImplicitExit(false);
         Platform.runLater(() -> {
-            CodebaseHeatMapSplitPane root = new CodebaseHeatMapSplitPane();
+            SplitPane root = new SplitPane();
             MainScene mainScene = new MainScene(root, componentWidth, componentHeight);
             root.prefWidthProperty().bind(mainScene.widthProperty());
             root.prefHeightProperty().bind(mainScene.heightProperty());
@@ -46,6 +47,7 @@ public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory
             // Will split into two sections
             InfoSplitPane commitInfoSplitPane = new InfoSplitPane();
             root.getItems().add(commitInfoSplitPane);
+
             fxPanel.setScene(mainScene);
         });
 
