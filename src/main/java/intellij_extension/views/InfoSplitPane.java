@@ -15,6 +15,9 @@ public class InfoSplitPane extends SplitPane {
         super();
 
         setOrientation(Orientation.VERTICAL);
+        setMinWidth(0);
+//        SplitPane.setResizableWithParent(this, Boolean.FALSE);
+
 
         // Top half
         fileHistoryPane = new FileHistoryPane();

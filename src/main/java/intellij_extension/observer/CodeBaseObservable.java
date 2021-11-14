@@ -4,15 +4,14 @@ import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
 import org.eclipse.jgit.diff.DiffEntry;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 
-public interface CodeBaseObservable
-{
+public interface CodeBaseObservable {
     void notifyObserversOfRefreshHeatMap();
 
-    void notifyObserversOfRefreshFileCommitHistory(FileObject selectedFile, Iterator<Commit> filesCommits);
+    void notifyObserversOfRefreshFileCommitHistory(FileObject selectedFile, ArrayList<Commit> filesCommits);
 
-    void notifyObserversOfRefreshCommitDetails(Commit commit, Iterator<DiffEntry> fileDiffs);
+    void notifyObserversOfRefreshCommitDetails(Commit commit, ArrayList<DiffEntry> fileDiffs);
 
     void registerObserver(CodeBaseObserver observer);
 

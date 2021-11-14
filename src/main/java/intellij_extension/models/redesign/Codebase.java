@@ -208,7 +208,7 @@ public class Codebase implements CodeBaseObservable {
                 .filter(commit -> commit.getFileSet().contains(selectedFile.getFilename()))
                 .collect(Collectors.toList());
 
-        notifyObserversOfRefreshFileCommitHistory(selectedFile, associatedCommits.iterator());
+        notifyObserversOfRefreshFileCommitHistory(selectedFile, associatedCommits);
     }
 
     // TODO - Based on Pete's changes this needs a big update..
@@ -248,7 +248,7 @@ public class Codebase implements CodeBaseObservable {
 
         ArrayList<DiffEntry> diffs = new ArrayList<>();
 
-        notifyObserversOfRefreshCommitDetails(selectedCommit, diffs.iterator());
+        notifyObserversOfRefreshCommitDetails(selectedCommit, diffs);
     }
 
     public void changeHeatMapToCommit(String commitHash) {
@@ -268,18 +268,18 @@ public class Codebase implements CodeBaseObservable {
     }
 
     @Override
-    public void notifyObserversOfRefreshFileCommitHistory(FileObject selectedFile, Iterator<Commit> filesCommits) {
+    public void notifyObserversOfRefreshFileCommitHistory(FileObject selectedFile, ArrayList<Commit> filesCommits) {
 //        Constants.LOG.info("CLI: Notifying view of change in data.");
 //        System.out.println("SOP: Notifying view of change in data.");
         for (CodeBaseObserver observer : observerList) {
-            observer.fileSelected(selectedFile, filesCommits);
+            observer.fileSelected(selectedFile, filesCommits.iterator());
         }
     }
 
     @Override
-    public void notifyObserversOfRefreshCommitDetails(Commit commit, Iterator<DiffEntry> fileDiffs) {
+    public void notifyObserversOfRefreshCommitDetails(Commit commit, ArrayList<DiffEntry> fileDiffs) {
         for (CodeBaseObserver observer : observerList) {
-            observer.commitSelected(commit, fileDiffs);
+            observer.commitSelected(commit, fileDiffs.iterator());
         }
     }
 

@@ -43,10 +43,10 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
         // Create the banner text
         createHeaderText(Constants.CD_HEADER_TEXT_ID, Constants.CD_HEADER_TEXT, topHorizontalBanner);
         // Create the commit details text
-        descriptionText = createText(Constants.CD_DESCRIPTION_TEXT_ID, Constants.CD_DESCRIPTION, topHorizontalBanner);
-        authorText = createText(Constants.CD_AUTHOR_TEXT_ID, Constants.CD_AUTHOR, topHorizontalBanner);
-        dateText = createText(Constants.CD_DATE_TEXT_ID, Constants.CD_DATE, topHorizontalBanner);
-        hashText = createText(Constants.CD_HASH_TEXT_ID, Constants.CD_HASH, topHorizontalBanner);
+        descriptionText = createCommitDetailsText(Constants.CD_DESCRIPTION_TEXT_ID, Constants.CD_DESCRIPTION, topHorizontalBanner);
+        authorText = createCommitDetailsText(Constants.CD_AUTHOR_TEXT_ID, Constants.CD_AUTHOR, topHorizontalBanner);
+        dateText = createCommitDetailsText(Constants.CD_DATE_TEXT_ID, Constants.CD_DATE, topHorizontalBanner);
+        hashText = createCommitDetailsText(Constants.CD_HASH_TEXT_ID, Constants.CD_HASH, topHorizontalBanner);
 
         // Create the Commit Detail's file list container (i.e. scroll view)
         ScrollPane fileListContainer = ViewFactory.getInstance().createOrGetScrollPane(Constants.CD_FILE_LIST_CONTAINER_ID);
@@ -78,6 +78,12 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
         setHeaderTextProperties(headerText);
     }
 
+    private Text createCommitDetailsText(String id, String label, Pane parent) {
+        Text text = createText(id, label, parent);
+        setCommitDetailsTextProperties(text);
+        return text;
+    }
+
     private @NotNull Text createText(String id, String label, Pane parent) {
         Text text = ViewFactory.getInstance().createOrGetText(id);
         text.setText(label);
@@ -106,6 +112,10 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
 
     private void setHeaderTextProperties(@NotNull Text headerText) {
         headerText.setFont(Font.font(Constants.HEADER_FONT, Constants.HEADER_TEXT_FONT_WEIGHT, Constants.HEADER_TEXT_SIZE));
+    }
+
+    private void setCommitDetailsTextProperties(@NotNull Text text) {
+        text.wrappingWidthProperty().bind(this.widthProperty().multiply(0.9f));
     }
 
     private void setFileListContainerProperties(@NotNull ScrollPane fileListContainer) {
