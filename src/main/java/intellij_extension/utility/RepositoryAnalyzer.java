@@ -194,12 +194,16 @@ public class RepositoryAnalyzer {
 
             //Iterate through the commits two-at-a-time
             while (commitIterator.hasNext()) {
+
                 RevCommit olderRevCommit = commitIterator.next();
+
                 //Find the difference between the olderRevCommit and newerRevCommit
                 final List<DiffEntry> diffs = git.diff()
                         .setOldTree(prepareTreeParser(olderRevCommit.getName()))
                         .setNewTree(prepareTreeParser(newerRevCommit.getName()))
                         .call();
+
+                newerCommit.addDiffEntriesToDiffList(diffs);
 
                 //For each file modified in the commit...
                 for (DiffEntry diffEntry : diffs) {

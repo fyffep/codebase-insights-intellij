@@ -63,11 +63,6 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
         model.registerObserver(this);
     }
 
-    private void updateHeatMapAction(MouseEvent event) {
-        // TODO Pseudo implementation of view communication with controller.
-        //  Update to this commit's heatmap was pressed.
-    }
-
     /*
         Creation Methods
         -These don't really 'create' text, that's the ViewFactory's job
@@ -95,13 +90,7 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
         UI Property Settings
     */
     private void setBannerProperties() {
-        // We want this so the user can make the Commit Details view as big
-        // as the right side if desirable
-        topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT);
-        // TODO We really want this to be a set, not a bind.
-        // The header shouldn't grow with the window size. But it should be a percentage of the window size.
-        topHorizontalBanner.prefHeightProperty().bind(this.heightProperty().multiply(Constants.BANNER_SIZE_MULTIPLIER));
-        topHorizontalBanner.maxHeightProperty().bind(this.heightProperty().multiply(Constants.BANNER_SIZE_MULTIPLIER));
+        // Set up constraints on width/height
         topHorizontalBanner.prefWidthProperty().bind(this.widthProperty());
 
         // Child layout properties
@@ -120,17 +109,12 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
 
     private void setFileListContainerProperties(@NotNull ScrollPane fileListContainer) {
         // Set up constraints on width/height
-        // We want this so the user can make the Commit History view as big as the right side if desirable
-        fileListContainer.setMinHeight(Constants.FILE_LIST_MIN_HEIGHT);
-        fileListContainer.prefHeightProperty().bind(this.heightProperty().multiply(Constants.FILE_LIST_SIZE_MULTIPLIER));
-        fileListContainer.maxHeightProperty().bind(this.heightProperty().multiply(Constants.FILE_LIST_SIZE_MULTIPLIER));
+        fileListContainer.minHeightProperty().bind(this.heightProperty().multiply(Constants.FILE_LIST_SIZE_MULTIPLIER));
         fileListContainer.prefWidthProperty().bind(this.widthProperty());
     }
 
     private void setFileListProperties() {
         // Set up constraints on width/height
-
-        // We want this so the user can make the Commit History view as big as the right side if desirable
         fileList.setMinHeight(Constants.FILE_LIST_MIN_HEIGHT);
         fileList.prefWidthProperty().bind(this.widthProperty());
 
@@ -176,7 +160,7 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
     }
 
     @Override
-    public void commitSelected(Commit commit, Iterator<DiffEntry> fileDiffs) {
+    public void commitSelected(Commit commit) {
         System.out.println("Full circle: " + commit.getHash());
 
         // Update Commit detail texts
@@ -191,9 +175,10 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
 
         // Index is mainly for id
         int fileIndex = 0;
-        while (fileDiffs.hasNext()) {
+        Iterator<DiffEntry> commitDiffs = commit.getCommitDiffs().iterator();
+        while (commitDiffs.hasNext()) {
             // Grab the diff for a file
-            DiffEntry diffEntry = fileDiffs.next();
+            DiffEntry diffEntry = commitDiffs.next();
 
             // Create or get a text
             Text fileText = ViewFactory.getInstance().createOrGetText(Constants.CD_FILE_TEXT_PREFIX + fileIndex);

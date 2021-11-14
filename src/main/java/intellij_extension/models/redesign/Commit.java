@@ -6,6 +6,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -21,7 +22,7 @@ import java.util.Set;
  **/
 public class Commit {
 
-    private ArrayList<DiffEntry> commitDiff;
+    private ArrayList<DiffEntry> commitDiffs;
     private String author;
     private String authorEmail;
     private String fullMessage;
@@ -42,13 +43,15 @@ public class Commit {
         this.hash = revCommit.getId().toString();
 
         this.fileSet = new HashSet<>();
-
-        // TODO - Resolve DiffEntry information
-        // commitDiff = ??
+        this.commitDiffs = new ArrayList<>();
     }
 
-    public ArrayList<DiffEntry> getCommitDiff() {
-        return commitDiff;
+    public ArrayList<DiffEntry> getCommitDiffs() {
+        return commitDiffs;
+    }
+
+    public void addDiffEntriesToDiffList(List<DiffEntry> diffs) {
+        commitDiffs.addAll(diffs);
     }
 
     public String getAuthor() {
@@ -75,7 +78,11 @@ public class Commit {
         return hash;
     }
 
-    public Set<String> getFileSet() { return fileSet; }
+    public Set<String> getFileSet() {
+        return fileSet;
+    }
 
-    public void addFileToSet(String file) { fileSet.add(file); }
+    public void addFileToSet(String file) {
+        fileSet.add(file);
+    }
 }
