@@ -1,7 +1,6 @@
 package intellij_extension.utility;
 
 import intellij_extension.Constants;
-import intellij_extension.models.FileObject;
 import intellij_extension.models.redesign.FileObjectV2;
 import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.utility.filesize.FileSizeCalculator;
@@ -85,7 +84,7 @@ public class HeatCalculationUtility //can be renamed if adding more methods
     /**
      * Returns the level of heat caused by the HeatObject's file size.
      *
-     * @param fileObject this should have its lineCount already assigned
+     * @param heatObject this should have its lineCount already assigned
      */
     public static int calculateHeatForFileSize(@NotNull HeatObject heatObject) {
         int heatLevel;
