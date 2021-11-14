@@ -148,7 +148,6 @@ public class Codebase implements CodeBaseObservable {
         notifyObserversOfBranchList();
     }
 
-    // TODO - Based on Pete's changes this needs a big update..
     public void branchSelected(String branchName) {
         // Branch doesn't exist - or we don't know about it some how...
         if (!branchNameList.contains(branchName) && !branchName.isEmpty()) {
@@ -163,19 +162,9 @@ public class Codebase implements CodeBaseObservable {
         activeFileObjects.clear();
         activeFileObjects = new LinkedHashSet<>();
 
-        /*try {
-            buildBranchData(branchName);
-        } catch (IOException e) {
-            Constants.LOG.error("Exception throwing when building branch data!");
-            Constants.LOG.error(e.getStackTrace());
-        }*/
+        // REBUILD MODEL DATA
 
-        // TODO need the observer relationship here
-        //  Update HeatMapPane with new data
-        //  Clear FileHistoryCommitPane
-        //  Clear CommitDetailsPane
-        //  Hide and Clear SelectedFilePane
-
+        notifyObserversOfBranchChange();
     }
 
     public void commitSelected(String id) {
@@ -209,9 +198,14 @@ public class Codebase implements CodeBaseObservable {
     }
 
     @Override
+    public void notifyObserversOfBranchChange() {
+        for (CodeBaseObserver observer : observerList) {
+            observer.branchSelected();
+        }
+    }
+
+    @Override
     public void notifyObserversOfRefreshFileCommitHistory(FileObject selectedFile, ArrayList<Commit> filesCommits) {
-//        Constants.LOG.info("CLI: Notifying view of change in data.");
-//        System.out.println("SOP: Notifying view of change in data.");
         for (CodeBaseObserver observer : observerList) {
             observer.fileSelected(selectedFile, filesCommits.iterator());
         }
