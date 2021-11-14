@@ -1,6 +1,5 @@
 package intellij_extension.models.redesign;
 
-import intellij_extension.Constants;
 import intellij_extension.observer.CodeBaseObservable;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.utility.HeatCalculationUtility;
@@ -18,17 +17,17 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class CodebaseV2 implements CodeBaseObservable {
-    private static CodebaseV2 instance; //singleton
+public class Codebase implements CodeBaseObservable {
+    private static Codebase instance; //singleton
     private final List<CodeBaseObserver> observerList = new LinkedList<>();
 
     private String activeBranch;
     private LinkedHashSet<String> branchNameList;
-    private LinkedHashSet<CommitV2> activeCommits;
-    private LinkedHashSet<FileObjectV2> activeFileObjects;
+    private LinkedHashSet<Commit> activeCommits;
+    private LinkedHashSet<FileObject> activeFileObjects;
 
 
-    public CodebaseV2() {
+    public Codebase() {
         activeBranch = "master";
         branchNameList = new LinkedHashSet<>();
         activeCommits = new LinkedHashSet<>();
@@ -38,13 +37,13 @@ public class CodebaseV2 implements CodeBaseObservable {
     /**
      * @return a singleton instance of this class.
      */
-    public static CodebaseV2 getInstance() {
+    public static Codebase getInstance() {
         if (instance == null) {
             //synchronized block to remove overhead
-            synchronized (CodebaseV2.class) {
+            synchronized (Codebase.class) {
                 if (instance == null) {
                     // if instance is null, initialize
-                    instance = new CodebaseV2();
+                    instance = new Codebase();
                 }
             }
         }
@@ -52,7 +51,7 @@ public class CodebaseV2 implements CodeBaseObservable {
         return instance;
     }
 
-    public HashSet<FileObjectV2> getActiveFileObjects() {
+    public HashSet<FileObject> getActiveFileObjects() {
         return activeFileObjects;
     }
 
@@ -68,7 +67,7 @@ public class CodebaseV2 implements CodeBaseObservable {
         return branchNameList;
     }
 
-    public LinkedHashSet<CommitV2> getActiveCommits() {
+    public LinkedHashSet<Commit> getActiveCommits() {
         return activeCommits;
     }
 
@@ -76,16 +75,16 @@ public class CodebaseV2 implements CodeBaseObservable {
      * @param path to file
      * @return a FileObject corresponding to the target path - if not corresponding FileObject found, it is created.
      */
-    public FileObjectV2 createOrGetFileObjectFromPath(String path) {
+    public FileObject createOrGetFileObjectFromPath(String path) {
         String fileName = new File(path).getName(); //convert file path to file name
 
-        FileObjectV2 selectedFile = activeFileObjects.stream()
+        FileObject selectedFile = activeFileObjects.stream()
                 .filter(file -> file.getFilename().equals(fileName)).findAny().orElse(null);
 
         // Failed to find file associated with param id
         if (selectedFile == null) {
             // Create and return new FileObject
-            selectedFile = new FileObjectV2(Paths.get(path), fileName);
+            selectedFile = new FileObject(Paths.get(path), fileName);
             activeFileObjects.add(selectedFile);
         }
 
@@ -96,10 +95,10 @@ public class CodebaseV2 implements CodeBaseObservable {
      * @param path the file name
      * @return a FileObject corresponding to the target filename
      */
-    private FileObjectV2 getFileObjectFromPath(String path) {
+    private FileObject getFileObjectFromPath(String path) {
         String fileName = new File(path).getName(); //convert file path to file name
 
-        FileObjectV2 selectedFile = activeFileObjects.stream()
+        FileObject selectedFile = activeFileObjects.stream()
                 .filter(file -> file.getFilename().equals(fileName)).findAny().orElse(null);
 
         // Failed to find file associated with param path
@@ -114,8 +113,8 @@ public class CodebaseV2 implements CodeBaseObservable {
      * @param id a Git commit hash
      * @return a Commit corresponding to the target commit hash
      */
-    public CommitV2 getCommitFromId(String id) {
-        CommitV2 selectedCommit = activeCommits.stream()
+    public Commit getCommitFromId(String id) {
+        Commit selectedCommit = activeCommits.stream()
                 .filter(commit -> commit.getHash().equals(id)).findAny().orElse(null);
 
         // Failed to find file associated with param id
@@ -133,7 +132,7 @@ public class CodebaseV2 implements CodeBaseObservable {
         for (RevCommit revCommit : treeWalkCommitsPair.getKey()) {
             TreeWalk treeWalk = treeWalkCommitsPair.getValue();
             treeWalk.addTree(revCommit.getTree());
-            CommitV2 newCommit = new CommitV2(revCommit);
+            Commit newCommit = new Commit(revCommit);
             // Track newCommit object
             activeCommits.add(newCommit);
 
@@ -144,7 +143,7 @@ public class CodebaseV2 implements CodeBaseObservable {
                 String filePath = treeWalk.getPathString();
                 ObjectLoader loader = CommitCountCalculator.getObjectLoader(treeWalk.getObjectId(0));
 
-                FileObjectV2 fileObject = new FileObjectV2(Paths.get(filePath), fileName);
+                FileObject fileObject = new FileObject(Paths.get(filePath), fileName);
 
                 // Nice, love me a good stream implementation
                 // For those unfamiliar
@@ -153,7 +152,7 @@ public class CodebaseV2 implements CodeBaseObservable {
                 // In this case if the above fileObject = a fileObject in the list already
                 // FindAny() = Give me any object that satisfies the filter
                 // OrElse() = If FindAny fails return the above fileObject (meaning there is no already created fileObject for this file)
-                FileObjectV2 existingFileObject = activeFileObjects.stream()
+                FileObject existingFileObject = activeFileObjects.stream()
                         .filter(fileObjectV2 -> fileObject.equals(fileObjectV2)).findAny().orElse(null);
 
                 // First time adding this fileObject to the list.
@@ -202,10 +201,10 @@ public class CodebaseV2 implements CodeBaseObservable {
 //        Constants.LOG.info("CLI: Controller told Model " + path + " was clicked. Extracting data.");
 //        System.out.println("SOP: Controller told Model " + path + " was clicked. Extracting data.");
 
-        FileObjectV2 selectedFile = getFileObjectFromPath(path);
+        FileObject selectedFile = getFileObjectFromPath(path);
 
         // Get commits associated with file
-        ArrayList<CommitV2> associatedCommits = (ArrayList<CommitV2>) activeCommits.stream()
+        ArrayList<Commit> associatedCommits = (ArrayList<Commit>) activeCommits.stream()
                 .filter(commit -> commit.getFileSet().contains(selectedFile.getFilename()))
                 .collect(Collectors.toList());
 
@@ -245,7 +244,7 @@ public class CodebaseV2 implements CodeBaseObservable {
     }
 
     public void commitSelected(String id) {
-        CommitV2 selectedCommit = getCommitFromId(id);
+        Commit selectedCommit = getCommitFromId(id);
 
         ArrayList<DiffEntry> diffs = new ArrayList<>();
 
@@ -257,7 +256,7 @@ public class CodebaseV2 implements CodeBaseObservable {
     }
 
     public void openFile(String id) {
-        FileObjectV2 selectedFile = getFileObjectFromPath(id);
+        FileObject selectedFile = getFileObjectFromPath(id);
         // TODO - How to open this file via Intellij
     }
 
@@ -269,7 +268,7 @@ public class CodebaseV2 implements CodeBaseObservable {
     }
 
     @Override
-    public void notifyObserversOfRefreshFileCommitHistory(FileObjectV2 selectedFile, Iterator<CommitV2> filesCommits) {
+    public void notifyObserversOfRefreshFileCommitHistory(FileObject selectedFile, Iterator<Commit> filesCommits) {
 //        Constants.LOG.info("CLI: Notifying view of change in data.");
 //        System.out.println("SOP: Notifying view of change in data.");
         for (CodeBaseObserver observer : observerList) {
@@ -278,7 +277,7 @@ public class CodebaseV2 implements CodeBaseObservable {
     }
 
     @Override
-    public void notifyObserversOfRefreshCommitDetails(CommitV2 commit, Iterator<DiffEntry> fileDiffs) {
+    public void notifyObserversOfRefreshCommitDetails(Commit commit, Iterator<DiffEntry> fileDiffs) {
         for (CodeBaseObserver observer : observerList) {
             observer.commitSelected(commit, fileDiffs);
         }

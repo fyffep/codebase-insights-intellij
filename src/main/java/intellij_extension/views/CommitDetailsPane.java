@@ -1,9 +1,9 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
-import intellij_extension.models.redesign.CodebaseV2;
-import intellij_extension.models.redesign.CommitV2;
-import intellij_extension.models.redesign.FileObjectV2;
+import intellij_extension.models.redesign.Codebase;
+import intellij_extension.models.redesign.Commit;
+import intellij_extension.models.redesign.FileObject;
 import intellij_extension.observer.CodeBaseObserver;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseEvent;
@@ -59,7 +59,7 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
         fileListContainer.setContent(fileList);
 
         //Register self as an observer of the model
-        CodebaseV2 model = CodebaseV2.getInstance();
+        Codebase model = Codebase.getInstance();
         model.registerObserver(this);
     }
 
@@ -140,7 +140,7 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
         Codebase Observer Implementation
     */
     @Override
-    public void refreshHeatMap(CodebaseV2 codeBase) {
+    public void refreshHeatMap(Codebase codeBase) {
         // Nothing to do for this action
     }
 
@@ -158,12 +158,12 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
     }
 
     @Override
-    public void fileSelected(FileObjectV2 selectedFile, Iterator<CommitV2> filesCommits) {
+    public void fileSelected(FileObject selectedFile, Iterator<Commit> filesCommits) {
         // Nothing to do for this action
     }
 
     @Override
-    public void commitSelected(CommitV2 commit, Iterator<DiffEntry> fileDiffs) {
+    public void commitSelected(Commit commit, Iterator<DiffEntry> fileDiffs) {
         // Update Commit detail texts
         descriptionText.setText(Constants.CD_DESCRIPTION + commit.getFullMessage());
         authorText.setText(Constants.CD_AUTHOR + commit.getAuthor());

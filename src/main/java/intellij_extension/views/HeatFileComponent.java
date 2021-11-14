@@ -1,15 +1,14 @@
 package intellij_extension.views;
 
-import intellij_extension.Constants;
 import intellij_extension.controllers.HeatMapController;
-import intellij_extension.models.redesign.FileObjectV2;
+import intellij_extension.models.redesign.FileObject;
 import javafx.scene.layout.Pane;
 
 public class HeatFileComponent extends Pane {
 
     private final String fileObjectId;
 
-    public HeatFileComponent(FileObjectV2 fileObject) {
+    public HeatFileComponent(FileObject fileObject) {
         super();
         this.setPrefWidth(20);
         this.setPrefHeight(30);

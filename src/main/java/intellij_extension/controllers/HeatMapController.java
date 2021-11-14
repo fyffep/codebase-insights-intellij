@@ -2,8 +2,7 @@ package intellij_extension.controllers;
 
 import com.intellij.openapi.application.PreloadingActivity;
 import com.intellij.openapi.progress.ProgressIndicator;
-import intellij_extension.Constants;
-import intellij_extension.models.redesign.CodebaseV2;
+import intellij_extension.models.redesign.Codebase;
 import intellij_extension.utility.RepositoryAnalyzer;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.jetbrains.annotations.NotNull;
@@ -14,10 +13,10 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
 
     private static HeatMapController instance;
 
-    private CodebaseV2 codeBase;
+    private Codebase codeBase;
 
     private HeatMapController() {
-        this.codeBase = CodebaseV2.getInstance();
+        this.codeBase = Codebase.getInstance();
     }
 
     public static HeatMapController getInstance() {

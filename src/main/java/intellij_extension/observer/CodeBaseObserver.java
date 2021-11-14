@@ -1,19 +1,19 @@
 package intellij_extension.observer;
 
 
-import intellij_extension.models.redesign.CodebaseV2;
-import intellij_extension.models.redesign.CommitV2;
-import intellij_extension.models.redesign.FileObjectV2;
+import intellij_extension.models.redesign.Codebase;
+import intellij_extension.models.redesign.Commit;
+import intellij_extension.models.redesign.FileObject;
 import org.eclipse.jgit.diff.DiffEntry;
 
 import java.util.Iterator;
 
 public interface CodeBaseObserver {
-    void refreshHeatMap(CodebaseV2 codeBase);
+    void refreshHeatMap(Codebase codeBase);
 
     void branchSelected();
 
-    void fileSelected(FileObjectV2 selectedFile, Iterator<CommitV2> filesCommits);
+    void fileSelected(FileObject selectedFile, Iterator<Commit> filesCommits);
 
-    void commitSelected(CommitV2 commit, Iterator<DiffEntry> fileDiffs);
+    void commitSelected(Commit commit, Iterator<DiffEntry> fileDiffs);
 }
