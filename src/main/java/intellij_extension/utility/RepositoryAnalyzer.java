@@ -18,7 +18,9 @@ import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
 
@@ -28,11 +30,10 @@ import java.util.List;
  * The attachCodebaseData(CodebaseV2 codebase) method is meant to do everything at once, including
  * file size computation and the number of commits per file for all commits in a Git repository.
  */
-public class RepositoryAnalyzer
-{
+public class RepositoryAnalyzer {
     //The class needs to have a Git repos open to analyze
-    private Repository repository;
-    private Git git;
+    private final Repository repository;
+    private final Git git;
 
     /**
      * Automatically locates the Git project according to what project
@@ -50,18 +51,32 @@ public class RepositoryAnalyzer
         this.git = new Git(repository);
     }
 
+    /**
+     * Adds 1 to the number of commits associated with a file.
+     *
+     * @param filePath   the file's path or name (can be either)
+     * @param commitHash the state of the Git repos that the number should be recorded at.
+     *                   Example: On commit #3, a file has a commit count of 2 because it was modified in the previous two commits.
+     */
+    private static void incrementNumberOfTimesChanged(Codebase codebase, String filePath, String commitHash) {
+        //Retrieve the HeatObject that holds the number of commits for the target file
+        FileObject fileObjectV2 = codebase.createOrGetFileObjectFromPath(filePath);
+        HeatObject heatObject = fileObjectV2.getHeatObjectAtCommit(commitHash);
+        //Increment the HeatObject's number of commits
+        heatObject.setNumberOfCommits(heatObject.getNumberOfCommits() + 1);
+    }
 
     /**
      * Returns an InputStream with the old version of the file open.
      * This is method is expensive because it has to search through the entire
      * old version of the repository to find the file.
-     * @param filePath the path of the file to open relative to the project root dir (ex: "my-project/my-package/my-file.java")
+     *
+     * @param filePath   the path of the file to open relative to the project root dir (ex: "my-project/my-package/my-file.java")
      * @param commitHash a commit hash, such as "1e589e61ef75003b1df88bdb738f9d9f4a4f5f8a" that the file is present on.
-     * @throws IOException when there are problems opening the commit
+     * @throws IOException           when there are problems opening the commit
      * @throws IllegalStateException if the file could not be found at that commit
      */
-    public InputStream obtainFileContents(String filePath, String commitHash) throws IOException
-    {
+    public InputStream obtainFileContents(String filePath, String commitHash) throws IOException {
         //Create a commit object from the commit hash
         ObjectId commitId = repository.resolve(commitHash);
         assert commitId != null;
@@ -78,8 +93,7 @@ public class RepositoryAnalyzer
         //I couldn't get `treeWalk.setFilter(PathFilter.create(filePath));` to work, so this is an alternative approach.
         while (treeWalk.next()) {
             String path = treeWalk.getPathString();
-            if (path.endsWith(filePath))
-            {
+            if (path.endsWith(filePath)) {
                 //Return an input stream that has the old version of the file open
                 ObjectId objectId = treeWalk.getObjectId(0);
                 ObjectLoader loader = repository.open(objectId);
@@ -91,19 +105,17 @@ public class RepositoryAnalyzer
         throw new IllegalStateException(String.format("The file `%s` could not be found in the commit `%s`.", filePath, commitHash));
     }
 
-
-
     /**
      * Given a CodeBase, attaches all the file sizes (in bytes) and line counts of each file present
      * at a particular commit of the Git repository. Each FileObject in the Codebase is given a new
      * HeatObject that holds this file size and line count data. If a HeatObject already exists for the
      * file at the given commit, this updates the existing HeatObject.
-     * @param codeBase represents the entire repository and history
+     *
+     * @param codeBase   represents the entire repository and history
      * @param commitHash the Git commit hash representing the version of the repository to examine
      * @throws IOException when there are problems opening the commit
      */
-    public void attachLineCountToCodebase(Codebase codeBase, String commitHash) throws IOException
-    {
+    public void attachLineCountToCodebase(Codebase codeBase, String commitHash) throws IOException {
         //Create a commit object from the commit hash
         ObjectId commitId = repository.resolve(commitHash);
         assert commitId != null;
@@ -118,12 +130,12 @@ public class RepositoryAnalyzer
      * at a particular commit of the Git repository. Each FileObject in the Codebase is given a new
      * HeatObject that holds this file size and line count data. If a HeatObject already exists for the
      * file at the given commit, this updates the existing HeatObject.
-     * @param codeBase represents the entire repository and history
+     *
+     * @param codeBase  represents the entire repository and history
      * @param revCommit the state of the Git repository to examine
      * @throws IOException when there are problems opening the commit
      */
-    public void attachLineCountToCodebase(Codebase codeBase, RevCommit revCommit) throws IOException
-    {
+    public void attachLineCountToCodebase(Codebase codeBase, RevCommit revCommit) throws IOException {
         //Prepare a TreeWalk that can walk through the version of the repos at that commit
         RevTree tree = revCommit.getTree();
         TreeWalk treeWalk = new TreeWalk(repository);
@@ -152,18 +164,16 @@ public class RepositoryAnalyzer
         }
     }
 
-
     /**
      * Computes line count, file size, and number of commits for every file at every commit.
      * This places FileObjects in the given Codebase, and each of these FielObjects has its
      * map of commit hashes to HeatObjects filled out.
      * These new HeatObjects contain the newly computed metrics.
+     *
      * @param codebase the Codebase to modify. It should have its active branch set.
      */
-    public void attachCodebaseData(Codebase codebase)
-    {
-        try
-        {
+    public void attachCodebaseData(Codebase codebase) {
+        try {
             //Get all commits in the repos for one branch
             Iterable<RevCommit> commitIterable = getCommitsByBranch(codebase.getActiveBranch());
 
@@ -183,8 +193,7 @@ public class RepositoryAnalyzer
 
 
             //Iterate through the commits two-at-a-time
-            while (commitIterator.hasNext())
-            {
+            while (commitIterator.hasNext()) {
                 RevCommit olderRevCommit = commitIterator.next();
                 //Find the difference between the olderRevCommit and newerRevCommit
                 final List<DiffEntry> diffs = git.diff()
@@ -193,8 +202,7 @@ public class RepositoryAnalyzer
                         .call();
 
                 //For each file modified in the commit...
-                for (DiffEntry diffEntry : diffs)
-                {
+                for (DiffEntry diffEntry : diffs) {
                     String filePath = diffEntry.getNewPath(); //arbitrarily choose the newer path of the file since its name may have changed
                     String fileName = new File(filePath).getName(); //convert file path to file name
 
@@ -204,68 +212,34 @@ public class RepositoryAnalyzer
                     newerCommit.getFileSet().add(fileName);
                 }
 
-				//Process the olderRevCommit (can be moved to another method?)
-				attachLineCountToCodebase(codebase, olderRevCommit);
+                //Process the olderRevCommit (can be moved to another method?)
+                attachLineCountToCodebase(codebase, olderRevCommit);
                 newerCommit = new Commit(olderRevCommit);
                 codebase.getActiveCommits().add(newerCommit);
 
                 newerRevCommit = olderRevCommit;
             }
-        }
-        catch (IOException | GitAPIException e) {
+        } catch (IOException | GitAPIException e) {
             Constants.LOG.error(e);
             Constants.LOG.error(e.getMessage());
         }
     }
 
     /**
-     * Adds 1 to the number of commits associated with a file.
-     * @param filePath the file's path or name (can be either)
-     * @param commitHash the state of the Git repos that the number should be recorded at.
-    *  Example: On commit #3, a file has a commit count of 2 because it was modified in the previous two commits.
-     */
-    private static void incrementNumberOfTimesChanged(Codebase codebase, String filePath, String commitHash)
-    {
-        //Retrieve the HeatObject that holds the number of commits for the target file
-        FileObject fileObjectV2 = codebase.createOrGetFileObjectFromPath(filePath);
-        HeatObject heatObject = fileObjectV2.getHeatObjectAtCommit(commitHash);
-        //Increment the HeatObject's number of commits
-        heatObject.setNumberOfCommits(heatObject.getNumberOfCommits() + 1);
-    }
-
-
-    /**
      * Finds the list of all LOCAL branch names and adds them
      * to the list inside the provided Codebase.
      */
-    public void attachBranchNameList(Codebase codebase) throws GitAPIException
-    {
+    public void attachBranchNameList(Codebase codebase) throws GitAPIException {
         //Get the list of all LOCAL branches
         List<Ref> call = git.branchList().call();
         //Alternatively: Get the list of all branches, both local and REMOTE --> call = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
 
         //Add all branch names to the Codebase
-        for (Ref ref : call)
-        {
+        for (Ref ref : call) {
             String branchName = new File(ref.getName()).getName(); //quick-and-dirty way to convert a branch name from format "refs/heads/retire-old-model" to "retire-old-model"
             codebase.getBranchNameList().add(branchName);
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     /**
@@ -290,9 +264,12 @@ public class RepositoryAnalyzer
         }
     }
 
+    /*
+    Commenting out to remove warning.
     public Iterable<RevCommit> getAllCommits() throws IOException, GitAPIException {
         return git.log().all().call();
     }
+*/
 
     public Iterable<RevCommit> getCommitsByBranch(String branchName) throws IOException, GitAPIException {
         //Choose the branch
