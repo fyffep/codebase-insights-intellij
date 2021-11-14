@@ -3,8 +3,7 @@ package intellij_extension.views;
 import intellij_extension.models.redesign.Commit;
 import javafx.beans.property.SimpleStringProperty;
 
-public class CommitInfoRow
-{
+public class CommitInfoRow {
     private final SimpleStringProperty rowNumber = new SimpleStringProperty();
     private final SimpleStringProperty commitDescription = new SimpleStringProperty();
     private final SimpleStringProperty commitAuthor = new SimpleStringProperty();

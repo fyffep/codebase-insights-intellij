@@ -15,7 +15,6 @@ public class HeatMapSplitPane extends SplitPane {
         super();
 
         setOrientation(Orientation.VERTICAL);
-        this.setWidth(250);
 
         // Top half
         heatMapPane = new HeatMapPane();

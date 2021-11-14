@@ -16,11 +16,7 @@ public class HeatFileComponent extends Pane {
         this.fileObjectId = fileObject.getPath().toString();
 
         this.setOnMouseClicked(event -> {
-//            if (event.getClickCount() == 2) {
-//            Constants.LOG.info("CLI: " + fileObjectId + " was clicked.");
-//            System.out.println("SOP: " + fileObjectId + " was clicked.");
             HeatMapController.getInstance().heatMapComponentSelected(fileObjectId);
-//            }
         });
     }
 }

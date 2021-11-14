@@ -28,15 +28,12 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
     private final ComboBox<String> branchComboBox; // This might have to change from String to something else.
     private final TableView<CommitInfoRow> commitList;
 
-    // Will be used when Model is sending data
     // This is all the lines we created so far - we should never remove from this list
     private final ArrayList<CommitInfoRow> commitLines = new ArrayList<>();
     // These are active lines in the TableView
     private final ObservableList<CommitInfoRow> activeCommitLines = FXCollections.observableArrayList();
-
-    // Branch list
+    // Branch list for ComboBox
     private final ObservableList<String> activeBranchList = FXCollections.observableArrayList();
-
 
     public FileHistoryPane() {
         super();
@@ -72,14 +69,8 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
         UI Property Settings
      */
     private void setBannerProperties() {
-        // Banner layout properties
-
-        // We want this so the user can make the Commit Details view as big
-        // as the right side if desirable
+        // Add constraints to width/height
         topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT);
-        // TODO We really want this to be a set, not a bind.
-        // The header shouldn't grow with the window size
-        // But it should be a percentage of the window size.
         topHorizontalBanner.prefHeightProperty().bind(this.heightProperty().multiply(Constants.BANNER_SIZE_MULTIPLIER));
         topHorizontalBanner.maxHeightProperty().bind(this.heightProperty().multiply(Constants.BANNER_SIZE_MULTIPLIER));
         topHorizontalBanner.prefWidthProperty().bind(this.widthProperty());
@@ -193,14 +184,10 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
 
     @Override
     public void branchListRequested(String activeBranch, Iterator<String> branchList) {
-        System.out.println("Updating branch combo box.");
         activeBranchList.clear();
 
         while (branchList.hasNext()) {
             String branchName = branchList.next();
-
-            System.out.println("CB: " + branchName);
-
             activeBranchList.add(branchName);
         }
 

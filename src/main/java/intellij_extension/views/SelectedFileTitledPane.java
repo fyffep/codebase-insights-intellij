@@ -35,23 +35,20 @@ public class SelectedFileTitledPane extends TitledPane implements CodeBaseObserv
 
         // Filename
         fileName = ViewFactory.getInstance().createOrGetText(Constants.SF_FILENAME_TEXT_ID); // create a Text node
-        String formattedFieldName = formatFieldName(Constants.SF_FILE_NAME_SPECIFIER, Constants.SF_TEXT_FILENAME); //format the  Text node
         setFileDetailsTextProperties(fileName); // set the font
-        fileName.setText(formattedFieldName);
+        fileName.setText(Constants.SF_TEXT_FILENAME);
         ViewFactory.setPaneChild(vbox, fileName); //add the Text Node to VBox
 
         // Package Name Node
         packageName = ViewFactory.getInstance().createOrGetText(Constants.SF_PACKAGE_NAME_TEXT_ID);
-        formattedFieldName = formatFieldName(Constants.SF_PACKAGE_NAME_SPECIFIER, Constants.SF_TEXT_PACKAGE_NAME); //format the  Text node
         setFileDetailsTextProperties(packageName);
-        packageName.setText(formattedFieldName);
+        packageName.setText(Constants.SF_TEXT_PACKAGE_NAME);
         ViewFactory.setPaneChild(vbox, packageName);
 
         // Author Node
         authors = ViewFactory.getInstance().createOrGetText(Constants.SF_AUTHOR_TEXT_ID);
-        formattedFieldName = formatFieldName(Constants.SF_FILE_AUTHOR_SPECIFIER, Constants.SF_TEXT_AUTHORS); //format the  Text node
         setFileDetailsTextProperties(authors);
-        authors.setText(formattedFieldName);
+        authors.setText(Constants.SF_TEXT_AUTHORS);
         ViewFactory.setPaneChild(vbox, authors);
 
         //Register self as an observer of the model
@@ -73,12 +70,6 @@ public class SelectedFileTitledPane extends TitledPane implements CodeBaseObserv
     public void setFileDetailsTextProperties(Text text) {
         text.setFont(Font.font(Constants.SF_TEXT_FONT, Constants.SF_TEXT_FONT_WEIGHT, Constants.SF_TEXT_SIZE));
         text.wrappingWidthProperty().bind(this.widthProperty().multiply(0.9f));
-    }
-
-    public String formatFieldName(String specifier, String fieldName) {
-        String formattedFieldName = String.format(specifier, fieldName);
-        formattedFieldName = formattedFieldName + Constants.SF_TEXT_SEPERATOR;
-        return formattedFieldName;
     }
 
     /*
@@ -115,29 +106,30 @@ public class SelectedFileTitledPane extends TitledPane implements CodeBaseObserv
 
     @Override
     public void fileSelected(FileObject selectedFile, Iterator<Commit> filesCommits) {
-//        System.out.println("Full circle: " + selectedFile.getFilename());
+        // Filename
+        fileName.setText(String.format("%s%s", Constants.SF_TEXT_FILENAME, selectedFile.getFilename()));
 
-        fileName.setText(String.format("%s%s", formatFieldName(Constants.SF_FILE_NAME_SPECIFIER, Constants.SF_TEXT_FILENAME), selectedFile.getFilename()));
-        if(selectedFile.getPath().getParent() != null) {
-            packageName.setText(String.format("%s%s", formatFieldName(Constants.SF_PACKAGE_NAME_SPECIFIER, Constants.SF_TEXT_PACKAGE_NAME), selectedFile.getPath().getParent().toString()));
+        // Package
+        if (selectedFile.getPath().getParent() != null) {
+            packageName.setText(String.format("%s%s",Constants.SF_TEXT_PACKAGE_NAME, selectedFile.getPath().getParent().toString()));
         } else {
-            packageName.setText(String.format("%s%s", formatFieldName(Constants.SF_PACKAGE_NAME_SPECIFIER, Constants.SF_TEXT_PACKAGE_NAME), "Unknown"));
+            packageName.setText(String.format("%s%s", Constants.SF_TEXT_PACKAGE_NAME, "Unknown"));
         }
 
         // Gather all authors from list of commits
         ArrayList<String> uniqueAuthors = new ArrayList<>();
         while (filesCommits.hasNext()) {
             Commit commit = filesCommits.next();
-            if(!uniqueAuthors.contains(commit.getAuthor())) {
+            if (!uniqueAuthors.contains(commit.getAuthor())) {
                 uniqueAuthors.add(commit.getAuthor());
             }
         }
 
         // Build the authors string
         String fileAuthors = "";
-        for(String author: uniqueAuthors) {
+        for (String author : uniqueAuthors) {
             // If only 1 author
-            if(uniqueAuthors.size() == 1) {
+            if (uniqueAuthors.size() == 1) {
                 fileAuthors = author;
             }
             // If last author in list, don't add comma
@@ -148,10 +140,10 @@ public class SelectedFileTitledPane extends TitledPane implements CodeBaseObserv
             else {
                 fileAuthors = String.format("%s%s%s", fileAuthors, author, ", ");
             }
-//            System.out.println(fileAuthors);
         }
 
-        authors.setText(String.format("%s%s", formatFieldName(Constants.SF_FILE_AUTHOR_SPECIFIER, Constants.SF_TEXT_AUTHORS), fileAuthors));
+        // Authors
+        authors.setText(String.format("%s%s", Constants.SF_TEXT_AUTHORS, fileAuthors));
 
         // Show the Pane
         showPane();
