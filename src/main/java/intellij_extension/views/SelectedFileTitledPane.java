@@ -102,6 +102,11 @@ public class SelectedFileTitledPane extends TitledPane implements CodeBaseObserv
     }
 
     @Override
+    public void branchListRequested(String activeBranch, Iterator<String> branchList) {
+        // Nothing to do for this action
+    }
+
+    @Override
     public void branchSelected() {
         fileName.setText(Constants.SF_TEXT_FILENAME);
         packageName.setText(Constants.SF_TEXT_PACKAGE_NAME);

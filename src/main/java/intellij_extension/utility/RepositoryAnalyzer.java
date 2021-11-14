@@ -237,7 +237,7 @@ public class RepositoryAnalyzer {
         //Add all branch names to the Codebase
         for (Ref ref : call) {
             String branchName = new File(ref.getName()).getName(); //quick-and-dirty way to convert a branch name from format "refs/heads/retire-old-model" to "retire-old-model"
-            codebase.getBranchNameList().add(branchName);
+            codebase.getBranchNameList().add(branchName.toLowerCase());
         }
     }
 

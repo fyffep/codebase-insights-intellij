@@ -36,7 +36,7 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
     private final ObservableList<CommitInfoRow> activeCommitLines = FXCollections.observableArrayList();
 
     // Branch list
-    private final ObservableList<String> branchList = FXCollections.observableArrayList();
+    private final ObservableList<String> activeBranchList = FXCollections.observableArrayList();
 
 
     public FileHistoryPane() {
@@ -66,6 +66,7 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
         //Register self as an observer of the model
         Codebase model = Codebase.getInstance();
         model.registerObserver(this);
+        HeatMapController.getInstance().branchListRequested();
     }
 
     /*
@@ -92,15 +93,12 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
 
     private void setHeaderTextProperties() {
         headerText.setFont(Font.font(Constants.HEADER_FONT, Constants.HEADER_TEXT_FONT_WEIGHT, Constants.HEADER_TEXT_SIZE));
-        headerText.setText(Constants.CH_HEADER_TEXT);
+        headerText.setText(Constants.FCH_HEADER_TEXT);
     }
 
     private void setBranchComboBoxProperties() {
-        // TODO
-        //  How to get branch list from model?
-        branchComboBox.setItems(branchList);
-        // Select first entry by default... for now
-        branchComboBox.getSelectionModel().selectFirst();
+        // Set up observable list
+        branchComboBox.setItems(activeBranchList);
         // Set up the select action
         branchComboBox.setOnAction(this::branchSelectedAction);
     }
@@ -144,22 +142,22 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
 
     private void setCommitListColumns() {
         // Number Column
-        TableColumn<CommitInfoRow, String> rowColumn = new TableColumn("#");
+        TableColumn<CommitInfoRow, String> rowColumn = new TableColumn<>("#");
 
         // Description Column
-        TableColumn<CommitInfoRow, String> descriptionColumn = new TableColumn("Description");
+        TableColumn<CommitInfoRow, String> descriptionColumn = new TableColumn<>("Description");
         descriptionColumn.setPrefWidth(Constants.FCH_DESCRIPTION_COLUMN_MAX_WIDTH);
         descriptionColumn.setSortable(false);
 
         // Author Column
-        TableColumn<CommitInfoRow, String> authorColumn = new TableColumn("Author");
+        TableColumn<CommitInfoRow, String> authorColumn = new TableColumn<>("Author");
 
         // Date Column
-        TableColumn<CommitInfoRow, String> dateColumn = new TableColumn("Date");
+        TableColumn<CommitInfoRow, String> dateColumn = new TableColumn<>("Date");
         dateColumn.setSortable(false);
 
         // Hash Column
-        TableColumn<CommitInfoRow, String> hashColumn = new TableColumn("Hash");
+        TableColumn<CommitInfoRow, String> hashColumn = new TableColumn<>("Hash");
         hashColumn.setSortable(false);
 
         //Associate data with columns
@@ -192,6 +190,22 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
     @Override
     public void refreshHeatMap(Codebase codeBase) {
         // Nothing to do for this action
+    }
+
+    @Override
+    public void branchListRequested(String activeBranch, Iterator<String> branchList) {
+        System.out.println("Updating branch combo box.");
+        activeBranchList.clear();
+
+        while(branchList.hasNext()) {
+            String branchName = branchList.next();
+
+            System.out.println("CB: " + branchName);
+
+            activeBranchList.add(branchName);
+        }
+
+        branchComboBox.getSelectionModel().select(activeBranch);
     }
 
     @Override

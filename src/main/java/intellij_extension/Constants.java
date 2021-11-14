@@ -99,7 +99,7 @@ public class Constants {
     // Commit Details File List
     public static final double FILE_LIST_SIZE_MULTIPLIER = 0.80;
     public static final int FILE_LIST_MIN_HEIGHT = 0;
-    public static final String CH_HEADER_TEXT = "Commit History:";
+    public static final String FCH_HEADER_TEXT = "File's Commit History:";
 
     /***************************/
     /* UI Strings              */
@@ -114,6 +114,8 @@ public class Constants {
     public static final String SF_TEXT_PACKAGE_NAME = "Package Name: ";
     public static final String SF_TEXT_AUTHORS = "Authors: ";
     public static final String SF_TEXT_SEPERATOR = ":";
+    public static final String[] DEFAULT_BRANCHES = {"master", "main", "development"};
+
     private Constants() {
         //Prevent instantiation
     }
