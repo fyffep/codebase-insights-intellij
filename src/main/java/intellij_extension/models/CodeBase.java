@@ -1,8 +1,12 @@
 package intellij_extension.models;
 
+import intellij_extension.models.redesign.CommitV2;
+import intellij_extension.models.redesign.FileObjectV2;
 import intellij_extension.observer.CodeBaseObservable;
 import intellij_extension.observer.CodeBaseObserver;
+import org.eclipse.jgit.diff.DiffEntry;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -74,13 +78,28 @@ public class CodeBase implements CodeBaseObservable
     }
 
 
+//    @Override
+//    public void notifyObservers()
+//    {
+//        for (CodeBaseObserver observer : observerList)
+//        {
+//            //observer.refresh(this);
+//        }
+//    }
+
     @Override
-    public void notifyObservers()
-    {
-        for (CodeBaseObserver observer : observerList)
-        {
-            //observer.refresh(this);
-        }
+    public void notifyObserversOfRefreshHeatMap() {
+
+    }
+
+    @Override
+    public void notifyObserversOfRefreshFileCommitHistory(FileObjectV2 selectedFile, Iterator<CommitV2> filesCommits) {
+
+    }
+
+    @Override
+    public void notifyObserversOfRefreshCommitDetails(CommitV2 commit, Iterator<DiffEntry> fileDiffs) {
+
     }
 
     @Override

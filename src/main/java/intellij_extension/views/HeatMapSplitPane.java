@@ -1,7 +1,5 @@
 package intellij_extension.views;
 
-import intellij_extension.controllers.HeatMapController;
-import intellij_extension.models.CodeBase;
 import javafx.geometry.Orientation;
 import javafx.scene.control.SplitPane;
 
@@ -11,7 +9,7 @@ public class HeatMapSplitPane extends SplitPane {
     private HeatMapPane heatMapPane;
 
     // Bottom is for a selected file
-    private SelectedFilePane selectedFileView;
+    private SelectedFileTitledPane selectedFileView;
 
     public HeatMapSplitPane() {
         super();
@@ -24,7 +22,7 @@ public class HeatMapSplitPane extends SplitPane {
         this.getItems().add(heatMapPane);
 
         //Bottom half
-        selectedFileView = new SelectedFilePane();
+        selectedFileView = new SelectedFileTitledPane();
         this.getItems().add(selectedFileView);
     }
 }

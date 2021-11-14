@@ -1,5 +1,6 @@
 package intellij_extension.views;
 
+import intellij_extension.models.redesign.CommitV2;
 import javafx.beans.property.SimpleStringProperty;
 
 public class CommitInfoRow
@@ -36,5 +37,17 @@ public class CommitInfoRow
 
     public SimpleStringProperty getCommitHash() {
         return commitHash;
+    }
+
+    public void update(CommitV2 commit) {
+        commitDescription.setValue(commit.getShortMessage());
+        commitAuthor.setValue(commit.getAuthor());
+        commitDate.setValue(commit.getDate());
+        commitHash.setValue(commit.getHash());
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s %s %s %s", getRowNumber().getValue(), getCommitDescription().getValue(), getCommitAuthor().getValue(), getCommitDate().getValue(), getCommitHash().getValue());
     }
 }

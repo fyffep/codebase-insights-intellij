@@ -1,8 +1,6 @@
 package intellij_extension.utility;
 
 import intellij_extension.Constants;
-import intellij_extension.models.CodeBase;
-import intellij_extension.models.FileObject;
 import intellij_extension.models.redesign.CodebaseV2;
 import intellij_extension.models.redesign.CommitV2;
 import intellij_extension.models.redesign.FileObjectV2;
@@ -10,7 +8,6 @@ import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.utility.commithistory.JGitHelper;
 import intellij_extension.utility.filesize.FileSizeCalculator;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.*;
@@ -22,9 +19,7 @@ import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 
@@ -150,7 +145,7 @@ public class RepositoryAnalyzer
             long fileSize = loader.getSize();
 
             //Attach data to the HeatObject associated with this version of the file
-            FileObjectV2 fileObject = codeBase.getFileObjectFromId(path);
+            FileObjectV2 fileObject = codeBase.createOrGetFileObjectFromPath(path);
             HeatObject heatObject = fileObject.getHeatObjectAtCommit(revCommit.getName());
             heatObject.setLineCount(lineCount);
             heatObject.setFileSize(fileSize);
@@ -175,42 +170,47 @@ public class RepositoryAnalyzer
 
             //Extract the first commit
             Iterator<RevCommit> commitIterator = commitIterable.iterator();
-            RevCommit newerCommit;
+            RevCommit newerRevCommit;
             if (commitIterator.hasNext())
-                newerCommit = commitIterator.next();
+                newerRevCommit = commitIterator.next();
             else {
                 Constants.LOG.info("There were not enough commits to compute the number of times each file was changed.");
                 return;
             }
             //Process the first commit (can be moved to another method?)
-            attachLineCountToCodebase(codebase, newerCommit); //computes line count and file size data!
-            codebase.getActiveCommits().add(new CommitV2(newerCommit)); //extracts data from the RevCommit and stores it in our codebase model
+            attachLineCountToCodebase(codebase, newerRevCommit); //computes line count and file size data!
+            CommitV2 newerCommit = new CommitV2(newerRevCommit);
+            codebase.getActiveCommits().add(newerCommit); //extracts data from the RevCommit and stores it in our codebase model
 
 
             //Iterate through the commits two-at-a-time
             while (commitIterator.hasNext())
             {
-                RevCommit olderCommit = commitIterator.next();
-                //Find the difference between the olderCommit and newerCommit
+                RevCommit olderRevCommit = commitIterator.next();
+                //Find the difference between the olderRevCommit and newerRevCommit
                 final List<DiffEntry> diffs = git.diff()
-                        .setOldTree(prepareTreeParser(olderCommit.getName()))
-                        .setNewTree(prepareTreeParser(newerCommit.getName()))
+                        .setOldTree(prepareTreeParser(olderRevCommit.getName()))
+                        .setNewTree(prepareTreeParser(newerRevCommit.getName()))
                         .call();
 
                 //For each file modified in the commit...
                 for (DiffEntry diffEntry : diffs)
                 {
                     String filePath = diffEntry.getNewPath(); //arbitrarily choose the newer path of the file since its name may have changed
+                    String fileName = new File(filePath).getName(); //convert file path to file name
 
                     //Count the number of times the file was changed
-                    String newCommitHash = newerCommit.getName();
+                    String newCommitHash = newerRevCommit.getName();
                     incrementNumberOfTimesChanged(codebase, filePath, newCommitHash);
+                    newerCommit.getFileSet().add(fileName);
                 }
-				//Process the olderCommit (can be moved to another method?)
-				attachLineCountToCodebase(codebase, olderCommit);
-				codebase.getActiveCommits().add(new CommitV2(olderCommit));
 
-                newerCommit = olderCommit;
+				//Process the olderRevCommit (can be moved to another method?)
+				attachLineCountToCodebase(codebase, olderRevCommit);
+                newerCommit = new CommitV2(olderRevCommit);
+                codebase.getActiveCommits().add(newerCommit);
+
+                newerRevCommit = olderRevCommit;
             }
         }
         catch (IOException | GitAPIException e) {
@@ -228,7 +228,7 @@ public class RepositoryAnalyzer
     private static void incrementNumberOfTimesChanged(CodebaseV2 codebase, String filePath, String commitHash)
     {
         //Retrieve the HeatObject that holds the number of commits for the target file
-        FileObjectV2 fileObjectV2 = codebase.getFileObjectFromId(filePath);
+        FileObjectV2 fileObjectV2 = codebase.createOrGetFileObjectFromPath(filePath);
         HeatObject heatObject = fileObjectV2.getHeatObjectAtCommit(commitHash);
         //Increment the HeatObject's number of commits
         heatObject.setNumberOfCommits(heatObject.getNumberOfCommits() + 1);
