@@ -6,7 +6,6 @@ import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.observer.CodeBaseObserver;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -104,7 +103,7 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
     }
 
     private void setCommitDetailsTextProperties(@NotNull Text text) {
-        text.wrappingWidthProperty().bind(this.widthProperty().multiply(0.9f));
+        text.wrappingWidthProperty().bind(this.widthProperty().multiply(Constants.CD_DETAILS_WRAPPING_PERCENTAGE));
     }
 
     private void setFileListContainerProperties(@NotNull ScrollPane fileListContainer) {
@@ -186,8 +185,7 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
             setFileTextProperties(fileText);
 
             // Set text with diff info
-            // TODO This probably needs to be update
-            //  But let's see what this does first.
+            // TODO Re-organize how this information is displayed
             fileText.setText(diffEntry.getNewPath() + ": " + diffEntry.getChangeType());
 
             // Track it as an active text

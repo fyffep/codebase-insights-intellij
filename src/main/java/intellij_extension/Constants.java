@@ -10,6 +10,10 @@ import javafx.scene.text.FontWeight;
 
 public class Constants {
 
+    //Prevent instantiation
+    private Constants() {
+    }
+
     public static final Logger LOG = Logger.getInstance(Codebase.class); // TODO This should probably change to a more reasonable class?
 
     // Heat
@@ -69,6 +73,7 @@ public class Constants {
     /***************************/
     /* UI Properties           */
     /***************************/
+    public static final int INFO_SPLIT_PANE_MIN_WIDTH = 0;
     public static final Pos BANNER_ALIGNMENT = Pos.CENTER_LEFT;
     public static final int BANNER_SPACING = 15;
     public static final Insets BANNER_INSETS = new Insets(0, 0, 0, 10);
@@ -96,8 +101,9 @@ public class Constants {
     //Commit Details Banner
     public static final Pos CD_BANNER_ALIGNMENT = Pos.TOP_LEFT;
     public static final int CD_BANNER_SPACING = 5;
-    // Commit Details File List
     public static final double FILE_LIST_SIZE_MULTIPLIER = 0.80;
+    // Commit Details File List
+    public static final double CD_DETAILS_WRAPPING_PERCENTAGE = 0.9f;
     public static final int FILE_LIST_MIN_HEIGHT = 0;
     public static final String FCH_HEADER_TEXT = "File's Commit History:";
 
@@ -115,99 +121,4 @@ public class Constants {
     public static final String SF_TEXT_AUTHORS = "Authors: ";
     public static final String SF_TEXT_SEPERATOR = ":";
     public static final String[] DEFAULT_BRANCHES = {"master", "main", "development"};
-
-    private Constants() {
-        //Prevent instantiation
-    }
-//    public static final ObservableList<CommitInfoRow> MOCK_COMMIT_HISTORY_DATA = FXCollections.observableArrayList(
-//            new CommitInfoRow("1", "Commit 1's Description is middle size.", "Smith", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("2", "Commit 2's Description is middle size.", "Johnson", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("3", "Commit 3's Description a much longer description for testing is needed", "Williams", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("4", "A small description", "Jones", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("1", "Commit 1's Description is middle size.", "Smith", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("2", "Commit 2's Description is middle size.", "Johnson", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("3", "Commit 3's Description a much longer description for testing is needed", "Williams", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("4", "A small description", "Jones", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("1", "Commit 1's Description is middle size.", "Smith", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("2", "Commit 2's Description is middle size.", "Johnson", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("3", "Commit 3's Description a much longer description for testing is needed", "Williams", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("4", "A small description", "Jones", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("1", "Commit 1's Description is middle size.", "Smith", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("2", "Commit 2's Description is middle size.", "Johnson", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("3", "Commit 3's Description a much longer description for testing is needed", "Williams", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("4", "A small description", "Jones", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("1", "Commit 1's Description is middle size.", "Smith", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("2", "Commit 2's Description is middle size.", "Johnson", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("3", "Commit 3's Description a much longer description for testing is needed", "Williams", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("4", "A small description", "Jones", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("1", "Commit 1's Description is middle size.", "Smith", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("2", "Commit 2's Description is middle size.", "Johnson", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("3", "Commit 3's Description a much longer description for testing is needed", "Williams", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("4", "A small description", "Jones", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("1", "Commit 1's Description is middle size.", "Smith", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("2", "Commit 2's Description is middle size.", "Johnson", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("3", "Commit 3's Description a much longer description for testing is needed", "Williams", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c"),
-//            new CommitInfoRow("5", "Commit 5's Description is middle size.", "Brown", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c")
-//    );
-
-
-    // MOCK DATA
-    // TODO - MOVE TO TEST MOCK DATA FILE IN TEST DIRECTORY EVENTUALLY
-    // TODO - SYNC WITH MODEL DATA
-//    public static final CommitInfoRow MOCK_COMMIT_DETAILS = new CommitInfoRow("1", "Commit 1's Description is middle size.", "Smith", "11/5/2021", "72c26743deb9e6270ae2a7fe8b7367c56b7cb09c");
-//    public static final ArrayList<String> MOCK_COMMIT_FILE_DETAILS = new ArrayList<>() {
-//        {
-//            add("File 1: 10 Additions");
-//            add("File 2: 2 Additions");
-//            add("File 3: 6 Deletions");
-//            add("File 4: 3 Deletion");
-//            add("File 5: 2 Deletion");
-//            add("File 6: 3 Addition, 2 Deletion");
-//            add("File 7: 1 Addition, 1 Deletion");
-//            add("File 8: Added");
-//            add("File 9: Added");
-//            add("File 10: Deleted");
-//            add("File 11: Deleted");
-//            add("File 12: Deleted");
-//            add("File 1: 10 Additions");
-//            add("File 2: 2 Additions");
-//            add("File 3: 6 Deletions");
-//            add("File 4: 3 Deletion");
-//            add("File 5: 2 Deletion");
-//            add("File 6: 3 Addition, 2 Deletion");
-//            add("File 7: 1 Addition, 1 Deletion");
-//            add("File 8: Added");
-//            add("File 9: Added");
-//            add("File 10: Deleted");
-//            add("File 11: Deleted");
-//            add("File 12: Deleted");
-//            add("File 1: 10 Additions");
-//            add("File 2: 2 Additions");
-//            add("File 3: 6 Deletions");
-//            add("File 4: 3 Deletion");
-//            add("File 5: 2 Deletion");
-//            add("File 6: 3 Addition, 2 Deletion");
-//            add("File 7: 1 Addition, 1 Deletion");
-//            add("File 8: Added");
-//            add("File 9: Added");
-//            add("File 10: Deleted");
-//            add("File 11: Deleted");
-//            add("File 12: Deleted");
-//        }
-//    };
-
-//    public static final ObservableList<String> MOCK_BRANCHES = FXCollections.observableArrayList(
-//            "master",
-//            "development",
-//            "major feature A",
-//            "release 1.0",
-//            "major feature B",
-//            "hotfix 1.1hf",
-//            "major feature C",
-//            "major feature D",
-//            "release 1.5",
-//            "major feature F",
-//            "release 2.0",
-//            "major feature H"
-//    );
 }

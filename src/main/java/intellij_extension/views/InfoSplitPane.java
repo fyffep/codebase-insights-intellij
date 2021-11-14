@@ -1,5 +1,6 @@
 package intellij_extension.views;
 
+import intellij_extension.Constants;
 import javafx.geometry.Orientation;
 import javafx.scene.control.SplitPane;
 
@@ -15,9 +16,8 @@ public class InfoSplitPane extends SplitPane {
         super();
 
         setOrientation(Orientation.VERTICAL);
-        setMinWidth(0);
-//        SplitPane.setResizableWithParent(this, Boolean.FALSE);
-
+        // Ensure heat map can take over full tool  window
+        setMinWidth(Constants.INFO_SPLIT_PANE_MIN_WIDTH);
 
         // Top half
         fileHistoryPane = new FileHistoryPane();
