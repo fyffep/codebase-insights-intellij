@@ -132,9 +132,9 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
         commitList.setRowFactory(tableView -> {
             TableRow<CommitInfoRow> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                if (!row.isEmpty()) {
                     CommitInfoRow rowData = row.getItem();
-                    Constants.LOG.info("Commit " + rowData.getCommitHash().getValue() + " was double clicked! Update CommitDetails!");
+                    Constants.LOG.info("Commit " + rowData.getCommitHash().getValue() + " was clicked! Update CommitDetails!");
                     HeatMapController.getInstance().commitSelected(rowData.getCommitHash().getValue());
                 }
             });

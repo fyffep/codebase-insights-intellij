@@ -65,9 +65,7 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
 
     private void updateHeatMapAction(MouseEvent event) {
         // TODO Pseudo implementation of view communication with controller.
-        // MainView has the reference to controller so it officially talks to the controller.
-        // The children of the MainView tell the MainView when to talk to the controller.
-        // MainView.getInstance().changeHeatMapToCommit(ViewFactory.getInstance().createOrGetText(Constants.CD_HASH_TEXT_ID).getText());
+        //  Update to this commit's heatmap was pressed.
     }
 
     /*
@@ -164,8 +162,10 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
 
     @Override
     public void commitSelected(Commit commit, Iterator<DiffEntry> fileDiffs) {
+        System.out.println("Full circle: " + commit.getHash());
+
         // Update Commit detail texts
-        descriptionText.setText(Constants.CD_DESCRIPTION + commit.getFullMessage());
+        descriptionText.setText(Constants.CD_DESCRIPTION + commit.getShortMessage());
         authorText.setText(Constants.CD_AUTHOR + commit.getAuthor());
         dateText.setText(Constants.CD_DATE + commit.getDate());
         hashText.setText(Constants.CD_HASH + commit.getHash());
