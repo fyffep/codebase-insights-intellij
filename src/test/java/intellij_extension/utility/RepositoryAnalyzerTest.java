@@ -1,7 +1,7 @@
 package intellij_extension.utility;
 
-import intellij_extension.models.redesign.CodebaseV2;
-import intellij_extension.models.redesign.FileObjectV2;
+import intellij_extension.models.redesign.Codebase;
+import intellij_extension.models.redesign.FileObject;
 import intellij_extension.models.redesign.HeatObject;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.Test;
@@ -50,7 +50,7 @@ public class RepositoryAnalyzerTest
         final String TEST_HASH = "1e589e61ef75003b1df88bdb738f9d9f4a4f5f8a";
         RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(PROJECT_ROOT);
 
-        CodebaseV2 codebase = CodebaseV2.getInstance();
+        Codebase codebase = Codebase.getInstance();
 
         //Compute the size of an old version of a file
         final long EXPECTED_LINE_COUNT = 55;
@@ -58,7 +58,7 @@ public class RepositoryAnalyzerTest
         repositoryAnalyzer.attachLineCountToCodebase(codebase, TEST_HASH); //method being tested
 
         //Verify the result
-        FileObjectV2 fileObject = codebase.createOrGetFileObjectFromPath(TEST_FILE_NAME);
+        FileObject fileObject = codebase.createOrGetFileObjectFromPath(TEST_FILE_NAME);
         HeatObject heatObject = fileObject.getHeatObjectAtCommit(TEST_HASH);
         assertEquals(EXPECTED_LINE_COUNT, heatObject.getLineCount());
         assertEquals(EXPECTED_FILE_SIZE, heatObject.getFileSize());
@@ -68,7 +68,7 @@ public class RepositoryAnalyzerTest
     void attachBranchNameListTest() throws IOException, GitAPIException
     {
         //Create test objects
-        CodebaseV2 codebase = CodebaseV2.getInstance();
+        Codebase codebase = Codebase.getInstance();
         RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(PROJECT_ROOT);
         repositoryAnalyzer.attachBranchNameList(codebase); //method being tested
 
@@ -89,7 +89,7 @@ public class RepositoryAnalyzerTest
 
 
         //Create test objects
-        CodebaseV2 codebase = CodebaseV2.getInstance();
+        Codebase codebase = Codebase.getInstance();
         RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(PROJECT_ROOT);
         repositoryAnalyzer.attachBranchNameList(codebase); //FIXME bad place to obtain the list of branches for a Codebase?
         codebase.branchSelected("development");
@@ -97,7 +97,7 @@ public class RepositoryAnalyzerTest
         repositoryAnalyzer.attachCodebaseData(codebase); //method being tested
 
         //Verify the result
-        FileObjectV2 fileObject = codebase.createOrGetFileObjectFromPath(TEST_FILE_NAME);
+        FileObject fileObject = codebase.createOrGetFileObjectFromPath(TEST_FILE_NAME);
         HeatObject heatObject = fileObject.getHeatObjectAtCommit(TEST_HASH);
         assertEquals(EXPECTED_LINE_COUNT, heatObject.getLineCount());
         assertEquals(EXPECTED_FILE_SIZE, heatObject.getFileSize());

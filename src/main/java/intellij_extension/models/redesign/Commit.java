@@ -19,7 +19,7 @@ import java.util.Set;
  * No setters b/c once the commit is built... that's it. Nothing should change after that.
  * TODO - Where do DiffEntries come from?
  **/
-public class CommitV2 {
+public class Commit {
 
     private ArrayList<DiffEntry> commitDiff;
     private String author;
@@ -31,7 +31,7 @@ public class CommitV2 {
 
     private Set<String> fileSet;
 
-    public CommitV2(RevCommit revCommit) {
+    public Commit(RevCommit revCommit) {
         PersonIdent authorIdent = revCommit.getAuthorIdent();
 
         this.author = revCommit.getAuthorIdent().getName();

@@ -1,7 +1,7 @@
 package intellij_extension.utility;
 
 import intellij_extension.Constants;
-import intellij_extension.models.redesign.FileObjectV2;
+import intellij_extension.models.redesign.FileObject;
 import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.utility.filesize.FileSizeCalculator;
 import javafx.scene.paint.Color;
@@ -129,7 +129,7 @@ public class HeatCalculationUtility //can be renamed if adding more methods
     /**
      *
      */
-    public static HeatObject computeHeatObjectFromHistory(LinkedHashMap<String, HeatObject> commitHashMap, FileObjectV2 existingFileObject, String fileName, String filePath, ObjectLoader loader) {
+    public static HeatObject computeHeatObjectFromHistory(LinkedHashMap<String, HeatObject> commitHashMap, FileObject existingFileObject, String fileName, String filePath, ObjectLoader loader) {
         HeatObject previousHeat = commitHashMap.get(existingFileObject.getLatestCommit());
         float latestHeatLevel = previousHeat.getHeatLevel();
         int prevNumOfCommits = previousHeat.getNumberOfCommits();

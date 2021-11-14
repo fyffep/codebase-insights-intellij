@@ -2,9 +2,9 @@ package intellij_extension.views;
 
 
 import intellij_extension.Constants;
-import intellij_extension.models.redesign.CodebaseV2;
-import intellij_extension.models.redesign.CommitV2;
-import intellij_extension.models.redesign.FileObjectV2;
+import intellij_extension.models.redesign.Codebase;
+import intellij_extension.models.redesign.Commit;
+import intellij_extension.models.redesign.FileObject;
 import intellij_extension.observer.CodeBaseObserver;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.VBox;
@@ -90,7 +90,7 @@ public class SelectedFileTitledPane extends TitledPane implements CodeBaseObserv
         Codebase Observer Implementation
     */
     @Override
-    public void refreshHeatMap(CodebaseV2 codeBase) {
+    public void refreshHeatMap(Codebase codeBase) {
         // Nothing to do for this action
     }
 
@@ -103,14 +103,14 @@ public class SelectedFileTitledPane extends TitledPane implements CodeBaseObserv
     }
 
     @Override
-    public void fileSelected(FileObjectV2 selectedFile, Iterator<CommitV2> filesCommits) {
+    public void fileSelected(FileObject selectedFile, Iterator<Commit> filesCommits) {
         fileName.setText(selectedFile.getFilename());
         packageName.setText(selectedFile.getPath().getParent().toString());
 
         // Gather all authors from list of commits
         String fileAuthors = "";
         while (filesCommits.hasNext()) {
-            CommitV2 commit = filesCommits.next();
+            Commit commit = filesCommits.next();
             fileAuthors = String.format(fileAuthors, commit.getAuthor(), ", ");
         }
         authors.setText(fileAuthors);
@@ -120,7 +120,7 @@ public class SelectedFileTitledPane extends TitledPane implements CodeBaseObserv
     }
 
     @Override
-    public void commitSelected(CommitV2 commit, Iterator<DiffEntry> fileDiffs) {
+    public void commitSelected(Commit commit, Iterator<DiffEntry> fileDiffs) {
         // Nothing to do for this action
     }
 }

@@ -1,9 +1,9 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
-import intellij_extension.models.redesign.CodebaseV2;
-import intellij_extension.models.redesign.CommitV2;
-import intellij_extension.models.redesign.FileObjectV2;
+import intellij_extension.models.redesign.Codebase;
+import intellij_extension.models.redesign.Commit;
+import intellij_extension.models.redesign.FileObject;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.utility.HeatCalculationUtility;
 import javafx.application.Platform;
@@ -31,7 +31,7 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
         this.setPadding(new Insets(10, 10, 10, 10));
 
         //Register self as an observer of the model
-        CodebaseV2 model = CodebaseV2.getInstance();
+        Codebase model = Codebase.getInstance();
         model.registerObserver(this);
         refreshHeatMap(model); //use latest appearance
     }
@@ -56,16 +56,16 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
      *                 file-to-heat data.
      */
     @Override
-    public void refreshHeatMap(CodebaseV2 codebase) {
+    public void refreshHeatMap(Codebase codebase) {
         System.out.println("Called refresh");
         Platform.runLater(() -> {
             clear();
 
             //Iterate through the files and add them to the screen
-            Iterator<FileObjectV2> fileObjectIterator = codebase.getActiveFileObjects().iterator();
+            Iterator<FileObject> fileObjectIterator = codebase.getActiveFileObjects().iterator();
             System.out.println("Updating the heatmap view");
             while (fileObjectIterator.hasNext()) {
-                FileObjectV2 fileObject = fileObjectIterator.next();
+                FileObject fileObject = fileObjectIterator.next();
                 //String commitHash = fileObject.getCo(); //TODO maybe add a "current commit" field to the Codebase?
                 int heatLevel = fileObject.getHeatObjectAtCommit("0d124558bb1000395288d12299d7d290aec61521").computeHeatLevel(); //retrieve or calculate heat level
 
@@ -98,11 +98,11 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
     }
 
     @Override
-    public void fileSelected(FileObjectV2 selectedFile, Iterator<CommitV2> filesCommits) {
+    public void fileSelected(FileObject selectedFile, Iterator<Commit> filesCommits) {
         // Do nothing, method not for this view.
     }
 
-    public void commitSelected(CommitV2 commit, Iterator<DiffEntry> fileDiffs) {
+    public void commitSelected(Commit commit, Iterator<DiffEntry> fileDiffs) {
         // Nothing to do for this action
     }
 }

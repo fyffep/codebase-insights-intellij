@@ -1,7 +1,7 @@
 package intellij_extension;
 
 import com.intellij.openapi.diagnostic.Logger;
-import intellij_extension.models.redesign.CodebaseV2;
+import intellij_extension.models.redesign.Codebase;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.paint.Color;
@@ -10,7 +10,7 @@ import javafx.scene.text.FontWeight;
 
 public class Constants {
 
-    public static final Logger LOG = Logger.getInstance(CodebaseV2.class); // TODO This should probably change to a more reasonable class?
+    public static final Logger LOG = Logger.getInstance(Codebase.class); // TODO This should probably change to a more reasonable class?
 
     // Heat
     public static final int HEAT_MIN = 1;
@@ -18,8 +18,8 @@ public class Constants {
     //Heat Colors
     public static final Color HEAT_MIN_COLOR = Color.BLUE;
     public static final Color HEAT_MAX_COLOR = Color.RED;
-    //Heat Colors
-    public static final Color HEAT_COLOR_1 = Color.rgb(80, 255, 80); //green
+    //Heat Colors (unused)
+    /*public static final Color HEAT_COLOR_1 = Color.rgb(80, 255, 80); //green
     public static final Color HEAT_COLOR_2 = Color.rgb(120, 255, 120); //green
     public static final Color HEAT_COLOR_3 = Color.rgb(165, 212, 106); //green
     public static final Color HEAT_COLOR_4 = Color.rgb(165, 212, 106); //light green
@@ -28,7 +28,7 @@ public class Constants {
     public static final Color HEAT_COLOR_7 = Color.rgb(255, 200, 40); //light orange
     public static final Color HEAT_COLOR_8 = Color.rgb(229, 177, 52); //bright orange
     public static final Color HEAT_COLOR_9 = Color.rgb(255, 50, 50); //red
-    public static final Color HEAT_COLOR_10 = Color.rgb(200, 20, 20); //dark red
+    public static final Color HEAT_COLOR_10 = Color.rgb(200, 20, 20); //dark red*/
 
 
     /***************************/

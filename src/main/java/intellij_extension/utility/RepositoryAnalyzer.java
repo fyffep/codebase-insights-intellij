@@ -1,9 +1,9 @@
 package intellij_extension.utility;
 
 import intellij_extension.Constants;
-import intellij_extension.models.redesign.CodebaseV2;
-import intellij_extension.models.redesign.CommitV2;
-import intellij_extension.models.redesign.FileObjectV2;
+import intellij_extension.models.redesign.Codebase;
+import intellij_extension.models.redesign.Commit;
+import intellij_extension.models.redesign.FileObject;
 import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.utility.commithistory.JGitHelper;
 import intellij_extension.utility.filesize.FileSizeCalculator;
@@ -102,7 +102,7 @@ public class RepositoryAnalyzer
      * @param commitHash the Git commit hash representing the version of the repository to examine
      * @throws IOException when there are problems opening the commit
      */
-    public void attachLineCountToCodebase(CodebaseV2 codeBase, String commitHash) throws IOException
+    public void attachLineCountToCodebase(Codebase codeBase, String commitHash) throws IOException
     {
         //Create a commit object from the commit hash
         ObjectId commitId = repository.resolve(commitHash);
@@ -122,7 +122,7 @@ public class RepositoryAnalyzer
      * @param revCommit the state of the Git repository to examine
      * @throws IOException when there are problems opening the commit
      */
-    public void attachLineCountToCodebase(CodebaseV2 codeBase, RevCommit revCommit) throws IOException
+    public void attachLineCountToCodebase(Codebase codeBase, RevCommit revCommit) throws IOException
     {
         //Prepare a TreeWalk that can walk through the version of the repos at that commit
         RevTree tree = revCommit.getTree();
@@ -145,7 +145,7 @@ public class RepositoryAnalyzer
             long fileSize = loader.getSize();
 
             //Attach data to the HeatObject associated with this version of the file
-            FileObjectV2 fileObject = codeBase.createOrGetFileObjectFromPath(path);
+            FileObject fileObject = codeBase.createOrGetFileObjectFromPath(path);
             HeatObject heatObject = fileObject.getHeatObjectAtCommit(revCommit.getName());
             heatObject.setLineCount(lineCount);
             heatObject.setFileSize(fileSize);
@@ -160,7 +160,7 @@ public class RepositoryAnalyzer
      * These new HeatObjects contain the newly computed metrics.
      * @param codebase the Codebase to modify. It should have its active branch set.
      */
-    public void attachCodebaseData(CodebaseV2 codebase)
+    public void attachCodebaseData(Codebase codebase)
     {
         try
         {
@@ -178,7 +178,7 @@ public class RepositoryAnalyzer
             }
             //Process the first commit (can be moved to another method?)
             attachLineCountToCodebase(codebase, newerRevCommit); //computes line count and file size data!
-            CommitV2 newerCommit = new CommitV2(newerRevCommit);
+            Commit newerCommit = new Commit(newerRevCommit);
             codebase.getActiveCommits().add(newerCommit); //extracts data from the RevCommit and stores it in our codebase model
 
 
@@ -206,7 +206,7 @@ public class RepositoryAnalyzer
 
 				//Process the olderRevCommit (can be moved to another method?)
 				attachLineCountToCodebase(codebase, olderRevCommit);
-                newerCommit = new CommitV2(olderRevCommit);
+                newerCommit = new Commit(olderRevCommit);
                 codebase.getActiveCommits().add(newerCommit);
 
                 newerRevCommit = olderRevCommit;
@@ -224,10 +224,10 @@ public class RepositoryAnalyzer
      * @param commitHash the state of the Git repos that the number should be recorded at.
     *  Example: On commit #3, a file has a commit count of 2 because it was modified in the previous two commits.
      */
-    private static void incrementNumberOfTimesChanged(CodebaseV2 codebase, String filePath, String commitHash)
+    private static void incrementNumberOfTimesChanged(Codebase codebase, String filePath, String commitHash)
     {
         //Retrieve the HeatObject that holds the number of commits for the target file
-        FileObjectV2 fileObjectV2 = codebase.createOrGetFileObjectFromPath(filePath);
+        FileObject fileObjectV2 = codebase.createOrGetFileObjectFromPath(filePath);
         HeatObject heatObject = fileObjectV2.getHeatObjectAtCommit(commitHash);
         //Increment the HeatObject's number of commits
         heatObject.setNumberOfCommits(heatObject.getNumberOfCommits() + 1);
@@ -238,7 +238,7 @@ public class RepositoryAnalyzer
      * Finds the list of all LOCAL branch names and adds them
      * to the list inside the provided Codebase.
      */
-    public void attachBranchNameList(CodebaseV2 codebase) throws GitAPIException
+    public void attachBranchNameList(Codebase codebase) throws GitAPIException
     {
         //Get the list of all LOCAL branches
         List<Ref> call = git.branchList().call();

@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
  * - Map<CommitHash, HeatObject>;
  * - HeatObject has the metrics for this file per commit
  */
-public class FileObjectV2 {
+public class FileObject {
 
     private Path path;
     // Id = filename = id;
@@ -20,11 +20,11 @@ public class FileObjectV2 {
     // This would maintain the latest key commit hash added in the map to avoid any traversal again
     private String latestCommit;
 
-    public FileObjectV2() {
+    public FileObject() {
         //Empty constructor
     }
 
-    public FileObjectV2(Path path, String filename) {
+    public FileObject(Path path, String filename) {
         this.path = path;
         this.filename = filename;
         this.commitHashToHeatObjectMap = new LinkedHashMap<>();
@@ -82,7 +82,7 @@ public class FileObjectV2 {
     @Override
     public boolean equals(Object object) {
         if (object != null && object.getClass() == getClass()) {
-            FileObjectV2 fileObject = (FileObjectV2) object;
+            FileObject fileObject = (FileObject) object;
             if (this.getFilename().equals(fileObject.getFilename())) return true;
         }
         return false;
