@@ -199,8 +199,8 @@ public class CodebaseV2 implements CodeBaseObservable {
     }
 
     public void heatMapComponentSelected(String path) {
-        Constants.LOG.info("CLI: Controller told Model " + path + " was clicked. Extracting data.");
-        System.out.println("SOP: Controller told Model " + path + " was clicked. Extracting data.");
+//        Constants.LOG.info("CLI: Controller told Model " + path + " was clicked. Extracting data.");
+//        System.out.println("SOP: Controller told Model " + path + " was clicked. Extracting data.");
 
         FileObjectV2 selectedFile = getFileObjectFromPath(path);
 
@@ -270,8 +270,8 @@ public class CodebaseV2 implements CodeBaseObservable {
 
     @Override
     public void notifyObserversOfRefreshFileCommitHistory(FileObjectV2 selectedFile, Iterator<CommitV2> filesCommits) {
-        Constants.LOG.info("CLI: Notifying view of change in data.");
-        System.out.println("SOP: Notifying view of change in data.");
+//        Constants.LOG.info("CLI: Notifying view of change in data.");
+//        System.out.println("SOP: Notifying view of change in data.");
         for (CodeBaseObserver observer : observerList) {
             observer.fileSelected(selectedFile, filesCommits);
         }
