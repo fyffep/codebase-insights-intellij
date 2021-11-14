@@ -1,9 +1,7 @@
 package intellij_extension.utility.commithistory;
 
 import intellij_extension.Constants;
-import intellij_extension.models.FileObject;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -43,18 +41,5 @@ class CommitCountCalculatorTest
                 commitCountCalculator.calculateNumberOfCommitsPerFile(commitCountCalculator.getAllCommits());
 
         assertEquals(NUMBER_OF_COMMITS_IN_GITIGNORE, (int) filePathToCommitCountMap.get(".gitignore"));
-    }
-
-    //Ensure that the .gitignore has the expected number of commits, and also check that the data is placed onto a HashMap correctly
-    @Test
-    void editFileMetricMapTest() throws IOException, GitAPIException
-    {
-        CommitCountCalculator commitCountCalculator = new CommitCountCalculator();
-
-        HashMap<String, FileObject> existingFileMetricMap = new HashMap<>();
-        existingFileMetricMap =
-                commitCountCalculator.editFileMetricMap(existingFileMetricMap); //method under test
-
-        assertEquals(NUMBER_OF_COMMITS_IN_GITIGNORE, (int) existingFileMetricMap.get(".gitignore").getNumberOfCommits());
     }
 }

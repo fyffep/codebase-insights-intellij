@@ -1,10 +1,7 @@
 package intellij_extension.utility.commithistory;
 
 import com.google.common.collect.FluentIterable;
-import com.intellij.ui.treeStructure.Tree;
 import intellij_extension.Constants;
-import intellij_extension.models.FileObject;
-import intellij_extension.utility.HeatCalculator;
 import javafx.util.Pair;
 import org.apache.commons.collections.IteratorUtils;
 import org.eclipse.jgit.api.Git;
@@ -23,7 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-public class CommitCountCalculator implements HeatCalculator {
+public class CommitCountCalculator {
     private static Repository repository;
     private static Git git;
     private static TreeWalk treeWalk;
@@ -177,34 +174,5 @@ LogCommit: commit 0d124558bb1000395288d12299d7d290aec61521 1635171571 -----sp
         treeWalk.setRecursive(true);
         treeWalk.setPostOrderTraversal(false);
         return treeWalk;
-    }
-
-    public HashMap<String, FileObject> editFileMetricMap(HashMap<String, FileObject> existingFileMetricMap) {
-        try {
-            //Calculate the number of times each file was changed in the entire commit history
-            HashMap<String, Integer> numberOfCommitsPerFile = this.calculateNumberOfCommitsPerFile(
-                    this.getAllCommits());
-            Iterator<String> timesUpdatedIterator = numberOfCommitsPerFile.keySet().iterator();
-
-            //Put the data onto the hash map
-            while (timesUpdatedIterator.hasNext()) {
-                String filePath = timesUpdatedIterator.next();
-
-                //Merge the existing data (if it exists) with the newly computed data
-                FileObject existingData = existingFileMetricMap.get(filePath); //what was passed in as a param
-                int numberOfCommits = numberOfCommitsPerFile.get(filePath); //what this class computed
-                if (existingData == null)
-                    existingData = new FileObject(filePath, filePath, -1);
-                existingData.setNumberOfCommits(numberOfCommits);
-
-                existingFileMetricMap.put(filePath, existingData);
-            }
-
-            return existingFileMetricMap;
-        } catch (IOException | GitAPIException e) {
-            Constants.LOG.error(e);
-            Constants.LOG.error(e.getMessage());
-            return new HashMap<>();
-        }
     }
 }

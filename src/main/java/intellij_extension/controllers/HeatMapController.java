@@ -34,7 +34,7 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
             //Calculate file sizes for every commit
             RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer();
             repositoryAnalyzer.attachBranchNameList(codeBase); // FIXME bad place to obtain the list of branches for a Codebase?
-            codeBase.branchSelected("main"); // FIXME this should select the first branch it finds, whether "master" or "main"
+            codeBase.branchSelected("development"); // FIXME this should select the first branch it finds, whether "master" or "main"
             repositoryAnalyzer.attachCodebaseData(codeBase);
 
             //Now the Codebase contains all the data it needs

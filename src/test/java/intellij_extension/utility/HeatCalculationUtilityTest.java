@@ -1,11 +1,9 @@
 package intellij_extension.utility;
 
-import intellij_extension.models.FileObject;
 import javafx.scene.paint.Color;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static testdata.TestData.*;
 
 class HeatCalculationUtilityTest
 {

@@ -1,11 +1,7 @@
 package intellij_extension;
 
 import com.intellij.openapi.diagnostic.Logger;
-import intellij_extension.models.CodeBase;
 import intellij_extension.models.redesign.CodebaseV2;
-import intellij_extension.views.CommitInfoRow;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.paint.Color;
