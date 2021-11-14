@@ -24,11 +24,9 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
     public HeatMapPane() {
         super();
         //Set margin around the heat boxes.
-        //The value 10 is arbitrary.
-        this.setVgap(10);
-        this.setHgap(10);
-        this.setPadding(new Insets(10, 10, 10, 10));
-
+        this.setVgap(Constants.HEATMAP_VERTICAL_SPACING);
+        this.setHgap(Constants.HEATMAP_HORIZONTAL_SPACING);
+        this.setPadding(Constants.HEATMAP_PADDING);
         //Register self as an observer of the model
         Codebase model = Codebase.getInstance();
         model.registerObserver(this);
