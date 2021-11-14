@@ -1,7 +1,7 @@
 package intellij_extension;
 
 import com.intellij.openapi.diagnostic.Logger;
-import intellij_extension.models.CodeBase;
+import intellij_extension.models.redesign.CodebaseV2;
 import intellij_extension.views.CommitInfoRow;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class Constants {
 
-    public static final Logger LOG = Logger.getInstance(CodeBase.class); // TODO This should probably change to a more reasonable class?
+    public static final Logger LOG = Logger.getInstance(CodebaseV2.class); // TODO This should probably change to a more reasonable class?
 
     // Heat
     public static final int HEAT_MIN = 1;
