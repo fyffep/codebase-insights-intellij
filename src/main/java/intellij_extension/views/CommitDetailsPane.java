@@ -160,8 +160,6 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
 
     @Override
     public void commitSelected(Commit commit) {
-        System.out.println("Full circle: " + commit.getHash());
-
         // Update Commit detail texts
         descriptionText.setText(Constants.CD_DESCRIPTION + commit.getShortMessage());
         authorText.setText(Constants.CD_AUTHOR + commit.getAuthor());

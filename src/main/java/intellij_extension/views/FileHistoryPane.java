@@ -101,28 +101,18 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
 
         // This forces columns to resize to their content
         commitList.setColumnResizePolicy((param) -> true);
-        // Can't have both at the same time =/ so we get that extra column...
-        // Do not create n + 1 columns with n + 1 being empty... (Why is that default behavior?!)
-        // commitList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         // Set up constraints on width/height
-        // We want this so the user can make the Commit Details view as big
-        // as the right side if desirable
         commitList.setMinHeight(Constants.FCH_COMMIT_LIST_MIN_HEIGHT);
-        // TODO set this based on a portion of the view
-        // like the top banner should get 90% real estate
-        // But it should also be dynamic shrink with the parent
         commitList.prefWidthProperty().bind(this.widthProperty());
         commitList.prefHeightProperty().bind(this.heightProperty());
 
         // Add click method to rows
-        // I hate that I can't refactor this double lambda expression
         commitList.setRowFactory(tableView -> {
             TableRow<CommitInfoRow> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (!row.isEmpty()) {
                     CommitInfoRow rowData = row.getItem();
-                    Constants.LOG.info("Commit " + rowData.getCommitHash().getValue() + " was clicked! Update CommitDetails!");
                     HeatMapController.getInstance().commitSelected(rowData.getCommitHash().getValue());
                 }
             });
@@ -168,10 +158,7 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
         String selectedValue = branchComboBox.getValue();
         Constants.LOG.info("The " + selectedValue + " branch was selected. Update HeatMap, CommitHistory, and CommitDetails, Hide SelectedFileTerminal Window");
 
-        // TODO Pseudo implementation of view communication with controller.
-        // MainView has the reference to controller so it officially talks to the controller.
-        // The children of the MainView tell the MainView when to talk to the controller.
-        // MainView.getInstance().branchSelected(selectedValue);
+        HeatMapController.getInstance().branchSelected(selectedValue);
     }
 
     /*

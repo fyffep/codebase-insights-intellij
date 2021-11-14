@@ -83,7 +83,7 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
     // FileHistoryPane lines 163-166
     // What do we do now?
     // We need to tell model about this so the model can send the CommitDetails the info of the selected commit
-    // I.e. Update ComitDetailsPane
+    // I.e. Update CommitDetailsPane
     public void commitSelected(String commitHash) {
         codeBase.commitSelected(commitHash);
     }
@@ -95,7 +95,6 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
     // We need to tell model about this so the model can send HeatMap data associated with the selected CommitHash
     // I.e. Update HeatMapPane with a new heat map
     // Might make sense to have the selected file highlighted.
-
     public void changeHeatMapToCommit(String commitHash) {
         codeBase.changeHeatMapToCommit(commitHash);
     }
