@@ -58,7 +58,7 @@ public class RepositoryAnalyzerTest
         repositoryAnalyzer.attachLineCountToCodebase(codebase, TEST_HASH); //method being tested
 
         //Verify the result
-        FileObjectV2 fileObject = codebase.getFileObjectFromId(TEST_FILE_NAME);
+        FileObjectV2 fileObject = codebase.createOrGetFileObjectFromPath(TEST_FILE_NAME);
         HeatObject heatObject = fileObject.getHeatObjectAtCommit(TEST_HASH);
         assertEquals(EXPECTED_LINE_COUNT, heatObject.getLineCount());
         assertEquals(EXPECTED_FILE_SIZE, heatObject.getFileSize());
@@ -97,7 +97,7 @@ public class RepositoryAnalyzerTest
         repositoryAnalyzer.attachCodebaseData(codebase); //method being tested
 
         //Verify the result
-        FileObjectV2 fileObject = codebase.getFileObjectFromId(TEST_FILE_NAME);
+        FileObjectV2 fileObject = codebase.createOrGetFileObjectFromPath(TEST_FILE_NAME);
         HeatObject heatObject = fileObject.getHeatObjectAtCommit(TEST_HASH);
         assertEquals(EXPECTED_LINE_COUNT, heatObject.getLineCount());
         assertEquals(EXPECTED_FILE_SIZE, heatObject.getFileSize());
