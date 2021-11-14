@@ -2,17 +2,9 @@ package intellij_extension.models.redesign;
 
 import intellij_extension.observer.CodeBaseObservable;
 import intellij_extension.observer.CodeBaseObserver;
-import intellij_extension.utility.HeatCalculationUtility;
-import intellij_extension.utility.commithistory.CommitCountCalculator;
-import intellij_extension.utility.filesize.FileSizeCalculator;
-import javafx.util.Pair;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.lib.ObjectLoader;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.treewalk.TreeWalk;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,7 +14,7 @@ public class Codebase implements CodeBaseObservable {
     private final List<CodeBaseObserver> observerList = new LinkedList<>();
 
     private String activeBranch;
-    private LinkedHashSet<String> branchNameList;
+    private final  LinkedHashSet<String> branchNameList;
     private LinkedHashSet<Commit> activeCommits;
     private LinkedHashSet<FileObject> activeFileObjects;
 
@@ -59,9 +51,12 @@ public class Codebase implements CodeBaseObservable {
         return activeBranch;
     }
 
-    public void setActiveBranch(String activeBranch) { //FIXME from Pete-- this is just a quick fix so that I can test non-master branches, but it seems that there's another method for branch selection
+    /*
+    // FIXME from Pete-- this is just a quick fix so that I can test non-master branches, but it seems that there's another method for branch selection
+    public void setActiveBranch(String activeBranch) {
         this.activeBranch = activeBranch;
     }
+    */
 
     public LinkedHashSet<String> getBranchNameList() {
         return branchNameList;
@@ -125,6 +120,7 @@ public class Codebase implements CodeBaseObservable {
         return selectedCommit;
     }
 
+    /*
     // TODO
     // Is this the JGit object?
     public void buildBranchData(String branch) throws IOException {
@@ -176,7 +172,7 @@ public class Codebase implements CodeBaseObservable {
                 activeFileObjects.add(existingFileObject);
 
 
-                /** I gave the 2D array/HashBasedTable idea another thought and came to the conclusion that either way is
+                * I gave the 2D array/HashBasedTable idea another thought and came to the conclusion that either way is
                  * a very memory-intensive approach.
                  * If we go via the 2D array approach, iterating through a huge one for instance 1000 indexes of primitives
                  * can cause a bottleneck. On the other way round, if we discard are to get away from the idea of 2D array,
@@ -188,14 +184,15 @@ public class Codebase implements CodeBaseObservable {
                  * as a value, a simple HashMap would have done the job for us, However, it's better to just have a simple
                  * Set of fileName string per CommitV2 object.
                  * If the above justification sounds OK, we can remove the HashBasedTable init.
-                 * */
-                // TODO - Ethan's Comment - I prefer simplicity and to worry about size/slow down problems when that actually happens.
-                //  Ethan's Comment - Like Prof. Rawlins said during the Command Pattern talk, do worry about it being too much data until it becomes a problem.
-                //  Ethan's Comment - Another approach is to limit how far we go back in the history of a branch - Just an idea - Don't have to act on this.
+                 *
+    // TODO - Ethan's Comment - I prefer simplicity and to worry about size/slow down problems when that actually happens.
+    //  Ethan's Comment - Like Prof. Rawlins said during the Command Pattern talk, do worry about it being too much data until it becomes a problem.
+    //  Ethan's Comment - Another approach is to limit how far we go back in the history of a branch - Just an idea - Don't have to act on this.
                 newCommit.addFileToSet(existingFileObject.getFilename());
-            }
+}
         }
-    }
+                }
+                */
 
     public void heatMapComponentSelected(String path) {
 //        Constants.LOG.info("CLI: Controller told Model " + path + " was clicked. Extracting data.");
@@ -222,10 +219,8 @@ public class Codebase implements CodeBaseObservable {
 
         // Dump old data and create new sets
         activeCommits.clear();
-        activeCommits = null; // Yeah... I know probably overkill.
         activeCommits = new LinkedHashSet<>();
         activeFileObjects.clear();
-        activeFileObjects = null;
         activeFileObjects = new LinkedHashSet<>();
 
         /*try {
@@ -252,11 +247,12 @@ public class Codebase implements CodeBaseObservable {
     }
 
     public void changeHeatMapToCommit(String commitHash) {
-
+        System.out.println("Update HeatMapComponents to this commitHash: " + commitHash);
     }
 
     public void openFile(String id) {
         FileObject selectedFile = getFileObjectFromPath(id);
+        System.out.println("Open file in intellij: " + selectedFile.getFilename());
         // TODO - How to open this file via Intellij
     }
 
