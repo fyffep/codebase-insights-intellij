@@ -110,9 +110,9 @@ public class Constants {
     public static final String CD_DATE = "Date: ";
     public static final String CD_HASH = "Hash: ";
     public static final String SF_TITLE_TEXT = "Selected File Details";
-    public static final String SF_TEXT_FILENAME = "File Name";
-    public static final String SF_TEXT_PACKAGE_NAME = "Package Name";
-    public static final String SF_TEXT_AUTHORS = "Authors";
+    public static final String SF_TEXT_FILENAME = "File's Name: ";
+    public static final String SF_TEXT_PACKAGE_NAME = "Package Name: ";
+    public static final String SF_TEXT_AUTHORS = "Authors: ";
     public static final String SF_TEXT_SEPERATOR = ":";
     private Constants() {
         //Prevent instantiation

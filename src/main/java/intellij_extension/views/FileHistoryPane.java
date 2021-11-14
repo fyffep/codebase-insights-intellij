@@ -235,8 +235,8 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
             rowIndex++;
         }
 
-        System.out.println(commitLines.size());
-        System.out.println(activeCommitLines.size());
+//        System.out.println(commitLines.size());
+//        System.out.println(activeCommitLines.size());
     }
 
     @Override
