@@ -147,7 +147,7 @@ public class Codebase implements CodeBaseObservable {
     }
 
     public void branchListRequested() {
-        notifyObserversOfBranchList(branchNameList);
+        notifyObserversOfBranchList();
     }
 
     // TODO - Based on Pete's changes this needs a big update..
