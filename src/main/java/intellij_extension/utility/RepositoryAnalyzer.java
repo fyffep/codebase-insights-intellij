@@ -1,8 +1,6 @@
 package intellij_extension.utility;
 
 import intellij_extension.Constants;
-import intellij_extension.models.CodeBase;
-import intellij_extension.models.FileObject;
 import intellij_extension.models.redesign.CodebaseV2;
 import intellij_extension.models.redesign.CommitV2;
 import intellij_extension.models.redesign.FileObjectV2;
@@ -10,7 +8,6 @@ import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.utility.commithistory.JGitHelper;
 import intellij_extension.utility.filesize.FileSizeCalculator;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.*;
@@ -22,9 +19,7 @@ import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 
@@ -154,7 +149,6 @@ public class RepositoryAnalyzer
             HeatObject heatObject = fileObject.getHeatObjectAtCommit(revCommit.getName());
             heatObject.setLineCount(lineCount);
             heatObject.setFileSize(fileSize);
-            //System.out.println("Gave "+fileObject.getFilename()+" lineCount="+lineCount+" at commit="+revCommit.getName());
         }
     }
 

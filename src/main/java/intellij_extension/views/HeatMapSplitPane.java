@@ -1,7 +1,5 @@
 package intellij_extension.views;
 
-import intellij_extension.controllers.HeatMapController;
-import intellij_extension.models.CodeBase;
 import javafx.geometry.Orientation;
 import javafx.scene.control.SplitPane;
 
