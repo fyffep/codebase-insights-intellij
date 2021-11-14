@@ -1,6 +1,5 @@
 package intellij_extension.models.redesign;
 
-import com.google.common.collect.HashBasedTable;
 import intellij_extension.Constants;
 import intellij_extension.observer.CodeBaseObservable;
 import intellij_extension.observer.CodeBaseObserver;
@@ -8,6 +7,7 @@ import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.utility.commithistory.CommitCountCalculator;
 import intellij_extension.utility.filesize.FileSizeCalculator;
 import javafx.util.Pair;
+import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
@@ -18,8 +18,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class CodebaseV2 implements CodeBaseObservable
-{
+public class CodebaseV2 implements CodeBaseObservable {
     private static CodebaseV2 instance; //singleton
     private final List<CodeBaseObserver> observerList = new LinkedList<>();
 
@@ -28,29 +27,18 @@ public class CodebaseV2 implements CodeBaseObservable
     private LinkedHashSet<CommitV2> activeCommits;
     private LinkedHashSet<FileObjectV2> activeFileObjects;
 
-    // TODO
-    // I think this is the exact sort of DataStructure we want for this.
-    // Here's more info on it.
-    // The stack overflow post isn't really related to our problem but it led me to the discovery of this class.
-    // https://stackoverflow.com/questions/7906123/java-matrix-data-type-for-inserting-values-based-on-their-coordinates
-    // https://guava.dev/releases/snapshot/api/docs/com/google/common/collect/Table.html
-    // https://guava.dev/releases/snapshot/api/docs/com/google/common/collect/HashBasedTable.html
-    // https://github.com/google/guava/wiki/NewCollectionTypesExplained#table
-    private HashBasedTable<String, String, Integer> commitToFileAssociation;
 
     public CodebaseV2() {
         activeBranch = "master";
         branchNameList = new LinkedHashSet<>();
         activeCommits = new LinkedHashSet<>();
         activeFileObjects = new LinkedHashSet<>();
-        commitToFileAssociation = HashBasedTable.create();
     }
 
     /**
      * @return a singleton instance of this class.
      */
-    public static CodebaseV2 getInstance()
-    {
+    public static CodebaseV2 getInstance() {
         if (instance == null) {
             //synchronized block to remove overhead
             synchronized (CodebaseV2.class) {
@@ -72,6 +60,10 @@ public class CodebaseV2 implements CodeBaseObservable
         return activeBranch;
     }
 
+    public void setActiveBranch(String activeBranch) { //FIXME from Pete-- this is just a quick fix so that I can test non-master branches, but it seems that there's another method for branch selection
+        this.activeBranch = activeBranch;
+    }
+
     public LinkedHashSet<String> getBranchNameList() {
         return branchNameList;
     }
@@ -80,6 +72,59 @@ public class CodebaseV2 implements CodeBaseObservable
         return activeCommits;
     }
 
+    /**
+     * @param path to file
+     * @return a FileObject corresponding to the target path - if not corresponding FileObject found, it is created.
+     */
+    public FileObjectV2 createOrGetFileObjectFromPath(String path) {
+        String fileName = new File(path).getName(); //convert file path to file name
+
+        FileObjectV2 selectedFile = activeFileObjects.stream()
+                .filter(file -> file.getFilename().equals(fileName)).findAny().orElse(null);
+
+        // Failed to find file associated with param id
+        if (selectedFile == null) {
+            // Create and return new FileObject
+            selectedFile = new FileObjectV2(Paths.get(path), fileName);
+            activeFileObjects.add(selectedFile);
+        }
+
+        return selectedFile;
+    }
+
+    /**
+     * @param path the file name
+     * @return a FileObject corresponding to the target filename
+     */
+    private FileObjectV2 getFileObjectFromPath(String path) {
+        String fileName = new File(path).getName(); //convert file path to file name
+
+        FileObjectV2 selectedFile = activeFileObjects.stream()
+                .filter(file -> file.getFilename().equals(fileName)).findAny().orElse(null);
+
+        // Failed to find file associated with param path
+        if (selectedFile == null) {
+            throw new NullPointerException(String.format("Failed to find the proper file associated with the selected HeatMapObject. ID = %s", path));
+        }
+
+        return selectedFile;
+    }
+
+    /**
+     * @param id a Git commit hash
+     * @return a Commit corresponding to the target commit hash
+     */
+    public CommitV2 getCommitFromId(String id) {
+        CommitV2 selectedCommit = activeCommits.stream()
+                .filter(commit -> commit.getHash().equals(id)).findAny().orElse(null);
+
+        // Failed to find file associated with param id
+        if (selectedCommit == null) {
+            throw new NullPointerException(String.format("Failed to find the proper commit associated with the selected commit in the TableView. Hash = %s", id));
+        }
+
+        return selectedCommit;
+    }
 
     // TODO
     // Is this the JGit object?
@@ -144,7 +189,7 @@ public class CodebaseV2 implements CodeBaseObservable
                  * as a value, a simple HashMap would have done the job for us, However, it's better to just have a simple
                  * Set of fileName string per CommitV2 object.
                  * If the above justification sounds OK, we can remove the HashBasedTable init.
-                 **/
+                 * */
                 // TODO - Ethan's Comment - I prefer simplicity and to worry about size/slow down problems when that actually happens.
                 //  Ethan's Comment - Like Prof. Rawlins said during the Command Pattern talk, do worry about it being too much data until it becomes a problem.
                 //  Ethan's Comment - Another approach is to limit how far we go back in the history of a branch - Just an idea - Don't have to act on this.
@@ -153,25 +198,27 @@ public class CodebaseV2 implements CodeBaseObservable
         }
     }
 
-    public void heatMapObjectSelected(String id) {
-        FileObjectV2 selectedFile = getFileObjectFromId(id);
+    public void heatMapComponentSelected(String path) {
+        Constants.LOG.info("CLI: Controller told Model " + path + " was clicked. Extracting data.");
+        System.out.println("SOP: Controller told Model " + path + " was clicked. Extracting data.");
+
+        FileObjectV2 selectedFile = getFileObjectFromPath(path);
 
         // Get commits associated with file
         ArrayList<CommitV2> associatedCommits = (ArrayList<CommitV2>) activeCommits.stream()
-                .filter(commit -> commit.getFileSet().contains(id))
+                .filter(commit -> commit.getFileSet().contains(selectedFile.getFilename()))
                 .collect(Collectors.toList());
 
-        // TODO need the observer relationship here
-        //  Update FileCommitHistory pane with associatedCommits
-        //  Clear CommitDetailsPane
-        //  Show SelectedFilePane with selectedFile's info
+        notifyObserversOfRefreshFileCommitHistory(selectedFile, associatedCommits.iterator());
     }
 
+    // TODO - Based on Pete's changes this needs a big update..
     public void branchSelected(String branchName) {
         // Branch doesn't exist - or we don't know about it some how...
-        if (!branchNameList.contains(branchName)) {
+        if (!branchNameList.contains(branchName) && !branchName.isEmpty()) {
             throw new UnsupportedOperationException(String.format("Branch %s was selected but is not present in branchNameList.", branchName));
         }
+
         this.activeBranch = branchName;
 
         // Dump old data and create new sets
@@ -181,10 +228,6 @@ public class CodebaseV2 implements CodeBaseObservable
         activeFileObjects.clear();
         activeFileObjects = null;
         activeFileObjects = new LinkedHashSet<>();
-
-        commitToFileAssociation.clear();
-        commitToFileAssociation = null;
-        commitToFileAssociation = HashBasedTable.create();
 
         /*try {
             buildBranchData(branchName);
@@ -204,8 +247,9 @@ public class CodebaseV2 implements CodeBaseObservable
     public void commitSelected(String id) {
         CommitV2 selectedCommit = getCommitFromId(id);
 
-        // TODO need the observer relationship here
-        //  Update CommitDetailsPane with selectedCommit
+        ArrayList<DiffEntry> diffs = new ArrayList<>();
+
+        notifyObserversOfRefreshCommitDetails(selectedCommit, diffs.iterator());
     }
 
     public void changeHeatMapToCommit(String commitHash) {
@@ -213,75 +257,40 @@ public class CodebaseV2 implements CodeBaseObservable
     }
 
     public void openFile(String id) {
-        FileObjectV2 selectedFile = getFileObjectFromId(id);
-
-//        VirtualFile virtualFile = VirtualFileManager.getInstance().findFileByNioPath(selectedFile.getPath());
-//
-//        FileEditorManager.getInstance(VirtualFileManager.getInstance().getProject()).openTextEditor(
-//                new OpenFileDescriptor(
-//                        virtualFile,
-//                        textOffset
-//                ),
-//                true // request focus to editor
-//        );
+        FileObjectV2 selectedFile = getFileObjectFromPath(id);
+        // TODO - How to open this file via Intellij
     }
-
-    /**
-     * @param id the file name
-     * @return a FileObject corresponding to the target path
-     */
-    public FileObjectV2 getFileObjectFromId(String id)
-    {
-        String fileName = new File(id).getName(); //convert file path to file name
-
-        FileObjectV2 selectedFile = activeFileObjects.stream()
-                .filter(file -> file.getFilename().equals(fileName)).findAny().orElse(null);
-
-        // Failed to find file associated with param id
-        if (selectedFile == null) {
-            //Create and return new FileObject
-            selectedFile = new FileObjectV2(Paths.get(id), fileName);
-            activeFileObjects.add(selectedFile);
-        }
-
-        return selectedFile;
-    }
-
-    /**
-     * @param id a Git commit hash
-     * @return a Commit corresponding to the target commit hash
-     */
-    public CommitV2 getCommitFromId(String id) {
-        CommitV2 selectedCommit = activeCommits.stream()
-                .filter(commit -> commit.getHash().equals(id)).findAny().orElse(null);
-
-        // Failed to find file associated with param id
-        if (selectedCommit == null) {
-            throw new NullPointerException(String.format("Failed to find the proper commit associated with the selected commit in the TableView. Hash = %s", id));
-        }
-
-        return selectedCommit;
-    }
-
 
     @Override
-    public void notifyObservers()
-    {
-        for (CodeBaseObserver observer : observerList)
-        {
-            observer.refresh(this);
+    public void notifyObserversOfRefreshHeatMap() {
+        for (CodeBaseObserver observer : observerList) {
+            observer.refreshHeatMap(this);
         }
     }
 
     @Override
-    public void registerObserver(CodeBaseObserver observer)
-    {
+    public void notifyObserversOfRefreshFileCommitHistory(FileObjectV2 selectedFile, Iterator<CommitV2> filesCommits) {
+        Constants.LOG.info("CLI: Notifying view of change in data.");
+        System.out.println("SOP: Notifying view of change in data.");
+        for (CodeBaseObserver observer : observerList) {
+            observer.fileSelected(selectedFile, filesCommits);
+        }
+    }
+
+    @Override
+    public void notifyObserversOfRefreshCommitDetails(CommitV2 commit, Iterator<DiffEntry> fileDiffs) {
+        for (CodeBaseObserver observer : observerList) {
+            observer.commitSelected(commit, fileDiffs);
+        }
+    }
+
+    @Override
+    public void registerObserver(CodeBaseObserver observer) {
         observerList.add(observer);
     }
 
     @Override
-    public void unregisterObserver(CodeBaseObserver observer)
-    {
+    public void unregisterObserver(CodeBaseObserver observer) {
         observerList.remove(observer);
     }
 }

@@ -7,6 +7,5 @@ public class MainScene extends Scene {
 
     public MainScene(Parent root, double width, double height) {
         super(root, width, height);
-        // setFill(Color.DARKMAGENTA);
     }
 }
