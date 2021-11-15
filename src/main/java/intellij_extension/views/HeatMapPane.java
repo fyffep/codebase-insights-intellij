@@ -65,7 +65,7 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
             System.out.println("Updating the heatmap view");
             while (fileObjectIterator.hasNext()) {
                 FileObject fileObject = fileObjectIterator.next();
-                //String commitHash = fileObject.getCo(); //TODO maybe add a "current commit" field to the Codebase?
+                //String commitHash = fileObject.getCo(); // TODO maybe add a "current commit" field to the Codebase?
                 int heatLevel = fileObject.getHeatObjectAtCommit("df24464eb2394991112ed60f5252ccf8c59da455").computeHeatLevel(); //retrieve or calculate heat level
 
                 // Get commits associated with file
