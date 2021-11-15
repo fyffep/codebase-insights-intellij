@@ -108,5 +108,5 @@ public class Constants {
     public static final String SF_TEXT_PACKAGE_NAME = "Package Name: ";
     public static final String SF_TEXT_AUTHORS = "Authors: ";
     public static final String SF_TEXT_SEPERATOR = ":";
-    public static final String[] DEFAULT_BRANCHES = {"master", "main", "development"};
+    public static final String[] DEFAULT_BRANCHES = {"development", "master", "main"};
 }

@@ -35,10 +35,10 @@ public class Codebase implements CodeBaseObservable {
                 if (instance == null) {
                     // if instance is null, initialize
                     instance = new Codebase();
+                    System.out.println("Model (Codebase) has been created"); //logger doesn't work here
                 }
             }
         }
-        System.out.println("Model (Codebase) has been created"); //logger doesn't work here
         return instance;
     }
 

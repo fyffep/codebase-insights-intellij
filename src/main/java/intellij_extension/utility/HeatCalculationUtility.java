@@ -72,10 +72,10 @@ public class HeatCalculationUtility //can be renamed if adding more methods
      */
     public static Color colorOfHeat(int heatLevel) {
         // Get percentage
-        float heatPercentage = heatLevel / Constants.HEAT_MAX;
+        float heatPercentage = heatLevel / ((float) Constants.HEAT_MAX);
 
         // Get color based on percentage 0 = completely BLUE 1 = Completely RED
-        Color heatColor = Constants.HEAT_MAX_COLOR.interpolate(Constants.HEAT_MIN_COLOR, heatPercentage);
+        Color heatColor = Constants.HEAT_MIN_COLOR.interpolate(Constants.HEAT_MAX_COLOR, heatPercentage);
 
         return heatColor;
     }
