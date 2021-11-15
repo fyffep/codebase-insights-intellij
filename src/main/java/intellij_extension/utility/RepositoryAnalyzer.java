@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -55,15 +56,38 @@ public class RepositoryAnalyzer {
      * Adds 1 to the number of commits associated with a file.
      *
      * @param filePath   the file's path or name (can be either)
-     * @param commitHash the state of the Git repos that the number should be recorded at.
+     * @param newerCommitHash the state of the Git repos that the number should be recorded at.
      *                   Example: On commit #3, a file has a commit count of 2 because it was modified in the previous two commits.
      */
-    private static void incrementNumberOfTimesChanged(Codebase codebase, String filePath, String commitHash) {
+    private static void incrementNumberOfTimesChanged(Codebase codebase, String filePath, String olderCommitHash, String newerCommitHash) {
+
+        FileObject fileObject = codebase.createOrGetFileObjectFromPath(filePath);
+
+        int oldNumberOfCommits = 0;
+        String prevCommit = fileObject.getLatestCommit();
+        if (prevCommit != null)
+        {
+            oldNumberOfCommits = fileObject.getHeatObjectAtCommit(prevCommit).getNumberOfCommits();
+        }
+        fileObject.setLatestCommit(olderCommitHash);
+
+
         //Retrieve the HeatObject that holds the number of commits for the target file
+        HeatObject heatObject = fileObject.getHeatObjectAtCommit(olderCommitHash);
+        //Increment the HeatObject's number of commits
+        heatObject.setNumberOfCommits(oldNumberOfCommits + 1);
+
+
+        if (new File(filePath).getName().equals("TestData.java"))
+        {
+            System.out.println("prevCommit="+prevCommit+" newerCommitHash="+newerCommitHash+" oldNumberOfCommits="+oldNumberOfCommits+" new count="+heatObject.getNumberOfCommits());
+        }
+
+        /*/Retrieve the HeatObject that holds the number of commits for the target file
         FileObject fileObjectV2 = codebase.createOrGetFileObjectFromPath(filePath);
         HeatObject heatObject = fileObjectV2.getHeatObjectAtCommit(commitHash);
         //Increment the HeatObject's number of commits
-        heatObject.setNumberOfCommits(heatObject.getNumberOfCommits() + 1);
+        heatObject.setNumberOfCommits(heatObject.getNumberOfCommits() + 1);*/
     }
 
     /**
@@ -146,21 +170,23 @@ public class RepositoryAnalyzer {
         //I couldn't get `treeWalk.setFilter(PathFilter.create(filePath));` to work, so this is an alternative approach.
         while (treeWalk.next()) {
             String path = treeWalk.getPathString();
+            if (path.endsWith(".java"))
+            {
+                //Create an input stream that has the old version of the file open
+                ObjectId objectId = treeWalk.getObjectId(0);
+                ObjectLoader loader = repository.open(objectId);
+                InputStream inputStream = loader.openStream();
 
-            //Create an input stream that has the old version of the file open
-            ObjectId objectId = treeWalk.getObjectId(0);
-            ObjectLoader loader = repository.open(objectId);
-            InputStream inputStream = loader.openStream();
+                //Get number of lines and file size
+                long lineCount = FileSizeCalculator.computeLineCount(inputStream);
+                long fileSize = loader.getSize();
 
-            //Get number of lines and file size
-            long lineCount = FileSizeCalculator.computeLineCount(inputStream);
-            long fileSize = loader.getSize();
-
-            //Attach data to the HeatObject associated with this version of the file
-            FileObject fileObject = codeBase.createOrGetFileObjectFromPath(path);
-            HeatObject heatObject = fileObject.getHeatObjectAtCommit(revCommit.getName());
-            heatObject.setLineCount(lineCount);
-            heatObject.setFileSize(fileSize);
+                //Attach data to the HeatObject associated with this version of the file
+                FileObject fileObject = codeBase.createOrGetFileObjectFromPath(path);
+                HeatObject heatObject = fileObject.getHeatObjectAtCommit(revCommit.getName());
+                heatObject.setLineCount(lineCount);
+                heatObject.setFileSize(fileSize);
+            }
         }
     }
 
@@ -175,10 +201,16 @@ public class RepositoryAnalyzer {
     public void attachCodebaseData(Codebase codebase) {
         try {
             //Get all commits in the repos for one branch
-            Iterable<RevCommit> commitIterable = getCommitsByBranch(codebase.getActiveBranch());
+            Iterable<RevCommit> commitIterable = getAllCommits(); //getCommitsByBranch(codebase.getActiveBranch());
+            List<RevCommit> reversed = new LinkedList<>();
+            Iterator<RevCommit> commitIterator = commitIterable.iterator();
+            while (commitIterator.hasNext())
+                reversed.add(0, commitIterator.next());
+            commitIterator = reversed.iterator();
+
 
             //Extract the first commit
-            Iterator<RevCommit> commitIterator = commitIterable.iterator();
+            //Iterator<RevCommit> commitIterator = commitIterable.iterator();
             RevCommit newerRevCommit;
             if (commitIterator.hasNext())
                 newerRevCommit = commitIterator.next();
@@ -192,10 +224,12 @@ public class RepositoryAnalyzer {
             codebase.getActiveCommits().add(newerCommit); //extracts data from the RevCommit and stores it in our codebase model
 
 
+            //System.out.println(newerRevCommit.getName());
             //Iterate through the commits two-at-a-time
             while (commitIterator.hasNext()) {
 
                 RevCommit olderRevCommit = commitIterator.next();
+                //System.out.println(olderRevCommit.getName());
 
                 //Find the difference between the olderRevCommit and newerRevCommit
                 final List<DiffEntry> diffs = git.diff()
@@ -208,12 +242,17 @@ public class RepositoryAnalyzer {
                 //For each file modified in the commit...
                 for (DiffEntry diffEntry : diffs) {
                     String filePath = diffEntry.getNewPath(); //arbitrarily choose the newer path of the file since its name may have changed
-                    String fileName = new File(filePath).getName(); //convert file path to file name
+                    //Only .java files are allowed
+                    //(Can be changed to a list of possible extensions and put into Constants)
+                    if (filePath.endsWith(".java"))
+                    {
+                        String fileName = new File(filePath).getName(); //convert file path to file name
 
-                    //Count the number of times the file was changed
-                    String newCommitHash = newerRevCommit.getName();
-                    incrementNumberOfTimesChanged(codebase, filePath, newCommitHash);
-                    newerCommit.getFileSet().add(fileName);
+                        //Count the number of times the file was changed
+                        String newCommitHash = newerRevCommit.getName();
+                        incrementNumberOfTimesChanged(codebase, filePath, olderRevCommit.getName(), newCommitHash);
+                        newerCommit.getFileSet().add(fileName);
+                    }
                 }
 
                 //Process the olderRevCommit (can be moved to another method?)
@@ -268,12 +307,12 @@ public class RepositoryAnalyzer {
         }
     }
 
-    /*
-    Commenting out to remove warning.
+
+    //Commenting out to remove warning.
     public Iterable<RevCommit> getAllCommits() throws IOException, GitAPIException {
         return git.log().all().call();
     }
-*/
+
 
     public Iterable<RevCommit> getCommitsByBranch(String branchName) throws IOException, GitAPIException {
         //Choose the branch

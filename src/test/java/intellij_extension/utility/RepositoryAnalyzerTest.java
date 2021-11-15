@@ -80,7 +80,7 @@ public class RepositoryAnalyzerTest
     }
 
     @Test
-    void attachCodebaseDataTest() throws IOException, GitAPIException {
+    void attachCodebaseDataTest1() throws IOException, GitAPIException {
         final String TEST_FILE_NAME = "CodebaseInsightsToolWindowFactory.java";
         final String TEST_HASH = "1e589e61ef75003b1df88bdb738f9d9f4a4f5f8a";
         final long EXPECTED_LINE_COUNT = 55;
@@ -103,4 +103,31 @@ public class RepositoryAnalyzerTest
         assertEquals(EXPECTED_FILE_SIZE, heatObject.getFileSize());
         assertEquals(EXPECTED_NUMBER_OF_COMMITS, heatObject.getNumberOfCommits());
     }
+
+    //same as above test case but with different data
+    @Test
+    void attachCodebaseDataTest2() throws IOException, GitAPIException {
+        final String TEST_FILE_NAME = "TestData.java";
+        final String TEST_HASH = "d8dabff8ad133f719daeceaa863d9b5802c2b919";
+        final long EXPECTED_LINE_COUNT = 44;
+        final long EXPECTED_FILE_SIZE = 2462;
+        final int EXPECTED_NUMBER_OF_COMMITS = 7;
+
+
+        //Create test objects
+        Codebase codebase = Codebase.getInstance();
+        RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(PROJECT_ROOT);
+        repositoryAnalyzer.attachBranchNameList(codebase); //FIXME bad place to obtain the list of branches for a Codebase?
+        codebase.branchSelected("development");
+
+        repositoryAnalyzer.attachCodebaseData(codebase); //method being tested
+
+        //Verify the result
+        FileObject fileObject = codebase.createOrGetFileObjectFromPath(TEST_FILE_NAME);
+        HeatObject heatObject = fileObject.getHeatObjectAtCommit(TEST_HASH);
+        assertEquals(EXPECTED_LINE_COUNT, heatObject.getLineCount());
+        assertEquals(EXPECTED_FILE_SIZE, heatObject.getFileSize());
+        assertEquals(EXPECTED_NUMBER_OF_COMMITS, heatObject.getNumberOfCommits());
+    }
+
 }

@@ -41,6 +41,10 @@ public class FileObject {
         return filename;
     }
 
+    public int getLatestCommitHeatLevel() {
+        return latestCommitHeatLevel;
+    }
+
     /**
      * Returns a HeatObject that measures the heat of a certain version of this file.
      * If no HeatObject exists for this file, returns a new (blank) HeatObject.
@@ -62,6 +66,10 @@ public class FileObject {
 
     public String getLatestCommit() {
         return latestCommit;
+    }
+
+    public void setLatestCommit(String latestCommit) {
+        this.latestCommit = latestCommit;
     }
 
     public void setHeatForCommit(String commitHash, HeatObject heat) {
