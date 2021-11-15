@@ -96,7 +96,8 @@ public class Constants {
     // Commit Details File List
     public static final double CD_DETAILS_WRAPPING_PERCENTAGE = 0.9f;
     public static final int FILE_LIST_MIN_HEIGHT = 0;
-    public static final String FCH_HEADER_TEXT = "File's Commit History:";
+    public static final String FCH_DEFAULT_HEADER_TEXT = "File's Commit History:";
+    public static final String FCH_HEADER_SUFFIX_TEXT = "'s Commit History:";
 
     /***************************/
     /* UI Strings              */
@@ -112,7 +113,7 @@ public class Constants {
     public static final String CD_RENAMED_FILES = "Renamed Files:";
     public static final String CD_DELETED_FILES = "Deleted Files:";
     public static final String SF_TITLE_TEXT = "Selected File Details";
-    public static final String SF_TEXT_FILENAME = "File's Name: ";
+    public static final String SF_TEXT_FILENAME = "Filename: ";
     public static final String SF_TEXT_PACKAGE_NAME = "Package Name: ";
     public static final String SF_TEXT_AUTHORS = "Authors: ";
     public static final String SF_TEXT_SEPERATOR = ":";

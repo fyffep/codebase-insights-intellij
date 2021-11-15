@@ -51,7 +51,8 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
         // Create the banner combo box
         branchComboBox = ViewFactory.getInstance().createOrGetComboBox(Constants.FCH_BRANCH_COMBOBOX_ID);
         setBranchComboBoxProperties();
-        ViewFactory.setPaneChild(topHorizontalBanner, branchComboBox);
+        // Disabling for 11/15/21 demo since it's not fully functional
+//        ViewFactory.setPaneChild(topHorizontalBanner, branchComboBox);
 
         // Create Tableview with data
         commitList = ViewFactory.getInstance().createOrGetTableView(Constants.FCH_BRANCH_TABLEVIEW_ID);
@@ -83,7 +84,7 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
 
     private void setHeaderTextProperties() {
         headerText.setFont(Font.font(Constants.HEADER_FONT, Constants.HEADER_TEXT_FONT_WEIGHT, Constants.HEADER_TEXT_SIZE));
-        headerText.setText(Constants.FCH_HEADER_TEXT);
+        headerText.setText(Constants.FCH_DEFAULT_HEADER_TEXT);
     }
 
     private void setBranchComboBoxProperties() {
@@ -188,6 +189,9 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
 
     @Override
     public void fileSelected(FileObject selectedFile, Iterator<Commit> filesCommits) {
+        // Update header text to reflect selected filename
+        headerText.setText(selectedFile.getFilename() + Constants.FCH_HEADER_SUFFIX_TEXT);
+
         // Clear out the tableView's observable list
         activeCommitLines.clear();
 
