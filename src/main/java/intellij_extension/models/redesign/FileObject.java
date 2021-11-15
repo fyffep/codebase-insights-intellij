@@ -19,6 +19,9 @@ public class FileObject {
 
     // This would maintain the latest key commit hash added in the map to avoid any traversal again
     private String latestCommit;
+    // FIXME implement me properly along with latest commit
+    //  This is just an easy hacky way to sort FileObjects in  a list.
+    public int latestCommitHeatLevel;
 
     public FileObject() {
         //Empty constructor
@@ -86,5 +89,13 @@ public class FileObject {
             if (this.getFilename().equals(fileObject.getFilename())) return true;
         }
         return false;
+    }
+
+    public int compareTo(FileObject other) {
+        if(this.latestCommitHeatLevel > other.latestCommitHeatLevel) {
+            return 1;
+        } else {
+            return -1;
+        }
     }
 }
