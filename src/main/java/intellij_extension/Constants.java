@@ -10,6 +10,7 @@ import javafx.scene.text.FontWeight;
 
 public class Constants {
 
+
     //Prevent instantiation
     private Constants() {
     }
@@ -39,6 +40,8 @@ public class Constants {
     public static final String CD_FILE_LIST_CONTAINER_ID = "CD_FILE_LIST_CONTAINER_01";
     public static final String CD_FILE_LIST_ID = "CD_FILE_LIST_01";
     public static final String CD_FILE_TEXT_PREFIX = "CD_FILE_TEXT_";
+    public static final String CD_CHANGE_HEADER_TEXT_PREFIX = "CD_HEADER_FILE_TEXT_";
+
     // Selected File Pane
     public static final String SF_VBOX_ID = "SF_VBOX";
     public static final String SF_FILENAME_TEXT_ID = "SF_FILENAME_01";
@@ -103,10 +106,15 @@ public class Constants {
     public static final String CD_AUTHOR = "Author: ";
     public static final String CD_DATE = "Date: ";
     public static final String CD_HASH = "Hash: ";
+    public static final String CD_ADDED_FILES = "Added Files:";
+    public static final String CD_COPIED_FILES = "Copied Files:";
+    public static final String CD_MODIFIED_FILES = "Modified Files:";
+    public static final String CD_RENAMED_FILES = "Renamed Files:";
+    public static final String CD_DELETED_FILES = "Deleted Files:";
     public static final String SF_TITLE_TEXT = "Selected File Details";
     public static final String SF_TEXT_FILENAME = "File's Name: ";
     public static final String SF_TEXT_PACKAGE_NAME = "Package Name: ";
     public static final String SF_TEXT_AUTHORS = "Authors: ";
     public static final String SF_TEXT_SEPERATOR = ":";
-    public static final String[] DEFAULT_BRANCHES = {"development", "master", "main"};
+    public static final String[] DEFAULT_BRANCHES = {"master", "development", "main"};
 }
