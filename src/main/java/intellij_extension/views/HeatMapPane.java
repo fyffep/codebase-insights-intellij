@@ -11,6 +11,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -101,6 +102,7 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
                 String fileName = fileObject.getFilename();
                 Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d", fileName, fileObject.latestCommitHeatLevel));
                 tooltip.setFont(Constants.TOOLTIP_FONT);
+                tooltip.setShowDelay(Duration.seconds(0));
                 Tooltip.install(heatFileComponent, tooltip);
 
                 System.out.println("Added a file pane for " + fileName + " with heat level " + fileObject.latestCommitHeatLevel); // logger only works sometimes here

@@ -48,9 +48,9 @@ public class Constants {
     public static final String SF_PACKAGE_NAME_TEXT_ID = "SF_PACKAGE_NAME_01";
     public static final String SF_AUTHOR_TEXT_ID = "SF_AUTHOR_01";
     // Banners
-    public static final int BANNER_MIN_HEIGHT = 0;
+    public static final int BANNER_MIN_HEIGHT = 40;
     // General Properties
-    public static final double BANNER_SIZE_MULTIPLIER = 0.20f;
+    public static final double BANNER_SIZE_MULTIPLIER = 0.40f;
 
 
     /***************************/
@@ -92,7 +92,7 @@ public class Constants {
     //Commit Details Banner
     public static final Pos CD_BANNER_ALIGNMENT = Pos.TOP_LEFT;
     public static final int CD_BANNER_SPACING = 5;
-    public static final double FILE_LIST_SIZE_MULTIPLIER = 0.80;
+    public static final double FILE_LIST_SIZE_MULTIPLIER = 0.60;
     // Commit Details File List
     public static final double CD_DETAILS_WRAPPING_PERCENTAGE = 0.9f;
     public static final int FILE_LIST_MIN_HEIGHT = 0;
