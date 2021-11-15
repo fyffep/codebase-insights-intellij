@@ -13,7 +13,9 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.stream.Collectors;
 
 /**
  * A view that holds rectangles to represent files for a particular commit.
@@ -30,7 +32,7 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
         //Register self as an observer of the model
         Codebase model = Codebase.getInstance();
         model.registerObserver(this);
-        refreshHeatMap(model); //use latest appearance
+        //refreshHeatMap(model); //use latest appearance
     }
 
     /**
@@ -64,7 +66,13 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
             while (fileObjectIterator.hasNext()) {
                 FileObject fileObject = fileObjectIterator.next();
                 //String commitHash = fileObject.getCo(); //TODO maybe add a "current commit" field to the Codebase?
-                int heatLevel = fileObject.getHeatObjectAtCommit("0d124558bb1000395288d12299d7d290aec61521").computeHeatLevel(); //retrieve or calculate heat level
+                int heatLevel = fileObject.getHeatObjectAtCommit("df24464eb2394991112ed60f5252ccf8c59da455").computeHeatLevel(); //retrieve or calculate heat level
+
+                // Get commits associated with file
+                ArrayList<Commit> associatedCommits = (ArrayList<Commit>) codebase.getActiveCommits().stream()
+                        .filter(commit -> commit.getFileSet().contains(fileObject.getFilename()))
+                        .collect(Collectors.toList());
+                heatLevel = associatedCommits.size();
 
                 //Generate color
                 Color color = HeatCalculationUtility.colorOfHeat(heatLevel);
@@ -86,6 +94,7 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
                 System.out.println("Added a file pane for " + fileName + " with heat level " + heatLevel); //logger only works sometimes here
             }
         });
+        System.out.println("Finished adding panes to the heat map.");
     }
 
     @Override

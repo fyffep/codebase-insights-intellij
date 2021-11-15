@@ -75,10 +75,11 @@ public class HeatObject {
         System.out.println("sizeHeat="+sizeHeat+" for linecount2="+lineCount+" and numberOfCommitsHeat="+numberOfCommitsHeat);
 
         //Average all the metrics
-        return (
+        /*return (
                 sizeHeat +
                 numberOfCommitsHeat
                 //Add more metrics here...
-        ) / 2;
+        ) / 2;*/
+        return numberOfCommits; //FIXME AHHHH IT'S NOT WORKING BUT IT'S SUNDAY NIGHT
     }
 }
