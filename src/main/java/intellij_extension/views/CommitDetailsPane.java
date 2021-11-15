@@ -13,6 +13,7 @@ import javafx.scene.text.Text;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -123,8 +124,12 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
         fileList.setPadding(Constants.BANNER_INSETS);
     }
 
-    private void setFileTextProperties(Text fileText) {
+    private void setChangeTextProperties(Text fileText) {
         // Any formatting for text goes here.
+    }
+
+    private void setChangeHeaderTextProperties(Text headerText) {
+        headerText.setFont(Font.font(Constants.HEADER_FONT, Constants.HEADER_TEXT_FONT_WEIGHT, headerText.getFont().getSize()));
     }
 
     /*
@@ -170,29 +175,72 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
         activeFileTexts.clear();
         fileList.getChildren().clear();
 
-        // Index is mainly for id
-        int fileIndex = 0;
+        StringBuilder addBuilder = new StringBuilder();
+        StringBuilder copyBuilder = new StringBuilder();
+        StringBuilder modifyBuilder = new StringBuilder();
+        StringBuilder renameBuilder = new StringBuilder();
+        StringBuilder deleteBuilder = new StringBuilder();
+
         Iterator<DiffEntry> commitDiffs = commit.getCommitDiffs().iterator();
         while (commitDiffs.hasNext()) {
             // Grab the diff for a file
             DiffEntry diffEntry = commitDiffs.next();
 
-            // Create or get a text
-            Text fileText = ViewFactory.getInstance().createOrGetText(Constants.CD_FILE_TEXT_PREFIX + fileIndex);
-            // Set the properties
-            setFileTextProperties(fileText);
-
-            // Set text with diff info
-            // TODO Re-organize how this information is displayed
-            fileText.setText(diffEntry.getNewPath() + ": " + diffEntry.getChangeType());
-
-            // Track it as an active text
-            activeFileTexts.add(fileText);
-            // Add it to the file list VBox
-            ViewFactory.setPaneChild(fileList, fileText);
-
-            // Increment index
-            fileIndex++;
+            switch(diffEntry.getChangeType()) {
+                case ADD:
+                    addBuilder.append(new File(diffEntry.getNewPath()).getName() + "\n");
+                    break;
+                case COPY:
+                    copyBuilder.append(new File(diffEntry.getNewPath()).getName() + "\n");
+                    break;
+                case MODIFY:
+                    modifyBuilder.append(new File(diffEntry.getNewPath()).getName() + "\n");
+                    break;
+                case RENAME:
+                    renameBuilder.append(new File(diffEntry.getOldPath()).getName() + " renamed to: " + new File(diffEntry.getNewPath()).getName() + "\n");
+                    break;
+                case DELETE:
+                    deleteBuilder.append(new File(diffEntry.getOldPath()).getName() + "\n");
+                    break;
+                default:
+                    break;
+            }
         }
+
+        if(!addBuilder.toString().isEmpty()) {
+            buildChangeHeaderText(Constants.CD_ADDED_FILES, DiffEntry.ChangeType.ADD);
+            buildChangeText(addBuilder, DiffEntry.ChangeType.ADD);
+        }
+        if(!copyBuilder.toString().isEmpty()) {
+            buildChangeHeaderText(Constants.CD_COPIED_FILES, DiffEntry.ChangeType.COPY);
+            buildChangeText(copyBuilder, DiffEntry.ChangeType.COPY);
+        }
+        if(!modifyBuilder.toString().isEmpty()) {
+            buildChangeHeaderText(Constants.CD_MODIFIED_FILES, DiffEntry.ChangeType.MODIFY);
+            buildChangeText(modifyBuilder, DiffEntry.ChangeType.MODIFY);
+        }
+        if(!renameBuilder.toString().isEmpty()) {
+            buildChangeHeaderText(Constants.CD_RENAMED_FILES, DiffEntry.ChangeType.RENAME);
+            buildChangeText(renameBuilder, DiffEntry.ChangeType.RENAME);
+        }
+        if(!deleteBuilder.toString().isEmpty()) {
+            buildChangeHeaderText(Constants.CD_DELETED_FILES, DiffEntry.ChangeType.DELETE);
+            buildChangeText(deleteBuilder, DiffEntry.ChangeType.DELETE);
+        }
+    }
+
+    public void buildChangeHeaderText(String text, DiffEntry.ChangeType changeType) {
+        Text changeHeaderText = ViewFactory.getInstance().createOrGetText(Constants.CD_FILE_TEXT_PREFIX + changeType);
+        setChangeHeaderTextProperties(changeHeaderText);
+        changeHeaderText.setText(text);
+        ViewFactory.setPaneChild(fileList, changeHeaderText);
+    }
+
+    public void buildChangeText(StringBuilder builder, DiffEntry.ChangeType changeType) {
+        Text fileText = ViewFactory.getInstance().createOrGetText(Constants.CD_CHANGE_HEADER_TEXT_PREFIX + changeType);
+        setChangeTextProperties(fileText);
+        fileText.setText(builder.toString());
+        activeFileTexts.add(fileText);
+        ViewFactory.setPaneChild(fileList, fileText);
     }
 }
