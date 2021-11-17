@@ -75,9 +75,24 @@ public class RepositoryAnalyzer {
         heatObject.setNumberOfCommits(oldNumberOfCommits + 1);
 
         //TEMP
+        /*if (new File(filePath).getName().equals("CodebaseInsightsToolWindowFactory.java"))
+        {
+            System.out.println("File CodebaseInsightsToolWindowFactory has "+heatObject.getNumberOfCommits()+" commits as of "+commitHash);
+        }
+
         if (new File(filePath).getName().equals("TestData.java"))
         {
             System.out.println("File TestData has "+heatObject.getNumberOfCommits()+" commits as of "+commitHash);
+        }
+
+        if (new File(filePath).getName().equals("RepositoryAnalyzer.java"))
+        {
+            System.out.println("File RepositoryAnalyzer has "+heatObject.getNumberOfCommits()+" commits as of "+commitHash);
+        }*/
+
+        if (new File(filePath).getName().equals("CodeBaseObservable.java"))
+        {
+            System.out.println("File CodeBaseObservable has "+heatObject.getNumberOfCommits()+" commits as of "+commitHash);
         }
     }
 
@@ -224,9 +239,9 @@ public class RepositoryAnalyzer {
             while (commitIterator.hasNext()) {
 
                 RevCommit olderRevCommit = commitIterator.next();
+                System.out.println("Comparing old="+olderRevCommit.getName()+" to new="+newerRevCommit.getName());
 
                 //Find the difference between the olderRevCommit and newerRevCommit
-System.out.println("Comparing old="+olderRevCommit.getName()+" to new="+newerRevCommit.getName());
                 final List<DiffEntry> diffs = git.diff()
                         .setOldTree(prepareTreeParser(olderRevCommit.getName()))
                         .setNewTree(prepareTreeParser(newerRevCommit.getName()))
@@ -236,7 +251,8 @@ System.out.println("Comparing old="+olderRevCommit.getName()+" to new="+newerRev
 
                 //For each file modified in the commit...
                 for (DiffEntry diffEntry : diffs) {
-                    String oldFilePath = diffEntry.getOldPath();
+                    String oldFilePath = diffEntry.getNewPath(); //this affects which file should be given heat during a name change...
+                    //...and generally seems more effective than selecting the old path.
                     //Only .java files are allowed
                     //(Can be changed to a list of possible extensions and put into Constants)
                     if (oldFilePath.endsWith(".java"))
