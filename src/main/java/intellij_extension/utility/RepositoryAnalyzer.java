@@ -80,7 +80,7 @@ public class RepositoryAnalyzer {
             System.out.println("File CodebaseInsightsToolWindowFactory has "+heatObject.getNumberOfCommits()+" commits as of "+commitHash);
         }
 
-        if (new File(filePath).getName().equals("TestData.java"))
+        /*if (new File(filePath).getName().equals("TestData.java"))
         {
             System.out.println("File TestData has "+heatObject.getNumberOfCommits()+" commits as of "+commitHash);
         }
@@ -198,7 +198,7 @@ public class RepositoryAnalyzer {
 
     /**
      * Computes line count, file size, and number of commits for every file at every commit.
-     * This places FileObjects in the given Codebase, and each of these FielObjects has its
+     * This places FileObjects in the given Codebase, and each of these FileObjects has its
      * map of commit hashes to HeatObjects filled out.
      * These new HeatObjects contain the newly computed metrics.
      *
@@ -221,63 +221,63 @@ public class RepositoryAnalyzer {
             commitIterator = commitList.iterator();
 
             //Extract the first commit
-            RevCommit newerRevCommit;
+            RevCommit olderRevCommit;
             if (commitIterator.hasNext())
-                newerRevCommit = commitIterator.next();
+                olderRevCommit = commitIterator.next();
             else {
                 Constants.LOG.info("There were not enough commits to compute the number of times each file was changed.");
                 return;
             }
-            //Process the first commit (can be moved to another method?)
-            attachLineCountToCodebase(codebase, newerRevCommit); //computes line count and file size data!
-            Commit newerCommit = new Commit(newerRevCommit);
-            codebase.getActiveCommits().add(newerCommit); //extracts data from the RevCommit and stores it in our codebase model
+            //Copy the first (oldest) commit's data into a Commit object,
+            attachLineCountToCodebase(codebase, olderRevCommit); //computes line count and file size data!
+            Commit commitExtract = new Commit(olderRevCommit); //extracts data from the RevCommit
+            codebase.getActiveCommits().add(commitExtract);
 
 
-            //System.out.println(newerRevCommit.getName());
             //Iterate through the commits two-at-a-time
             while (commitIterator.hasNext()) {
 
-                RevCommit olderRevCommit = commitIterator.next();
+                RevCommit newerRevCommit = commitIterator.next();
                 System.out.println("Comparing old="+olderRevCommit.getName()+" to new="+newerRevCommit.getName());
 
                 //Find the difference between the olderRevCommit and newerRevCommit
                 final List<DiffEntry> diffs = git.diff()
-                        .setOldTree(prepareTreeParser(olderRevCommit.getName()))
-                        .setNewTree(prepareTreeParser(newerRevCommit.getName()))
+                        .setOldTree(prepareTreeParser(newerRevCommit.getName()))
+                        .setNewTree(prepareTreeParser(olderRevCommit.getName()))
                         .call();
 
-                newerCommit.addDiffEntriesToDiffList(diffs);
+                commitExtract.addDiffEntriesToDiffList(diffs);
 
                 //For each file modified in the commit...
                 for (DiffEntry diffEntry : diffs) {
-                    String oldFilePath = diffEntry.getNewPath(); //this affects which file should be given heat during a name change...
+                    String newFilePath = diffEntry.getNewPath(); //this affects which file should be given heat during a name change...
                     //...and generally seems more effective than selecting the old path.
                     //Only .java files are allowed
                     //(Can be changed to a list of possible extensions and put into Constants)
-                    if (oldFilePath.endsWith(".java"))
+                    if (newFilePath.endsWith(".java"))
                     {
-                        String fileName = new File(oldFilePath).getName(); //convert file path to file name
+                        String fileName = new File(newFilePath).getName(); //convert file path to file name
 
                         //Count the number of times the file was changed
-                        String olderCommitHash = olderRevCommit.getName(); //when the file changed
-                        incrementNumberOfTimesChanged(codebase, oldFilePath, olderCommitHash);
-                        newerCommit.getFileSet().add(fileName);
+                        incrementNumberOfTimesChanged(codebase, newFilePath, newerRevCommit.getName());
+                        commitExtract.getFileSet().add(fileName);
                     }
                 }
 
-                //Process the olderRevCommit (can be moved to another method?)
-                attachLineCountToCodebase(codebase, olderRevCommit);
-                newerCommit = new Commit(olderRevCommit);
-                codebase.getActiveCommits().add(newerCommit);
+                //Copy the newerRevCommit's data into a Commit object,
+                //then let diff data be added to that Commit on the next iteration.
+                attachLineCountToCodebase(codebase, newerRevCommit);
+                commitExtract = new Commit(newerRevCommit); //extracts data from the RevCommit
+                codebase.getActiveCommits().add(commitExtract);
 
-                newerRevCommit = olderRevCommit;
+                olderRevCommit = newerRevCommit;
             }
         } catch (IOException | GitAPIException e) {
             Constants.LOG.error(e);
             Constants.LOG.error(e.getMessage());
         }
     }
+
 
     /**
      * Finds the list of all LOCAL branch names and adds them
