@@ -66,7 +66,7 @@ public class RepositoryAnalyzer {
         {
             oldNumberOfCommits = fileObject.getHeatObjectAtCommit(prevCommit).getNumberOfCommits();
         }
-        fileObject.setLatestCommit(commitHash);
+        fileObject.setLatestCommit(commitHash); //record which commit the file was last changed on
 
 
         //Retrieve the HeatObject that holds the number of commits for the target file
@@ -75,7 +75,7 @@ public class RepositoryAnalyzer {
         heatObject.setNumberOfCommits(oldNumberOfCommits + 1);
 
         //TEMP
-        /*if (new File(filePath).getName().equals("CodebaseInsightsToolWindowFactory.java"))
+        if (new File(filePath).getName().equals("CodebaseInsightsToolWindowFactory.java"))
         {
             System.out.println("File CodebaseInsightsToolWindowFactory has "+heatObject.getNumberOfCommits()+" commits as of "+commitHash);
         }
@@ -90,13 +90,14 @@ public class RepositoryAnalyzer {
             System.out.println("File RepositoryAnalyzer has "+heatObject.getNumberOfCommits()+" commits as of "+commitHash);
         }*/
 
-        if (new File(filePath).getName().equals("CodeBaseObservable.java"))
+        /*if (new File(filePath).getName().equals("CodeBaseObservable.java"))
         {
             System.out.println("File CodeBaseObservable has "+heatObject.getNumberOfCommits()+" commits as of "+commitHash);
-        }
+        }*/
     }
 
     /**
+     * UNUSED
      * Returns an InputStream with the old version of the file open.
      * This is method is expensive because it has to search through the entire
      * old version of the repository to find the file.
@@ -136,6 +137,7 @@ public class RepositoryAnalyzer {
     }
 
     /**
+     * UNUSED
      * Given a CodeBase, attaches all the file sizes (in bytes) and line counts of each file present
      * at a particular commit of the Git repository. Each FileObject in the Codebase is given a new
      * HeatObject that holds this file size and line count data. If a HeatObject already exists for the
@@ -160,6 +162,7 @@ public class RepositoryAnalyzer {
      * at a particular commit of the Git repository. Each FileObject in the Codebase is given a new
      * HeatObject that holds this file size and line count data. If a HeatObject already exists for the
      * file at the given commit, this updates the existing HeatObject.
+     * TODO prevent counting the number of lines for a file that did not change
      *
      * @param codeBase  represents the entire repository and history
      * @param revCommit the state of the Git repository to examine
@@ -189,7 +192,7 @@ public class RepositoryAnalyzer {
 
                 //Attach data to the HeatObject associated with this version of the file
                 FileObject fileObject = codeBase.createOrGetFileObjectFromPath(path);
-                HeatObject heatObject = fileObject.getHeatObjectAtCommit(revCommit.getName());
+                HeatObject heatObject = fileObject.getHeatObjectAtCommit(revCommit.getName()); //FIXME may not have number of commits from previous commit
                 heatObject.setLineCount(lineCount);
                 heatObject.setFileSize(fileSize);
             }
@@ -261,6 +264,9 @@ public class RepositoryAnalyzer {
                         //Count the number of times the file was changed
                         incrementNumberOfTimesChanged(codebase, newFilePath, newerRevCommit.getName());
                         commitExtract.getFileSet().add(fileName);
+
+
+                        System.out.println("\t"+fileName+" changed with "+diffEntry.getChangeType());
                     }
                 }
 
@@ -272,6 +278,8 @@ public class RepositoryAnalyzer {
 
                 olderRevCommit = newerRevCommit;
             }
+            //Set project root
+            codebase.setProjectRootPath(repository.getDirectory().getAbsoluteFile().getParentFile().getParent());
         } catch (IOException | GitAPIException e) {
             Constants.LOG.error(e);
             Constants.LOG.error(e.getMessage());
@@ -353,5 +361,44 @@ public class RepositoryAnalyzer {
         }
         //Reached end and no previous commits.
         return null;
+    }*/ //https://github.iu.edu/P532-Fall2021/team3-project/blob/c53dfaeb18cb91b1e634e9a5f35e363e02b6c454/src/main/java/intellij_extension/utility/commithistory/CommitCountCalculator.java
+
+
+    //UNUSED method to test Abhishek's CodeBaseV2::buildBranchData() method
+    /*public void buildBranchDataExperiment(Codebase codebase) throws IOException
+    {
+        TreeWalk treeWalk = new TreeWalk(repository);
+        treeWalk.setRecursive(true);
+        treeWalk.setPostOrderTraversal(false);
+
+        Iterable<RevCommit> revCommitIterable;
+        //Choose the branch
+        ObjectId branchId;
+        try {
+
+            branchId = repository.resolve(codebase.getActiveBranch());
+            revCommitIterable = git.log().add(branchId).call();
+        } catch (IOException | GitAPIException e) {
+            Constants.LOG.error(e);
+            Constants.LOG.error(e.getMessage());
+            return;
+        }
+
+        Pair<Iterable<RevCommit>, TreeWalk> treeWalkCommitsPair = new Pair<>(revCommitIterable, treeWalk);
+        for (RevCommit rCommit : treeWalkCommitsPair.getKey()) {
+            treeWalk = treeWalkCommitsPair.getValue();
+            treeWalk.addTree(rCommit.getTree());
+            Commit newCommit = new Commit(rCommit);
+            System.out.println("Commit "+newCommit.getHash());
+
+            while (treeWalk.next()) {
+                //This can be used if there's a need for the File object to be stored
+                //treeWalk.getObjectId(0).copyTo(System.out);
+                String fileName = treeWalk.getNameString();
+                String filePath = treeWalk.getPathString();
+                System.out.println("\t"+filePath);
+            }
+        }
     }*/
+
 }
