@@ -16,6 +16,7 @@ public class Codebase implements CodeBaseObservable {
     private String activeBranch;
     private LinkedHashSet<Commit> activeCommits;
     private LinkedHashSet<FileObject> activeFileObjects;
+    private String projectRootPath;
 
 
     public Codebase() {
@@ -74,6 +75,14 @@ public class Codebase implements CodeBaseObservable {
 
     public LinkedHashSet<Commit> getActiveCommits() {
         return activeCommits;
+    }
+
+    public String getProjectRootPath() {
+        return projectRootPath;
+    }
+
+    public void setProjectRootPath(String projectRootPath) {
+        this.projectRootPath = projectRootPath;
     }
 
     /**
