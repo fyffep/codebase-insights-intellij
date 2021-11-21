@@ -11,18 +11,20 @@ public class HeatObject {
     private String filename;
     private long lineCount;
     private long fileSize;
-    private int numberOfCommits = 1;
+    private int numberOfCommits = 0;
+    private int numberOfAuthors = 0;
 
     public HeatObject() {
         //This allows the metrics to be filled out gradually
     }
 
-    public HeatObject(float heatLevel, String filename, long lineCount, long fileSize, int numberOfCommits) {
+    public HeatObject(float heatLevel, String filename, long lineCount, long fileSize, int numberOfCommits, int numberOfAuthors) {
         this.heatLevel = heatLevel;
         this.filename = filename;
         this.lineCount = lineCount;
         this.fileSize = fileSize;
         this.numberOfCommits = numberOfCommits;
+        this.numberOfAuthors = numberOfAuthors;
     }
 
     //TODO this should be deleted in favor of computeHeatLevel()
@@ -58,9 +60,18 @@ public class HeatObject {
         this.numberOfCommits = numberOfCommits;
     }
 
+    public int getNumberOfAuthors() {
+        return numberOfAuthors;
+    }
+
+    public void setNumberOfAuthors(int numberOfAuthors) {
+        this.numberOfAuthors = numberOfAuthors;
+    }
+
 
     /**
      * Assigns a heat level to this HeatObject based on its metrics.
+     *
      * @return a value from 1 to 10, with 10 being the hottest
      */
     public int computeHeatLevel() //maybe this class (a model) is not the best place for this method
@@ -72,7 +83,7 @@ public class HeatObject {
         int sizeHeat = HeatCalculationUtility.calculateHeatForFileSize(this);
         //Number of commits
         int numberOfCommitsHeat = HeatCalculationUtility.calculateHeatForNumberOfCommits(this);
-        System.out.println("sizeHeat="+sizeHeat+" for linecount2="+lineCount+" and numberOfCommitsHeat="+numberOfCommitsHeat);
+        System.out.println("sizeHeat=" + sizeHeat + " for linecount2=" + lineCount + " and numberOfCommitsHeat=" + numberOfCommitsHeat);
 
         //Average all the metrics
         /*return (
