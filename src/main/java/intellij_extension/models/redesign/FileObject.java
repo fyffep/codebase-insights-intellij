@@ -2,6 +2,8 @@ package intellij_extension.models.redesign;
 
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * FileObjectV2
@@ -16,6 +18,9 @@ public class FileObject {
     // Id = filename = id;
     private String filename;
     private LinkedHashMap<String, HeatObject> commitHashToHeatObjectMap;
+    private Set<String> uniqueAuthors;
+    private Set<String> uniqueAuthorEmails;
+
 
     // This would maintain the latest key commit hash added in the map to avoid any traversal again
     private String latestCommit;
@@ -31,6 +36,8 @@ public class FileObject {
         this.path = path;
         this.filename = filename;
         this.commitHashToHeatObjectMap = new LinkedHashMap<>();
+        this.uniqueAuthors = new LinkedHashSet<>();
+        this.uniqueAuthorEmails = new LinkedHashSet<>();
     }
 
     public Path getPath() {
@@ -41,6 +48,14 @@ public class FileObject {
         return filename;
     }
 
+    public Set<String> getUniqueAuthors() {
+        return uniqueAuthors;
+    }
+
+    public Set<String> getUniqueAuthorEmails() {
+        return uniqueAuthorEmails;
+    }
+
     public int getLatestCommitHeatLevel() {
         return latestCommitHeatLevel;
     }
@@ -48,6 +63,7 @@ public class FileObject {
     /**
      * Returns a HeatObject that measures the heat of a certain version of this file.
      * If no HeatObject exists for this file, returns a new (blank) HeatObject.
+     *
      * @param commitHash a Git commit hash, such as "1e589e61ef75003b1df88bdb738f9d9f4a4f5f8a" that the file is present in
      */
     public HeatObject getHeatObjectAtCommit(String commitHash) {
@@ -59,7 +75,6 @@ public class FileObject {
         return newHeatObject;
     }
 
-    // TODO - DECISION - Do we want to throw an exception or return null when commitHash not found?
     public LinkedHashMap<String, HeatObject> getCommitHashToHeatObjectMap() {
         return commitHashToHeatObjectMap;
     }
@@ -83,10 +98,10 @@ public class FileObject {
 
     /**
      * Returns the total heat
+     *
      * @return
      */
-    public int getOverallHeat()
-    {
+    public int getOverallHeat() {
         return (int) (Math.random() % 10); //TODO calculate overall heat here (this is a placeholder)
     }
 
@@ -94,13 +109,13 @@ public class FileObject {
     public boolean equals(Object object) {
         if (object != null && object.getClass() == getClass()) {
             FileObject fileObject = (FileObject) object;
-            if (this.getFilename().equals(fileObject.getFilename())) return true;
+            return this.getFilename().equals(fileObject.getFilename());
         }
         return false;
     }
 
     public int compareTo(FileObject other) {
-        if(this.latestCommitHeatLevel > other.latestCommitHeatLevel) {
+        if (this.latestCommitHeatLevel > other.latestCommitHeatLevel) {
             return 1;
         } else {
             return -1;

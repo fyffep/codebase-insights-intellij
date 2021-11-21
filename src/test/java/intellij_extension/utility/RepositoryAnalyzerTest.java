@@ -134,7 +134,7 @@ public class RepositoryAnalyzerTest
     @Test
     void attachCodebaseDataTest3() throws IOException, GitAPIException {
         final String TEST_FILE_NAME = "TestData.java";
-        final String TEST_HASH = "d8dabff8ad133f719daeceaa863d9b5802c2b919";
+        final String TEST_HASH = "fb5b5d27631eee85b16b63ae84873975706d4f4a";
         final long EXPECTED_LINE_COUNT = 44;
         final long EXPECTED_FILE_SIZE = 2462;
         final int EXPECTED_NUMBER_OF_COMMITS = 16;
