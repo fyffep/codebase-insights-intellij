@@ -38,10 +38,10 @@ public class RepositoryAnalyzer {
 
     private static final boolean DEBUG_BRANCH = true;
     private static final boolean DEBUG_COMMIT = true;
-    private static final boolean DEBUG_FILE = false;
+    private static final boolean DEBUG_FILE = true;
     private static final boolean DEBUG_DIFF_ENTRY = false;
-    private static final String DEBUG_COMMIT_HASH = "748e142e937b064f7df97cd6e22869cd20707d29";
-    private static final String DEBUG_FILENAME = "CommitInfoRow.java";
+    private static final String DEBUG_COMMIT_HASH = "0cdfe6bf92eddb57763f491b6db6edc6f56324f5";
+    private static final String DEBUG_FILENAME = "CodeBaseObservable.java";
     private final Git git;
 
     // Init git variable based on local repo
@@ -89,40 +89,36 @@ public class RepositoryAnalyzer {
         try {
 
             // Get all commits in the repos for active branch
-            Iterator<RevCommit> commitIterator = getTimeSortedCommitsByBranch(codebase.getActiveBranch());
+            Iterator<RevCommit> commitIterator = getCommitsByBranch(codebase.getActiveBranch());
 
             // Iterate through the commits and gather data per file
+            RevCommit previousCommit = null;
+            RevCommit processCommit;
             while (commitIterator.hasNext()) {
                 // Get commit to process
-                RevCommit processCommit = commitIterator.next();
+                processCommit = commitIterator.next();
+                if (DEBUG_COMMIT) {
+                    System.out.printf("\nProcessing commit: %s%n Commit Time: %s%n", processCommit.getName(), processCommit.getAuthorIdent().getWhen());
+                }
 
                 // Build CodebaseInsight's data object
                 // Extracts: author, email, full/short message, date, hash
                 Commit commitExtract = new Commit(processCommit);
                 // Add to active commit list
                 codebase.getActiveCommits().add(commitExtract);
-                // Get line count
-                attachLineCountToCodebase(codebase, processCommit);
-
-                if (DEBUG_COMMIT) {
-                    System.out.printf("\nProcessing commit: %s%n", processCommit.getName());
-                }
+                // Process heat metrics for every file
+                processHeatMetrics(codebase, processCommit, previousCommit);
 
                 // Find the difference between the processCommit and the previous commit
                 final List<DiffEntry> diffs = diffCommit(processCommit.getName());
-
                 // Save the DiffEntry list
                 commitExtract.addDiffEntriesToDiffList(diffs);
-
-                if (DEBUG_COMMIT) {
-                    if (processCommit.getName().equals(DEBUG_COMMIT_HASH)) {
-                        diffCommit(DEBUG_COMMIT_HASH);
-                    }
-                }
 
                 if (DEBUG_DIFF_ENTRY) {
                     System.out.println("DiffEntry size: " + diffs.size());
                 }
+
+                // Process heat metrics for DiffEntry files (# of commits/authors)
                 for (DiffEntry diffEntry : diffs) {
                     // Get file id (aka path)
                     String newFilePath = diffEntry.getNewPath();
@@ -131,25 +127,28 @@ public class RepositoryAnalyzer {
                         // Get filename from diffEntry's path
                         String fileName = getFilename(newFilePath);
 
-                        if (DEBUG_DIFF_ENTRY) {
-                            if (fileName.equals(DEBUG_FILENAME) || fileName.equals("CommitHistoryLine.java")) {
+                        if (DEBUG_FILE) {
+                            if (fileName.equals(DEBUG_FILENAME)) {
                                 System.out.printf("%s  found in commit %s%n", fileName, processCommit.getName());
-                                System.out.printf("%s  old id: %s%n", fileName, diffEntry.getOldId().toObjectId().getName());
-                                System.out.printf("%s  new id: %s%n", fileName, diffEntry.getNewId().toObjectId().getName());
+                                System.out.printf("%s  old Path: %s%n", fileName, diffEntry.getOldPath());
+                                System.out.printf("%s  new Path: %s%n", fileName, diffEntry.getNewPath());
                             }
                         }
 
                         // Get FileObject based on filename
                         FileObject fileObject = codebase.getFileObjectFromFilename(fileName);
-                        // Update latest commit for fileObject
-                        fileObject.setLatestCommit(processCommit.getName());
                         // Count the number of times the file was changed
                         incrementNumberOfTimesChanged(fileObject, processCommit.getName());
                         // Count the number of authors the file has
                         incrementNumberOfAuthors(fileObject, processCommit);
                         commitExtract.getFileSet().add(fileName);
+                        // Update latest commit for fileObject
+                        fileObject.setLatestCommit(processCommit.getName());
                     }
                 }
+
+                // Update previous Commit
+                previousCommit = processCommit;
             }
         } catch (IOException | GitAPIException e) {
             Constants.LOG.error(e);
@@ -157,11 +156,36 @@ public class RepositoryAnalyzer {
         }
     }
 
-    // For every file get file size and line count.
-    // Creates or gets HeatObject for file and fills/updates the values
-    public void attachLineCountToCodebase(Codebase codeBase, @NotNull RevCommit revCommit) throws IOException {
+    public Iterator<RevCommit> getCommitsByBranch(String branchName) throws IOException, GitAPIException {
+        // Get branch id
+        ObjectId branchId = git.getRepository().resolve(branchName);
+        // Get commits based on branch id
+        Iterator<RevCommit> commitIterator = git.log().add(branchId).call().iterator();
+
+        // Convert the commitIterable to a list for ease of use
+        List<RevCommit> commitList = new LinkedList<>();
+        while (commitIterator.hasNext()) {
+            commitList.add(0, commitIterator.next());
+        }
+
+        // Sort the commits by date with the oldest commits first
+        Comparator<RevCommit> TIME = Comparator.comparingInt(RevCommit::getCommitTime);
+        commitList.sort(TIME);
+
+        if (DEBUG_BRANCH) {
+            System.out.printf("Getting commits for branch %s,%n number of commits %s%n", branchName, commitList.size());
+        }
+
+        return commitList.iterator();
+    }
+
+    // For every file create HeatObject for processCommit
+    // And copy HeatObject from previousCommit into new HeatObject
+    // So we don't walk the tree again, after above is done, calculate fileSize and line count for new HeatObjects
+    // TODO can we do this in the DiffEntry b/c we'll know the file's fileSize / LineCount changed if they appear in the DiffEntry list
+    public void processHeatMetrics(Codebase codeBase, @NotNull RevCommit processCommit, RevCommit previousCommit) throws IOException {
         // Prepare a TreeWalk that can walk through the version of the repo at revCommit
-        RevTree tree = revCommit.getTree();
+        RevTree tree = processCommit.getTree();
         TreeWalk treeWalk = new TreeWalk(git.getRepository());
         treeWalk.addTree(tree);
         treeWalk.setRecursive(true);
@@ -171,31 +195,79 @@ public class RepositoryAnalyzer {
             // TODO proper file filtering
             String path = treeWalk.getPathString();
             if (path.endsWith(".java")) {
-                // Create an input stream that has the old version of the file open
-                ObjectId objectId = treeWalk.getObjectId(0);
-                ObjectLoader loader = git.getRepository().open(objectId);
-                InputStream inputStream = loader.openStream();
-
-                //Get number of lines and file size from inputStream
-                long lineCount = FileSizeCalculator.computeLineCount(inputStream);
-                long fileSize = loader.getSize();
 
                 // Get FileObject based on path
                 FileObject fileObject = codeBase.createOrGetFileObjectFromPath(path);
-                // Get the FileObject's HeatObject for this commit
-                HeatObject heatObject = fileObject.getHeatObjectAtCommit(revCommit.getName());
-                // Update vars with new info.
-                heatObject.setLineCount(lineCount);
-                heatObject.setFileSize(fileSize);
+
+                // Transfer old metrics to new heat object for this new commit
+                transferPreviousCommitHeatMetrics(fileObject, processCommit, previousCommit);
+
+                // Update line count and file size
+                updateLineCountAndFileSizeMetrics(treeWalk, fileObject, processCommit.getName());
+
+                if(DEBUG_FILE) {
+                    if(fileObject.getFilename().equals(DEBUG_FILENAME)) {
+                        HeatObject processHeatObject = fileObject.getHeatObjectAtCommit(processCommit.getName());
+                        System.out.printf("%s's HeatMetric lineCount %s.%n", DEBUG_FILENAME, processHeatObject.getLineCount());
+                        System.out.printf("%s's HeatMetric fileSize %s.%n", DEBUG_FILENAME, processHeatObject.getFileSize());
+                        System.out.printf("%s's HeatMetric commits %s.%n", DEBUG_FILENAME, processHeatObject.getNumberOfCommits());
+                        System.out.printf("%s's HeatMetric authors %s.%n", DEBUG_FILENAME, processHeatObject.getNumberOfAuthors());
+                    }
+                }
             }
         }
     }
+
+    public void transferPreviousCommitHeatMetrics(FileObject fileObject, RevCommit processCommit, RevCommit previousCommit) {
+        // Probably first commit..
+        if(previousCommit == null) {
+            // Get the FileObject's HeatObject for this commit
+            HeatObject heatObject = fileObject.createOrGetHeatObjectAtCommit(processCommit.getName());
+            heatObject.setFilename(fileObject.getFilename());
+            // That's all we can do if no previous commit found.
+            return;
+        }
+
+        // Start off a HeatObject by making it the have the values of the previous heat object
+        // The steps after this one will overwrite any that have updated.
+        HeatObject previousHeatObject = fileObject.createOrGetHeatObjectAtCommit(previousCommit.getName());
+        HeatObject processHeatObject = fileObject.createOrGetHeatObjectAtCommit(processCommit.getName());
+        // TODO in the future we can add the some sort of drop off here so as they don't change over commits they become less hot.
+        processHeatObject.setFilename(fileObject.getFilename()); // I think this is necessary
+        processHeatObject.setLineCount(previousHeatObject.getLineCount());
+        processHeatObject.setFileSize(previousHeatObject.getFileSize());
+        processHeatObject.setNumberOfCommits(previousHeatObject.getNumberOfCommits());
+        processHeatObject.setNumberOfAuthors(previousHeatObject.getNumberOfAuthors());
+    }
+
+    public void updateLineCountAndFileSizeMetrics(TreeWalk treeWalk, FileObject fileObject, String commitHash) throws IOException {
+        // Create an input stream that has the old version of the file open
+        ObjectId objectId = treeWalk.getObjectId(0);
+        ObjectLoader loader = git.getRepository().open(objectId);
+        InputStream inputStream = loader.openStream();
+
+        //Get number of lines and file size from inputStream
+        long lineCount = FileSizeCalculator.computeLineCount(inputStream);
+        long fileSize = loader.getSize();
+
+        // Get the FileObject's HeatObject for this commit
+        HeatObject heatObject = fileObject.getHeatObjectAtCommit(commitHash);
+        // Update vars with new info.
+        heatObject.setLineCount(lineCount);
+        heatObject.setFileSize(fileSize);
+    }
+
 
     private void incrementNumberOfTimesChanged(@NotNull FileObject fileObject, String commitHash) {
         // Get info about the previous commit
         int oldNumberOfCommits = 0;
         String prevCommit = fileObject.getLatestCommit();
         if (prevCommit != null) {
+            if (DEBUG_FILE) {
+                if (fileObject.getFilename().equals(DEBUG_FILENAME)) {
+                    System.out.printf("%s's latest commit is %s.%n", DEBUG_FILENAME, prevCommit);
+                }
+            }
             oldNumberOfCommits = fileObject.getHeatObjectAtCommit(prevCommit).getNumberOfCommits();
         }
 
@@ -229,29 +301,6 @@ public class RepositoryAnalyzer {
                 System.out.printf("File %s has %s authors as of %s%n", DEBUG_FILENAME, heatObject.getNumberOfAuthors(), commit.getName());
             }
         }
-    }
-
-    public Iterator<RevCommit> getTimeSortedCommitsByBranch(String branchName) throws IOException, GitAPIException {
-        // Get branch id
-        ObjectId branchId = git.getRepository().resolve(branchName);
-        // Get commits based on branch id
-        Iterator<RevCommit> commitIterator = git.log().add(branchId).call().iterator();
-
-        // Convert the commitIterable to a list for ease of use
-        List<RevCommit> commitList = new LinkedList<>();
-        while (commitIterator.hasNext()) {
-            commitList.add(0, commitIterator.next());
-        }
-
-        // Sort the commits by date with the oldest commits first
-        Comparator<RevCommit> TIME = Comparator.comparingInt(RevCommit::getCommitTime);
-        commitList.sort(TIME);
-
-        if (DEBUG_BRANCH) {
-            System.out.printf("Getting commits for branch %s,%n number of commits %s%n", branchName, commitList.size());
-        }
-
-        return commitList.iterator();
     }
 
     private List<DiffEntry> diffCommit(String hashID) throws IOException {
