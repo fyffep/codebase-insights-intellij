@@ -1,6 +1,9 @@
 package intellij_extension.models.redesign;
 
+import intellij_extension.utility.RepositoryAnalyzer;
+
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -14,38 +17,53 @@ import java.util.Set;
  */
 public class FileObject {
 
+    // region Variables
     private Path path;
-    // Id = filename = id;
     private String filename;
     private LinkedHashMap<String, HeatObject> commitHashToHeatObjectMap;
     private Set<String> uniqueAuthors;
     private Set<String> uniqueAuthorEmails;
-
-
     // This would maintain the latest key commit hash added in the map to avoid any traversal again
     private String latestCommit;
-    // FIXME implement me properly along with latest commit
-    //  This is just an easy hacky way to sort FileObjects in  a list.
-    public int latestCommitHeatLevel;
 
+    // FIXME implement me properly along with latest commit
+    //  This is just an easy hacky way to sort FileObjects in a list.
+    public int latestCommitHeatLevel;
+    // endregion
+
+    // region Constructors
     public FileObject() {
         //Empty constructor
     }
 
-    public FileObject(Path path, String filename) {
+    public FileObject(Path path) {
         this.path = path;
-        this.filename = filename;
+        this.filename = RepositoryAnalyzer.getFilename(this.path.toString());
+        System.out.printf("Filename %s from path %s.%n", filename, this.path.toString());
         this.commitHashToHeatObjectMap = new LinkedHashMap<>();
         this.uniqueAuthors = new LinkedHashSet<>();
         this.uniqueAuthorEmails = new LinkedHashSet<>();
     }
+    // endregion
 
     public Path getPath() {
         return path;
     }
 
+    public void setPath(String path) {
+        this.path = Paths.get(path);
+    }
+
+    public void setPath(Path path) {
+        this.path = path;
+    }
+
     public String getFilename() {
         return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 
     public Set<String> getUniqueAuthors() {
@@ -60,19 +78,17 @@ public class FileObject {
         return latestCommitHeatLevel;
     }
 
-    /**
-     * Returns a HeatObject that measures the heat of a certain version of this file.
-     * If no HeatObject exists for this file, returns a new (blank) HeatObject.
-     *
-     * @param commitHash a Git commit hash, such as "1e589e61ef75003b1df88bdb738f9d9f4a4f5f8a" that the file is present in
-     */
+    // Find/return existing or create new HeatObject for commitHash
     public HeatObject getHeatObjectAtCommit(String commitHash) {
-        if (commitHashToHeatObjectMap.containsKey(commitHash))
-            return commitHashToHeatObjectMap.get(commitHash);
-        //else: create a new HeatObject
-        HeatObject newHeatObject = new HeatObject();
-        commitHashToHeatObjectMap.put(commitHash, newHeatObject);
-        return newHeatObject;
+        HeatObject existingHeatObject = commitHashToHeatObjectMap.get(commitHash);
+
+        if(existingHeatObject != null) {
+            return existingHeatObject;
+        } else {
+            HeatObject newHeatObject = new HeatObject();
+            commitHashToHeatObjectMap.put(commitHash, newHeatObject);
+            return newHeatObject;
+        }
     }
 
     public LinkedHashMap<String, HeatObject> getCommitHashToHeatObjectMap() {
@@ -96,11 +112,6 @@ public class FileObject {
         this.latestCommit = commitHash;
     }
 
-    /**
-     * Returns the total heat
-     *
-     * @return
-     */
     public int getOverallHeat() {
         return (int) (Math.random() % 10); //TODO calculate overall heat here (this is a placeholder)
     }
