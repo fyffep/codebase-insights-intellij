@@ -39,7 +39,7 @@ public class FileObject {
     public FileObject(Path path) {
         this.path = path;
         this.filename = RepositoryAnalyzer.getFilename(this.path.toString());
-        System.out.printf("Filename %s from path %s.%n", filename, this.path.toString());
+        System.out.printf("FileObject Constructor: Filename %s from path %s.%n", this.filename, this.path.toString());
         this.commitHashToHeatObjectMap = new LinkedHashMap<>();
         this.uniqueAuthors = new LinkedHashSet<>();
         this.uniqueAuthorEmails = new LinkedHashSet<>();

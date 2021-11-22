@@ -38,8 +38,8 @@ public class RepositoryAnalyzer {
 
     private static final boolean DEBUG_BRANCH = true;
     private static final boolean DEBUG_COMMIT = true;
-    private static final boolean DEBUG_FILE = true;
-    private static final boolean DEBUG_DIFF_ENTRY = true;
+    private static final boolean DEBUG_FILE = false;
+    private static final boolean DEBUG_DIFF_ENTRY = false;
     private static final String DEBUG_COMMIT_HASH = "748e142e937b064f7df97cd6e22869cd20707d29";
     private static final String DEBUG_FILENAME = "CommitInfoRow.java";
     private final Git git;
@@ -57,6 +57,7 @@ public class RepositoryAnalyzer {
 
     // This method assumes "x/y/v/target";
     public static @NotNull String getFilename(@NotNull String path) {
+        path = path.replace("\\", "/");
         return path.substring(path.lastIndexOf("/") + 1);
     }
 
@@ -84,30 +85,14 @@ public class RepositoryAnalyzer {
 
     // Massive data gathering method
     // For every file gets line count, file size, # of authors/commits at every commit.
-    public void attachCodebaseData(Codebase codebase) {
+    public void attachCodebaseData(@NotNull Codebase codebase) {
         try {
 
             // Get all commits in the repos for active branch
-            Iterable<RevCommit> commitIterable = getCommitsByBranch(codebase.getActiveBranch());
-
-            // Convert the commitIterable to a list for ease of use
-            List<RevCommit> commitList = new LinkedList<>();
-            Iterator<RevCommit> commitIterator = commitIterable.iterator();
-            while (commitIterator.hasNext()) {
-                commitList.add(0, commitIterator.next());
-            }
-
-            // Sort the commits by date with the oldest commits first
-            Comparator<RevCommit> TIME = Comparator.comparingInt(RevCommit::getCommitTime);
-            commitList.sort(TIME);
-            commitIterator = commitList.iterator();
-
-            System.out.println(commitList.size());
+            Iterator<RevCommit> commitIterator = getTimeSortedCommitsByBranch(codebase.getActiveBranch());
 
             // Iterate through the commits and gather data per file
             while (commitIterator.hasNext()) {
-                System.out.println("1");
-
                 // Get commit to process
                 RevCommit processCommit = commitIterator.next();
 
@@ -125,6 +110,7 @@ public class RepositoryAnalyzer {
 
                 // Find the difference between the processCommit and the previous commit
                 final List<DiffEntry> diffs = diffCommit(processCommit.getName());
+
                 // Save the DiffEntry list
                 commitExtract.addDiffEntriesToDiffList(diffs);
 
@@ -173,7 +159,7 @@ public class RepositoryAnalyzer {
 
     // For every file get file size and line count.
     // Creates or gets HeatObject for file and fills/updates the values
-    public void attachLineCountToCodebase(Codebase codeBase, RevCommit revCommit) throws IOException {
+    public void attachLineCountToCodebase(Codebase codeBase, @NotNull RevCommit revCommit) throws IOException {
         // Prepare a TreeWalk that can walk through the version of the repo at revCommit
         RevTree tree = revCommit.getTree();
         TreeWalk treeWalk = new TreeWalk(git.getRepository());
@@ -245,20 +231,27 @@ public class RepositoryAnalyzer {
         }
     }
 
-    public Iterable<RevCommit> getCommitsByBranch(String branchName) throws IOException, GitAPIException {
+    public Iterator<RevCommit> getTimeSortedCommitsByBranch(String branchName) throws IOException, GitAPIException {
         // Get branch id
         ObjectId branchId = git.getRepository().resolve(branchName);
         // Get commits based on branch id
-        Iterable<RevCommit> commits = git.log().add(branchId).call();
+        Iterator<RevCommit> commitIterator = git.log().add(branchId).call().iterator();
 
-        if (DEBUG_BRANCH) {
-            System.out.printf("Getting commits for branch %s, branch's objectId is %s%n", branchName, branchId.getName());
-            // TODO (Only todo to make yellow)
-            //  WARNING - destroys list so the returned commits Iterable<> will be empty
-//            System.out.printf("Branch length: %s%n", StreamSupport.stream(commits.spliterator(), false).count());
+        // Convert the commitIterable to a list for ease of use
+        List<RevCommit> commitList = new LinkedList<>();
+        while (commitIterator.hasNext()) {
+            commitList.add(0, commitIterator.next());
         }
 
-        return commits;
+        // Sort the commits by date with the oldest commits first
+        Comparator<RevCommit> TIME = Comparator.comparingInt(RevCommit::getCommitTime);
+        commitList.sort(TIME);
+
+        if (DEBUG_BRANCH) {
+            System.out.printf("Getting commits for branch %s,%n number of commits %s%n", branchName, commitList.size());
+        }
+
+        return commitList.iterator();
     }
 
     private List<DiffEntry> diffCommit(String hashID) throws IOException {
