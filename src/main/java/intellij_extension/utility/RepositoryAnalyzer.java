@@ -19,6 +19,8 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,248 +36,131 @@ import java.util.*;
  */
 public class RepositoryAnalyzer {
 
-    // The class needs to have a Git repos open to analyze
-//    private final Repository repository;
+    private static final boolean DEBUG_BRANCH = true;
+    private static final boolean DEBUG_COMMIT = true;
+    private static final boolean DEBUG_FILE = true;
+    private static final boolean DEBUG_DIFF_ENTRY = true;
+    private static final String DEBUG_COMMIT_HASH = "748e142e937b064f7df97cd6e22869cd20707d29";
+    private static final String DEBUG_FILENAME = "CommitInfoRow.java";
     private final Git git;
 
-    /**
-     * Automatically locates the Git project according to what project
-     * the user has open in IntelliJ.
-     */
+    // Init git variable based on local repo
     public RepositoryAnalyzer() throws IOException {
-        // Open the repos
-//        this.repository = JGitHelper.openLocalRepository();
-        this.git = new Git(JGitHelper.openLocalRepository());
+        Repository repo = JGitHelper.openLocalRepository();
+        this.git = new Git(repo);
     }
 
+    // Init git variable based on supplied path
     public RepositoryAnalyzer(File projectPath) throws IOException {
-        // Open the repos
-//        this.repository = JGitHelper.openLocalRepository(projectPath);
         this.git = new Git(JGitHelper.openLocalRepository(projectPath));
     }
 
-    /**
-     * Adds 1 to the number of commits associated with a file.
-     *
-     * @param filePath   the file's path or name (can be either)
-     * @param commitHash the Git commit hash where the file changed at.
-     */
-    private static void incrementNumberOfTimesChanged(Codebase codebase, String filePath, String commitHash) {
-        FileObject fileObject = codebase.createOrGetFileObjectFromPath(filePath);
-
-        int oldNumberOfCommits = 0;
-        String prevCommit = fileObject.getLatestCommit();
-        if (prevCommit != null) {
-            oldNumberOfCommits = fileObject.getHeatObjectAtCommit(prevCommit).getNumberOfCommits();
-        }
-        fileObject.setLatestCommit(commitHash);
-
-
-        //Retrieve the HeatObject that holds the number of commits for the target file
-        HeatObject heatObject = fileObject.getHeatObjectAtCommit(commitHash);
-        //Increment the HeatObject's number of commits
-        heatObject.setNumberOfCommits(oldNumberOfCommits + 1);
-
-        //TEMP
-//        if (new File(filePath).getName().equals("CodebaseInsightsToolWindowFactory.java"))
-//        {
-//            System.out.println("File CodebaseInsightsToolWindowFactory has "+heatObject.getNumberOfCommits()+" commits as of "+commitHash);
-//        }
-
-        if (new File(filePath).getName().equals("TestData.java"))
-        {
-            System.out.println("File TestData has "+heatObject.getNumberOfCommits()+" commits as of "+commitHash);
-        }
-
-//        if (new File(filePath).getName().equals("RepositoryAnalyzer.java"))
-//        {
-//            System.out.println("File RepositoryAnalyzer has "+heatObject.getNumberOfCommits()+" commits as of "+commitHash);
-//        }
-
-//        if (new File(filePath).getName().equals("CodeBaseObservable.java")) {
-//            System.out.println("File CodeBaseObservable has " + heatObject.getNumberOfCommits() + " commits as of " + commitHash);
-//        }
+    // This method assumes "x/y/v/target";
+    public static @NotNull String getFilename(@NotNull String path) {
+        return path.substring(path.lastIndexOf("/") + 1);
     }
 
-    private static void trackAuthors(Codebase codebase, String filePath, RevCommit commit) {
-        // Get FileObject at path filePath
-        FileObject fileObject = codebase.createOrGetFileObjectFromPath(filePath);
-
-        // Extract and add author info to FileObject
-        PersonIdent authorInfo = commit.getAuthorIdent();
-        fileObject.getUniqueAuthors().add(authorInfo.getName());
-        fileObject.getUniqueAuthors().add(authorInfo.getEmailAddress());
-
-        // Retrieve the HeatObject associated with this commit
-        HeatObject heatObject = fileObject.getHeatObjectAtCommit(commit.getName());
-        // Attach author count
-        heatObject.setNumberOfAuthors(fileObject.getUniqueAuthors().size());
+    // Only for testing =/
+    public Git getGit() {
+        return git;
     }
 
-    /**
-     * Returns an InputStream with the old version of the file open.
-     * This is method is expensive because it has to search through the entire
-     * old version of the repository to find the file.
-     *
-     * @param filePath   the path of the file to open relative to the project root dir (ex: "my-project/my-package/my-file.java")
-     * @param commitHash a commit hash, such as "1e589e61ef75003b1df88bdb738f9d9f4a4f5f8a" that the file is present on.
-     * @throws IOException           when there are problems opening the commit
-     * @throws IllegalStateException if the file could not be found at that commit
-     */
-    public InputStream obtainFileContents(String filePath, String commitHash) throws IOException {
-        //Create a commit object from the commit hash
-        ObjectId commitId = git.getRepository().resolve(commitHash);
-        assert commitId != null;
-        RevWalk revWalk = new RevWalk(git.getRepository());
-        RevCommit commit = revWalk.parseCommit(commitId);
+    // Builds list of strings based on local checked out branches
+    public void attachBranchNameList(Codebase codebase) throws GitAPIException {
+        // Get the list of all LOCAL branches
+        List<Ref> call = git.branchList().call();
+        // Alternatively: Get the list of all branches, both local and REMOTE --> call = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
 
-        //Prepare a TreeWalk that can walk through the version of the repos at that commit
-        RevTree tree = commit.getTree();
-        TreeWalk treeWalk = new TreeWalk(git.getRepository());
-        treeWalk.addTree(tree);
-        treeWalk.setRecursive(true);
-
-        //Traverse through the old version of the project until the target file is found.
-        //I couldn't get `treeWalk.setFilter(PathFilter.create(filePath));` to work, so this is an alternative approach.
-        while (treeWalk.next()) {
-            String path = treeWalk.getPathString();
-            if (path.endsWith(filePath)) {
-                //Return an input stream that has the old version of the file open
-                ObjectId objectId = treeWalk.getObjectId(0);
-                ObjectLoader loader = git.getRepository().open(objectId);
-                return loader.openStream();
+        // Add all branch names to the Codebase
+        for (Ref ref : call) {
+            String branchName = getFilename(ref.getName());
+            if (DEBUG_BRANCH) {
+                System.out.printf("Branch name: %s, \n\tRef: %s, \n\tRef.getName(): %s, \n\tRef.getObjectId.getName(): %s%n",
+                        branchName, ref, ref.getName(), ref.getObjectId().getName());
             }
-        }
-
-        //Could not find the file on that commit
-        throw new IllegalStateException(String.format("The file `%s` could not be found in the commit `%s`.", filePath, commitHash));
-    }
-
-    /**
-     * Given a CodeBase, attaches all the file sizes (in bytes) and line counts of each file present
-     * at a particular commit of the Git repository. Each FileObject in the Codebase is given a new
-     * HeatObject that holds this file size and line count data. If a HeatObject already exists for the
-     * file at the given commit, this updates the existing HeatObject.
-     *
-     * @param codeBase   represents the entire repository and history
-     * @param commitHash the Git commit hash representing the version of the repository to examine
-     * @throws IOException when there are problems opening the commit
-     */
-    public void attachLineCountToCodebase(Codebase codeBase, String commitHash) throws IOException {
-        //Create a commit object from the commit hash
-        ObjectId commitId = git.getRepository().resolve(commitHash);
-        assert commitId != null;
-        RevWalk revWalk = new RevWalk(git.getRepository());
-        RevCommit revCommit = revWalk.parseCommit(commitId);
-
-        attachLineCountToCodebase(codeBase, revCommit);
-    }
-
-    /**
-     * Given a CodeBase, attaches all the file sizes (in bytes) and line counts of each file present
-     * at a particular commit of the Git repository. Each FileObject in the Codebase is given a new
-     * HeatObject that holds this file size and line count data. If a HeatObject already exists for the
-     * file at the given commit, this updates the existing HeatObject.
-     *
-     * @param codeBase  represents the entire repository and history
-     * @param revCommit the state of the Git repository to examine
-     * @throws IOException when there are problems opening the commit
-     */
-    public void attachLineCountToCodebase(Codebase codeBase, RevCommit revCommit) throws IOException {
-        //Prepare a TreeWalk that can walk through the version of the repos at that commit
-        RevTree tree = revCommit.getTree();
-        TreeWalk treeWalk = new TreeWalk(git.getRepository());
-        treeWalk.addTree(tree);
-        treeWalk.setRecursive(true);
-
-        //Traverse through the old version of the project until the target file is found.
-        //I couldn't get `treeWalk.setFilter(PathFilter.create(filePath));` to work, so this is an alternative approach.
-        while (treeWalk.next()) {
-            String path = treeWalk.getPathString();
-            if (path.endsWith(".java")) {
-                //Create an input stream that has the old version of the file open
-                ObjectId objectId = treeWalk.getObjectId(0);
-                ObjectLoader loader = git.getRepository().open(objectId);
-                InputStream inputStream = loader.openStream();
-
-                //Get number of lines and file size
-                long lineCount = FileSizeCalculator.computeLineCount(inputStream);
-                long fileSize = loader.getSize();
-
-                //Attach data to the HeatObject associated with this version of the file
-                FileObject fileObject = codeBase.createOrGetFileObjectFromPath(path);
-                HeatObject heatObject = fileObject.getHeatObjectAtCommit(revCommit.getName());
-                heatObject.setLineCount(lineCount);
-                heatObject.setFileSize(fileSize);
-            }
+            codebase.getBranchNameList().add(branchName.toLowerCase());
         }
     }
 
-    /**
-     * Computes line count, file size, and number of commits for every file at every commit.
-     * This places FileObjects in the given Codebase, and each of these FileObjects has its
-     * map of commit hashes to HeatObjects filled out.
-     * These new HeatObjects contain the newly computed metrics.
-     *
-     * @param codebase the Codebase to modify. It should have its active branch set.
-     */
+    // Massive data gathering method
+    // For every file gets line count, file size, # of authors/commits at every commit.
     public void attachCodebaseData(Codebase codebase) {
         try {
 
-            // Get all commits in the repos for one branch
+            // Get all commits in the repos for active branch
             Iterable<RevCommit> commitIterable = getCommitsByBranch(codebase.getActiveBranch());
 
-            // Convert the commitIterable (a RevWalk) to a List so that it can be sorted
+            // Convert the commitIterable to a list for ease of use
             List<RevCommit> commitList = new LinkedList<>();
             Iterator<RevCommit> commitIterator = commitIterable.iterator();
             while (commitIterator.hasNext()) {
                 commitList.add(0, commitIterator.next());
             }
-            commitIterable = null; // we're done with this now
 
             // Sort the commits by date with the oldest commits first
             Comparator<RevCommit> TIME = Comparator.comparingInt(RevCommit::getCommitTime);
             commitList.sort(TIME);
             commitIterator = commitList.iterator();
 
-            //Iterate through the commits two-at-a-time
-            while (commitIterator.hasNext()) {
+            System.out.println(commitList.size());
 
+            // Iterate through the commits and gather data per file
+            while (commitIterator.hasNext()) {
+                System.out.println("1");
+
+                // Get commit to process
                 RevCommit processCommit = commitIterator.next();
+
+                // Build CodebaseInsight's data object
+                // Extracts: author, email, full/short message, date, hash
                 Commit commitExtract = new Commit(processCommit);
+                // Add to active commit list
                 codebase.getActiveCommits().add(commitExtract);
+                // Get line count
                 attachLineCountToCodebase(codebase, processCommit);
-                System.out.println("\nProcessing commit: " + processCommit.getName());
+
+                if (DEBUG_COMMIT) {
+                    System.out.printf("\nProcessing commit: %s%n", processCommit.getName());
+                }
 
                 // Find the difference between the processCommit and the previous commit
                 final List<DiffEntry> diffs = diffCommit(processCommit.getName());
+                // Save the DiffEntry list
                 commitExtract.addDiffEntriesToDiffList(diffs);
 
-                if (processCommit.getName().equals("5720bf903e26d5da5ae09d40888a4b539b2ed534")) {
-                    diffCommit("5720bf903e26d5da5ae09d40888a4b539b2ed534");
-                }
-                if (processCommit.getName().equals("723a3eae7a8524b06733e9568f1b2240a0537b0b")) {
-                    diffCommit("723a3eae7a8524b06733e9568f1b2240a0537b0b");
-                }
-                if (processCommit.getName().equals("748e142e937b064f7df97cd6e22869cd20707d29")) {
-                    diffCommit("748e142e937b064f7df97cd6e22869cd20707d29");
+                if (DEBUG_COMMIT) {
+                    if (processCommit.getName().equals(DEBUG_COMMIT_HASH)) {
+                        diffCommit(DEBUG_COMMIT_HASH);
+                    }
                 }
 
-                // For each file modified in the commit...
-                System.out.println("DiffEntry size: " + diffs.size());
+                if (DEBUG_DIFF_ENTRY) {
+                    System.out.println("DiffEntry size: " + diffs.size());
+                }
                 for (DiffEntry diffEntry : diffs) {
+                    // Get file id (aka path)
                     String newFilePath = diffEntry.getNewPath();
+                    // TODO proper file filtering
                     if (newFilePath.endsWith(".java")) {
-                        String fileName = new File(newFilePath).getName(); //convert file path to file name
+                        // Get filename from diffEntry's path
+                        String fileName = getFilename(newFilePath);
 
-
-                        if (fileName.equals("TestData.java")) {
-                            System.out.println(fileName + " found in commit " + processCommit.getName());
+                        if (DEBUG_DIFF_ENTRY) {
+                            if (fileName.equals(DEBUG_FILENAME) || fileName.equals("CommitHistoryLine.java")) {
+                                System.out.printf("%s  found in commit %s%n", fileName, processCommit.getName());
+                                System.out.printf("%s  old id: %s%n", fileName, diffEntry.getOldId().toObjectId().getName());
+                                System.out.printf("%s  new id: %s%n", fileName, diffEntry.getNewId().toObjectId().getName());
+                            }
                         }
 
+                        // Get FileObject based on filename
+                        FileObject fileObject = codebase.getFileObjectFromFilename(fileName);
+                        // Update latest commit for fileObject
+                        fileObject.setLatestCommit(processCommit.getName());
                         // Count the number of times the file was changed
-                        incrementNumberOfTimesChanged(codebase, newFilePath, processCommit.getName());
-                        trackAuthors(codebase, newFilePath, processCommit);
+                        incrementNumberOfTimesChanged(fileObject, processCommit.getName());
+                        // Count the number of authors the file has
+                        incrementNumberOfAuthors(fileObject, processCommit);
                         commitExtract.getFileSet().add(fileName);
                     }
                 }
@@ -286,26 +171,94 @@ public class RepositoryAnalyzer {
         }
     }
 
-    /**
-     * Finds the list of all LOCAL branch names and adds them
-     * to the list inside the provided Codebase.
-     */
-    public void attachBranchNameList(Codebase codebase) throws GitAPIException {
-        // Get the list of all LOCAL branches
-        List<Ref> call = git.branchList().call();
-        // Alternatively: Get the list of all branches, both local and REMOTE --> call = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
+    // For every file get file size and line count.
+    // Creates or gets HeatObject for file and fills/updates the values
+    public void attachLineCountToCodebase(Codebase codeBase, RevCommit revCommit) throws IOException {
+        // Prepare a TreeWalk that can walk through the version of the repo at revCommit
+        RevTree tree = revCommit.getTree();
+        TreeWalk treeWalk = new TreeWalk(git.getRepository());
+        treeWalk.addTree(tree);
+        treeWalk.setRecursive(true);
 
-        // Add all branch names to the Codebase
-        for (Ref ref : call) {
-            String branchName = new File(ref.getName()).getName(); //quick-and-dirty way to convert a branch name from format "refs/heads/retire-old-model" to "retire-old-model"
-            codebase.getBranchNameList().add(branchName.toLowerCase());
+        // Traverse through the old version of the project until the target file is found.
+        while (treeWalk.next()) {
+            // TODO proper file filtering
+            String path = treeWalk.getPathString();
+            if (path.endsWith(".java")) {
+                // Create an input stream that has the old version of the file open
+                ObjectId objectId = treeWalk.getObjectId(0);
+                ObjectLoader loader = git.getRepository().open(objectId);
+                InputStream inputStream = loader.openStream();
+
+                //Get number of lines and file size from inputStream
+                long lineCount = FileSizeCalculator.computeLineCount(inputStream);
+                long fileSize = loader.getSize();
+
+                // Get FileObject based on path
+                FileObject fileObject = codeBase.createOrGetFileObjectFromPath(path);
+                // Get the FileObject's HeatObject for this commit
+                HeatObject heatObject = fileObject.getHeatObjectAtCommit(revCommit.getName());
+                // Update vars with new info.
+                heatObject.setLineCount(lineCount);
+                heatObject.setFileSize(fileSize);
+            }
+        }
+    }
+
+    private void incrementNumberOfTimesChanged(@NotNull FileObject fileObject, String commitHash) {
+        // Get info about the previous commit
+        int oldNumberOfCommits = 0;
+        String prevCommit = fileObject.getLatestCommit();
+        if (prevCommit != null) {
+            oldNumberOfCommits = fileObject.getHeatObjectAtCommit(prevCommit).getNumberOfCommits();
+        }
+
+        // Retrieve the HeatObject that holds the number of commits for the target file
+        HeatObject heatObject = fileObject.getHeatObjectAtCommit(commitHash);
+        // Increment the HeatObject's number of commits
+        heatObject.setNumberOfCommits(oldNumberOfCommits + 1);
+
+        if (DEBUG_FILE) {
+            if (fileObject.getFilename().equals(DEBUG_FILENAME)) {
+                System.out.printf("File %s has %s commits as of %s%n", DEBUG_FILENAME, heatObject.getNumberOfCommits(), commitHash);
+            }
+        }
+    }
+
+    private void incrementNumberOfAuthors(@NotNull FileObject fileObject, @NotNull RevCommit commit) {
+        // Extract and add author info to FileObject
+        PersonIdent authorInfo = commit.getAuthorIdent();
+        // These are sets so if the string already exists nothing will happen
+        fileObject.getUniqueAuthors().add(authorInfo.getName());
+        fileObject.getUniqueAuthorEmails().add(authorInfo.getEmailAddress());
+
+        // Retrieve the HeatObject associated with this commit
+        HeatObject heatObject = fileObject.getHeatObjectAtCommit(commit.getName());
+        // Attach author count
+        // Using email b/c that's possible more unique than a name
+        heatObject.setNumberOfAuthors(fileObject.getUniqueAuthorEmails().size());
+
+        if (DEBUG_FILE) {
+            if (fileObject.getFilename().equals(DEBUG_FILENAME)) {
+                System.out.printf("File %s has %s authors as of %s%n", DEBUG_FILENAME, heatObject.getNumberOfAuthors(), commit.getName());
+            }
         }
     }
 
     public Iterable<RevCommit> getCommitsByBranch(String branchName) throws IOException, GitAPIException {
-        // Choose the branch
+        // Get branch id
         ObjectId branchId = git.getRepository().resolve(branchName);
-        return git.log().add(branchId).call();
+        // Get commits based on branch id
+        Iterable<RevCommit> commits = git.log().add(branchId).call();
+
+        if (DEBUG_BRANCH) {
+            System.out.printf("Getting commits for branch %s, branch's objectId is %s%n", branchName, branchId.getName());
+            // TODO (Only todo to make yellow)
+            //  WARNING - destroys list so the returned commits Iterable<> will be empty
+//            System.out.printf("Branch length: %s%n", StreamSupport.stream(commits.spliterator(), false).count());
+        }
+
+        return commits;
     }
 
     private List<DiffEntry> diffCommit(String hashID) throws IOException {
@@ -315,31 +268,33 @@ public class RepositoryAnalyzer {
             newCommit = walk.parseCommit(git.getRepository().resolve(hashID));
         }
 
-        System.out.println("LogCommit: " + newCommit);
-        System.out.println("LogMessage: " + newCommit.getFullMessage());
+        if (DEBUG_DIFF_ENTRY) {
+            System.out.printf("LogCommit: %s%n", newCommit);
+            System.out.printf("LogMessage: %s%n", newCommit.getFullMessage());
+        }
 
         // Compute diff and return
         try {
             return getDiffOfCommit(newCommit);
         } catch (GitAPIException e) {
-            // Proper exception handling in this case
-            e.printStackTrace();
+            Constants.LOG.error(e.getMessage());
+            // TODO Proper exception handling in this case
+            //  Not sure this is best option (returning empty list)
+            return new ArrayList<>();
         }
-
-        // Proper null handling in this case
-        return new ArrayList<>();
     }
 
     // Helper gets the DiffEntry list
     private List<DiffEntry> getDiffOfCommit(RevCommit newCommit) throws IOException, GitAPIException {
-
         // Get commit that is previous to the current one.
         RevCommit oldCommit = getPrevHash(newCommit);
         if (oldCommit == null) {
+            // If no old commit then this is the first commit and there is no DiffEntries
+            // TODO - DECISION - should we make fake DiffEntry list will all files plus Addition category?
             return new ArrayList<>();
         }
 
-        // Use treeIterator to diff.
+        // Use treeIterator to create the diffs.
         AbstractTreeIterator oldTreeIterator = getCanonicalTreeParser(oldCommit);
         AbstractTreeIterator newTreeIterator = getCanonicalTreeParser(newCommit);
 
@@ -349,14 +304,19 @@ public class RepositoryAnalyzer {
                 .setNewTree(newTreeIterator)
                 .call();
 
-//        System.out.println("\n~~~~~!!!PREFORMAT!!!~~~~~");
-//        for (DiffEntry diffEntry : diffs) {
-//            System.out.println("~~~~~NEW FILE~~~~~");
-//            System.out.println("DiffEntry ChangeType: " + diffEntry.getChangeType());
-//            System.out.println("DiffEntry OldPath: " + diffEntry.getOldPath());
-//            System.out.println("DiffEntry NewPath: " + diffEntry.getNewPath());
-//        }
+        if (DEBUG_DIFF_ENTRY) {
+            System.out.println("\n~~~~~!!!PRE-FORMAT!!!~~~~~");
+            for (DiffEntry diffEntry : diffs) {
+                System.out.println("~~~~~NEW FILE~~~~~");
+                System.out.printf("DiffEntry ChangeType: %s%n", diffEntry.getChangeType());
+                System.out.printf("DiffEntry OldPath: %s%n", diffEntry.getOldPath());
+                System.out.printf("DiffEntry NewPath: %s%n", diffEntry.getNewPath());
+                System.out.printf("DiffEntry OldId: %s%n", diffEntry.getOldId().toObjectId().getName());
+                System.out.printf("DiffEntry NewId: %s%n", diffEntry.getNewId().toObjectId().getName());
+            }
+        }
 
+        // Format the diffs, used for finding renames - NOT PERFECT!
         OutputStream outputStream = NullOutputStream.NULL_OUTPUT_STREAM;
         try (DiffFormatter formatter = new DiffFormatter(outputStream)) {
             formatter.setRepository(git.getRepository());
@@ -365,39 +325,49 @@ public class RepositoryAnalyzer {
             diffs = formatter.getRenameDetector().compute();
         }
 
-//        System.out.println("\n~~~~~!!!POSTFORMAT!!!~~~~~");
-//        for (DiffEntry diffEntry : diffs) {
-//            System.out.println("~~~~~NEW FILE~~~~~");
-//            System.out.println("DiffEntry ChangeType: " + diffEntry.getChangeType());
-//            System.out.println("DiffEntry OldPath: " + diffEntry.getOldPath());
-//            System.out.println("DiffEntry NewPath: " + diffEntry.getNewPath());
-//        }
+        if (DEBUG_DIFF_ENTRY) {
+            System.out.println("\n~~~~~!!!POST FORMAT!!!~~~~~");
+            for (DiffEntry diffEntry : diffs) {
+                System.out.println("~~~~~NEW FILE~~~~~");
+                System.out.printf("DiffEntry ChangeType: %s%n", diffEntry.getChangeType());
+                System.out.printf("DiffEntry OldPath: %s%n", diffEntry.getOldPath());
+                System.out.printf("DiffEntry NewPath: %s%n", diffEntry.getNewPath());
+                System.out.printf("DiffEntry OldId: %s%n", diffEntry.getOldId().toObjectId().getName());
+                System.out.printf("DiffEntry NewId: %s%n", diffEntry.getNewId().toObjectId().getName());
+            }
+        }
 
         return diffs;
     }
 
-    // Helper function to get the previous commit. Written by Whitecat
-    public RevCommit getPrevHash(RevCommit commit) throws IOException {
-
+    // Helper function to get the previous commit. Written by Whitecat from https://stackoverflow.com/questions/39935160/how-to-use-jgit-to-get-list-of-changes-in-files
+    public RevCommit getPrevHash(RevCommit commit) {
+        // Make a rev walk
         try (RevWalk walk = new RevWalk(git.getRepository())) {
-            // Starting point
+            // Set starting point of RevWalk based on RevCommit
             walk.markStart(commit);
+            // One loop means previous commit
             int count = 0;
             for (RevCommit rev : walk) {
-                // got the previous commit.
+                // Got the previous commit.
                 if (count == 1) {
                     return rev;
                 }
                 count++;
             }
+            // Proper destruction if nothing is found
             walk.dispose();
+        } catch (IOException e) {
+            Constants.LOG.error(e.getMessage());
+            return null;
         }
         //Reached end and no previous commits.
         return null;
     }
 
-    // Helper function to get the tree of the changes in a commit. Written by Rüdiger Herrmann
-    private AbstractTreeIterator getCanonicalTreeParser(ObjectId commitId) throws IOException {
+    // Helper function to get the tree of the changes in a commit. Written by Rüdiger Herrmann from https://www.codeaffine.com/2016/06/16/jgit-diff/
+    @Contract("_ -> new")
+    private @NotNull AbstractTreeIterator getCanonicalTreeParser(ObjectId commitId) throws IOException {
         try (RevWalk walk = new RevWalk(git.getRepository())) {
             RevCommit commit = walk.parseCommit(commitId);
             ObjectId treeId = commit.getTree().getId();
@@ -406,38 +376,94 @@ public class RepositoryAnalyzer {
             }
         }
     }
-
-
-    /**UNUSED METHODS!!
-     * UNUSED METHODS!!
-     * UNUSED METHODS!!
-     * UNUSED METHODS!!
-     * UNUSED METHODS!!*/
-    /**
-     * A helper method from the JGit Cookbook...I actually have no idea what it does.
-     * However, it's necessary for finding diffs.
-     */
-    private AbstractTreeIterator prepareTreeParser(String commitHash) throws IOException {
-        // from the commit we can build the tree which allows us to construct the TreeParser
-        // noinspection Duplicates
-        try (RevWalk walk = new RevWalk(git.getRepository())) {
-            RevCommit commit = walk.parseCommit(git.getRepository().resolve(commitHash));
-            RevTree tree = walk.parseTree(commit.getTree().getId());
-
-            CanonicalTreeParser treeParser = new CanonicalTreeParser();
-            try (ObjectReader reader = git.getRepository().newObjectReader()) {
-                // Maybe this reset was doing us wrong??
-                // Not exactly sure what it does nor am I looking into it
-                // - Ethan
-                treeParser.reset(reader, tree.getId());
-            }
-            walk.dispose();
-            return treeParser;
-        }
-    }
-
-    public Iterable<RevCommit> getAllCommits() throws IOException, GitAPIException {
-        return git.log().all().call();
-    }
-
 }
+
+/**
+ * UNUSED METHODS!!
+ * UNUSED METHODS!!
+ * UNUSED METHODS!!
+ * UNUSED METHODS!!
+ * UNUSED METHODS!!
+ * UNUSED METHODS!!
+ * UNUSED METHODS!!
+ * UNUSED METHODS!!
+ * UNUSED METHODS!!
+ * UNUSED METHODS!!
+ */
+
+
+//    /**
+//     * Returns an InputStream with the old version of the file open.
+//     * This is method is expensive because it has to search through the entire
+//     * old version of the repository to find the file.
+//     *
+//     * @param filePath   the path of the file to open relative to the project root dir (ex: "my-project/my-package/my-file.java")
+//     * @param commitHash a commit hash, such as "1e589e61ef75003b1df88bdb738f9d9f4a4f5f8a" that the file is present on.
+//     * @throws IOException           when there are problems opening the commit
+//     * @throws IllegalStateException if the file could not be found at that commit
+//     */
+//    public InputStream obtainFileContents(String filePath, String commitHash) throws IOException {
+//        //Create a commit object from the commit hash
+//        ObjectId commitId = git.getRepository().resolve(commitHash);
+//        assert commitId != null;
+//        RevWalk revWalk = new RevWalk(git.getRepository());
+//        RevCommit commit = revWalk.parseCommit(commitId);
+//
+//        //Prepare a TreeWalk that can walk through the version of the repos at that commit
+//        RevTree tree = commit.getTree();
+//        TreeWalk treeWalk = new TreeWalk(git.getRepository());
+//        treeWalk.addTree(tree);
+//        treeWalk.setRecursive(true);
+//
+//        //Traverse through the old version of the project until the target file is found.
+//        //I couldn't get `treeWalk.setFilter(PathFilter.create(filePath));` to work, so this is an alternative approach.
+//        while (treeWalk.next()) {
+//            String path = treeWalk.getPathString();
+//            if (path.endsWith(filePath)) {
+//                //Return an input stream that has the old version of the file open
+//                ObjectId objectId = treeWalk.getObjectId(0);
+//                ObjectLoader loader = git.getRepository().open(objectId);
+//                return loader.openStream();
+//            }
+//        }
+//
+//        //Could not find the file on that commit
+//        throw new IllegalStateException(String.format("The file `%s` could not be found in the commit `%s`.", filePath, commitHash));
+//    }
+
+
+//    public void attachLineCountToCodebase(Codebase codeBase, String commitHash) throws IOException {
+//        //Create a commit object from the commit hash
+//        ObjectId commitId = git.getRepository().resolve(commitHash);
+//        assert commitId != null;
+//        RevWalk revWalk = new RevWalk(git.getRepository());
+//        RevCommit revCommit = revWalk.parseCommit(commitId);
+//
+//        attachLineCountToCodebase(codeBase, revCommit);
+//    }
+
+
+//    private AbstractTreeIterator prepareTreeParser(String commitHash) throws IOException {
+//        // from the commit we can build the tree which allows us to construct the TreeParser
+//        // noinspection Duplicates
+//        try (RevWalk walk = new RevWalk(git.getRepository())) {
+//            RevCommit commit = walk.parseCommit(git.getRepository().resolve(commitHash));
+//            RevTree tree = walk.parseTree(commit.getTree().getId());
+//
+//            CanonicalTreeParser treeParser = new CanonicalTreeParser();
+//            try (ObjectReader reader = git.getRepository().newObjectReader()) {
+//                // Maybe this reset was doing us wrong??
+//                // Not exactly sure what it does nor am I looking into it
+//                // - Ethan
+//                treeParser.reset(reader, tree.getId());
+//            }
+//            walk.dispose();
+//            return treeParser;
+//        }
+//    }
+
+
+//    public Iterable<RevCommit> getAllCommits() throws IOException, GitAPIException {
+//        return git.log().all().call();
+//    }
+

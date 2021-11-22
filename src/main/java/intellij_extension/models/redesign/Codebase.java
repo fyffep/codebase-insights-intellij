@@ -3,37 +3,37 @@ package intellij_extension.models.redesign;
 import intellij_extension.Constants;
 import intellij_extension.observer.CodeBaseObservable;
 import intellij_extension.observer.CodeBaseObserver;
+import intellij_extension.utility.RepositoryAnalyzer;
 
-import java.io.File;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class Codebase implements CodeBaseObservable {
+
+    // region Vars
     private static Codebase instance; //singleton
     private final List<CodeBaseObserver> observerList = new LinkedList<>();
     private final LinkedHashSet<String> branchNameList;
     private String activeBranch;
     private LinkedHashSet<Commit> activeCommits;
     private LinkedHashSet<FileObject> activeFileObjects;
+    // endregion
 
-
-    public Codebase() {
+    // region Singleton Constructor
+    private Codebase() {
         activeBranch = "master";
         branchNameList = new LinkedHashSet<>();
         activeCommits = new LinkedHashSet<>();
         activeFileObjects = new LinkedHashSet<>();
     }
 
-    /**
-     * @return a singleton instance of this class.
-     */
     public static Codebase getInstance() {
         if (instance == null) {
             //synchronized block to remove overhead
             synchronized (Codebase.class) {
+                // if instance is null, initialize
                 if (instance == null) {
-                    // if instance is null, initialize
                     instance = new Codebase();
                     System.out.println("Model (Codebase) has been created"); //logger doesn't work here
                 }
@@ -41,14 +41,7 @@ public class Codebase implements CodeBaseObservable {
         }
         return instance;
     }
-
-    public HashSet<FileObject> getActiveFileObjects() {
-        return activeFileObjects;
-    }
-
-    public String getActiveBranch() {
-        return activeBranch;
-    }
+    // endregion
 
     public void selectDefaultBranch() {
         String branch = "";
@@ -60,7 +53,7 @@ public class Codebase implements CodeBaseObservable {
         }
 
         // Means no default branches are in branchNameList
-        if (branch.equals("")) {
+        if (branch.isEmpty()) {
             // So, just grab the first branch
             branch = branchNameList.stream().findFirst().get();
         }
@@ -68,73 +61,63 @@ public class Codebase implements CodeBaseObservable {
         activeBranch = branch;
     }
 
-    public LinkedHashSet<String> getBranchNameList() {
-        return branchNameList;
-    }
-
+    // region Getters
     public LinkedHashSet<Commit> getActiveCommits() {
         return activeCommits;
     }
 
-    /**
-     * @param path to file
-     * @return a FileObject corresponding to the target path - if not corresponding FileObject found, it is created.
-     */
-    public FileObject createOrGetFileObjectFromPath(String path) {
-        String fileName = new File(path).getName(); //convert file path to file name
+    public HashSet<FileObject> getActiveFileObjects() {
+        return activeFileObjects;
+    }
 
+    public String getActiveBranch() {
+        return activeBranch;
+    }
+
+    public LinkedHashSet<String> getBranchNameList() {
+        return branchNameList;
+    }
+
+    // Should only be used when building model data
+    public FileObject createOrGetFileObjectFromPath(String path) {
         FileObject selectedFile = activeFileObjects.stream()
-                .filter(file -> file.getFilename().equals(fileName)).findAny().orElse(null);
+                .filter(file -> file.getFilename().equals(RepositoryAnalyzer.getFilename(path))).findAny().orElse(null);
 
         // Failed to find file associated with param id
         if (selectedFile == null) {
             // Create and return new FileObject
-            selectedFile = new FileObject(Paths.get(path), fileName);
+            selectedFile = new FileObject(Paths.get(path));
             activeFileObjects.add(selectedFile);
         }
 
         return selectedFile;
     }
 
-    /**
-     * @param path to file
-     * @return a FileObject corresponding to the target filename
-     */
-    private FileObject getFileObjectFromPath(String path) {
-        String fileName = new File(path).getName(); //convert file path to file name
-
+    // If not building model data we want a null return
+    // This ensures we know something went wrong. Which means we are looking for a filename that doesn't exist in our model's data
+    public FileObject getFileObjectFromFilename(String filename) {
         FileObject selectedFile = activeFileObjects.stream()
-                .filter(file -> file.getFilename().equals(fileName)).findAny().orElse(null);
-
-        // Failed to find file associated with param path
-        if (selectedFile == null) {
-            throw new NullPointerException(String.format("Failed to find the proper file associated with the selected HeatMapObject. ID = %s", path));
-        }
+                .filter(file -> file.getFilename().equals(filename)).findAny().orElse(null);
 
         return selectedFile;
     }
 
-    /**
-     * @param id a Git commit hash
-     * @return a Commit corresponding to the target commit hash
-     */
-    public Commit getCommitFromId(String id) {
+    public Commit getCommitFromCommitHash(String commitHash) {
         Commit selectedCommit = activeCommits.stream()
-                .filter(commit -> commit.getHash().equals(id)).findAny().orElse(null);
+                .filter(commit -> commit.getHash().equals(commitHash)).findAny().orElse(null);
 
         // Failed to find file associated with param id
         if (selectedCommit == null) {
-            throw new NullPointerException(String.format("Failed to find the proper commit associated with the selected commit in the TableView. Hash = %s", id));
+            throw new NullPointerException(String.format("Failed to find the proper commit associated with the selected commit in the TableView. Hash = %s", commitHash));
         }
 
         return selectedCommit;
     }
+    // endregion
 
+    // region Controller Communication
     public void heatMapComponentSelected(String path) {
-//        Constants.LOG.info("CLI: Controller told Model " + path + " was clicked. Extracting data.");
-//        System.out.println("SOP: Controller told Model " + path + " was clicked. Extracting data.");
-
-        FileObject selectedFile = getFileObjectFromPath(path);
+        FileObject selectedFile = getFileObjectFromFilename(RepositoryAnalyzer.getFilename(path));
 
         // Get commits associated with file
         ArrayList<Commit> associatedCommits = (ArrayList<Commit>) activeCommits.stream()
@@ -162,27 +145,30 @@ public class Codebase implements CodeBaseObservable {
         activeFileObjects.clear();
         activeFileObjects = new LinkedHashSet<>();
 
-        // REBUILD MODEL DATA
+        // TODO REBUILD MODEL DATA
 
         notifyObserversOfBranchChange();
     }
 
-    public void commitSelected(String id) {
-        Commit selectedCommit = getCommitFromId(id);
+    public void commitSelected(String commitHash) {
+        Commit selectedCommit = getCommitFromCommitHash(commitHash);
 
         notifyObserversOfRefreshCommitDetails(selectedCommit);
     }
 
     public void changeHeatMapToCommit(String commitHash) {
         System.out.println("Update HeatMapComponents to this commitHash: " + commitHash);
+        // TODO - Implement UI and backend logic.
     }
 
-    public void openFile(String id) {
-        FileObject selectedFile = getFileObjectFromPath(id);
+    public void openFile(String filename) {
+        FileObject selectedFile = getFileObjectFromFilename(filename);
         System.out.println("Open file in intellij: " + selectedFile.getFilename());
         // TODO - How to open this file via Intellij
     }
+    // endregion
 
+    // region Observable Methods
     @Override
     public void notifyObserversOfRefreshHeatMap() {
         for (CodeBaseObserver observer : observerList) {
@@ -227,4 +213,5 @@ public class Codebase implements CodeBaseObservable {
     public void unregisterObserver(CodeBaseObserver observer) {
         observerList.remove(observer);
     }
+    // endregion
 }
