@@ -1,7 +1,9 @@
 package intellij_extension.views;
 
 import javafx.geometry.Orientation;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
+import javafx.scene.layout.AnchorPane;
 
 public class HeatMapSplitPane extends SplitPane {
 
@@ -16,9 +18,20 @@ public class HeatMapSplitPane extends SplitPane {
 
         setOrientation(Orientation.VERTICAL);
 
-        // Top half
+        // Top half: insert HeatMapPane inside an AnchorPane inside a ScrollPane
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.prefWidthProperty().bind(this.widthProperty());
+        this.getItems().add(scrollPane);
+
+        AnchorPane anchorPane = new AnchorPane();
+        anchorPane.prefWidthProperty().bind(scrollPane.widthProperty());
+        anchorPane.prefHeightProperty().bind(scrollPane.heightProperty());
+        scrollPane.setContent(anchorPane);
+
         heatMapPane = new HeatMapPane();
-        this.getItems().add(heatMapPane);
+        heatMapPane.prefWidthProperty().bind(scrollPane.widthProperty());
+        anchorPane.getChildren().add(heatMapPane);
+
 
         //Bottom half
         selectedFileView = new SelectedFileTitledPane();
