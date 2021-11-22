@@ -11,21 +11,27 @@ public class HeatObject {
     private String filename;
     private long lineCount;
     private long fileSize;
-    private int numberOfCommits = 0;
-    private int numberOfAuthors = 0;
+    private int numberOfCommits;
+    private int numberOfAuthors;
 
     public HeatObject() {
         //This allows the metrics to be filled out gradually
+        heatLevel = -1;
+        filename = "";
+        lineCount = -1;
+        fileSize = -1;
+        numberOfCommits = -1;
+        numberOfAuthors = -1;
     }
 
-    public HeatObject(float heatLevel, String filename, long lineCount, long fileSize, int numberOfCommits, int numberOfAuthors) {
-        this.heatLevel = heatLevel;
-        this.filename = filename;
-        this.lineCount = lineCount;
-        this.fileSize = fileSize;
-        this.numberOfCommits = numberOfCommits;
-        this.numberOfAuthors = numberOfAuthors;
-    }
+//    public HeatObject(float heatLevel, String filename, long lineCount, long fileSize, int numberOfCommits, int numberOfAuthors) {
+//        this.heatLevel = heatLevel;
+//        this.filename = filename;
+//        this.lineCount = lineCount;
+//        this.fileSize = fileSize;
+//        this.numberOfCommits = numberOfCommits;
+//        this.numberOfAuthors = numberOfAuthors;
+//    }
 
     //TODO this should be deleted in favor of computeHeatLevel()
     public float getHeatLevel() {
@@ -34,6 +40,10 @@ public class HeatObject {
 
     public String getFilename() {
         return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 
     public long getLineCount() {

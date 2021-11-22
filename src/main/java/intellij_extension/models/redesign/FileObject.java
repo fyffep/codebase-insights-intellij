@@ -39,7 +39,6 @@ public class FileObject {
     public FileObject(Path path) {
         this.path = path;
         this.filename = RepositoryAnalyzer.getFilename(this.path.toString());
-        System.out.printf("FileObject Constructor: Filename %s from path %s.%n", this.filename, this.path.toString());
         this.commitHashToHeatObjectMap = new LinkedHashMap<>();
         this.uniqueAuthors = new LinkedHashSet<>();
         this.uniqueAuthorEmails = new LinkedHashSet<>();
@@ -79,7 +78,7 @@ public class FileObject {
     }
 
     // Find/return existing or create new HeatObject for commitHash
-    public HeatObject getHeatObjectAtCommit(String commitHash) {
+    public HeatObject createOrGetHeatObjectAtCommit(String commitHash) {
         HeatObject existingHeatObject = commitHashToHeatObjectMap.get(commitHash);
 
         if(existingHeatObject != null) {
@@ -89,6 +88,11 @@ public class FileObject {
             commitHashToHeatObjectMap.put(commitHash, newHeatObject);
             return newHeatObject;
         }
+    }
+
+    // Return null if not found - if null is returned there is an error in our code somewhere
+    public HeatObject getHeatObjectAtCommit(String commitHash) {
+        return commitHashToHeatObjectMap.get(commitHash);
     }
 
     public LinkedHashMap<String, HeatObject> getCommitHashToHeatObjectMap() {
