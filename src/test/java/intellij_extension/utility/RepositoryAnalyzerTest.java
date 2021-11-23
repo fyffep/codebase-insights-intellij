@@ -190,7 +190,7 @@ public class RepositoryAnalyzerTest
     //same as above test case but with different data
     @Test
     void attachCodebaseData_FileHeatMetrics_CodeBaseObservableHash9db512_Success() throws IOException, GitAPIException {
-        final String TEST_HASH = "bc4a8368aea73b743452a198f6c58c6b429c75ee";
+        final String TEST_HASH = "723a3eae7a8524b06733e9568f1b2240a0537b0b";
         final String TEST_FILE_NAME = "CodeBaseObservable.java";
         final long EXPECTED_LINE_COUNT = 21;
         final long EXPECTED_FILE_SIZE = 675;

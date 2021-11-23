@@ -36,11 +36,11 @@ import java.util.*;
  */
 public class RepositoryAnalyzer {
 
-    private static final boolean DEBUG_BRANCH = true;
+    private static final boolean DEBUG_BRANCH = false;
     private static final boolean DEBUG_COMMIT = true;
-    private static final boolean DEBUG_FILE = true;
+    private static final boolean DEBUG_FILE = false;
     private static final boolean DEBUG_DIFF_ENTRY = false;
-    private static final String DEBUG_COMMIT_HASH = "0cdfe6bf92eddb57763f491b6db6edc6f56324f5";
+    private static final String DEBUG_COMMIT_HASH = "commit 0cdfe6bf92eddb57763f491b6db6edc6f56324f5 1636656382 ------p";
     private static final String DEBUG_FILENAME = "CodeBaseObservable.java";
     private final Git git;
 
@@ -57,6 +57,7 @@ public class RepositoryAnalyzer {
 
     // This method assumes "x/y/v/target";
     public static @NotNull String getFilename(@NotNull String path) {
+        // If path uses \ replace with /
         path = path.replace("\\", "/");
         return path.substring(path.lastIndexOf("/") + 1);
     }
@@ -98,8 +99,12 @@ public class RepositoryAnalyzer {
                 // Get commit to process
                 processCommit = commitIterator.next();
                 if (DEBUG_COMMIT) {
-                    System.out.printf("\nProcessing commit: %s%n Commit Time: %s%n", processCommit.getName(), processCommit.getAuthorIdent().getWhen());
+                    PersonIdent authorInfo = processCommit.getAuthorIdent();
+                    System.out.printf("\nProcessing commit: %s%n Commit Author: %s%n Commit Time: %s%n", processCommit.getName(), authorInfo.getName(), authorInfo.getWhen());
+                    System.out.printf("LogMessage: %s%n", processCommit.getShortMessage());
+                    System.out.printf("Parent Count: %s%n", processCommit.getParentCount());
                 }
+
 
                 // Build CodebaseInsight's data object
                 // Extracts: author, email, full/short message, date, hash
@@ -143,7 +148,17 @@ public class RepositoryAnalyzer {
                         incrementNumberOfAuthors(fileObject, processCommit);
                         commitExtract.getFileSet().add(fileName);
                         // Update latest commit for fileObject
-                        fileObject.setLatestCommit(processCommit.getName());
+                        fileObject.setLatestCommitInDiffEntryList(processCommit.getName());
+
+                        //                if(DEBUG_FILE) {
+                        if(fileObject.getFilename().equals(DEBUG_FILENAME)) {
+                            HeatObject processHeatObject = fileObject.getHeatObjectAtCommit(processCommit.getName());
+                            System.out.printf("%s's HeatMetric lineCount %s.%n", DEBUG_FILENAME, processHeatObject.getLineCount());
+                            System.out.printf("%s's HeatMetric fileSize %s.%n", DEBUG_FILENAME, processHeatObject.getFileSize());
+                            System.out.printf("%s's HeatMetric commits %s.%n", DEBUG_FILENAME, processHeatObject.getNumberOfCommits());
+                            System.out.printf("%s's HeatMetric authors %s.%n", DEBUG_FILENAME, processHeatObject.getNumberOfAuthors());
+                        }
+//                }
                     }
                 }
 
@@ -200,27 +215,33 @@ public class RepositoryAnalyzer {
                 FileObject fileObject = codeBase.createOrGetFileObjectFromPath(path);
 
                 // Transfer old metrics to new heat object for this new commit
-                transferPreviousCommitHeatMetrics(fileObject, processCommit, previousCommit);
+                // processCommit == current, latest is previous commit
+                transferHeatMetricsFromLatestToCurrent(fileObject, processCommit);
 
                 // Update line count and file size
                 updateLineCountAndFileSizeMetrics(treeWalk, fileObject, processCommit.getName());
 
-                if(DEBUG_FILE) {
+                // Update last time we saw this file in a TreeWalk
+                fileObject.setLatestCommitInTreeWalk(processCommit.getName());
+
+////                if(DEBUG_FILE) {
                     if(fileObject.getFilename().equals(DEBUG_FILENAME)) {
+                        System.out.println("~~~~~FILE FOUND IN TREEWALK~~~~~");
                         HeatObject processHeatObject = fileObject.getHeatObjectAtCommit(processCommit.getName());
                         System.out.printf("%s's HeatMetric lineCount %s.%n", DEBUG_FILENAME, processHeatObject.getLineCount());
                         System.out.printf("%s's HeatMetric fileSize %s.%n", DEBUG_FILENAME, processHeatObject.getFileSize());
                         System.out.printf("%s's HeatMetric commits %s.%n", DEBUG_FILENAME, processHeatObject.getNumberOfCommits());
                         System.out.printf("%s's HeatMetric authors %s.%n", DEBUG_FILENAME, processHeatObject.getNumberOfAuthors());
                     }
-                }
+//                }
             }
         }
     }
 
-    public void transferPreviousCommitHeatMetrics(FileObject fileObject, RevCommit processCommit, RevCommit previousCommit) {
+    public void transferHeatMetricsFromLatestToCurrent(FileObject fileObject, RevCommit processCommit) {
+        String previousCommitHashId = fileObject.getLatestCommitInTreeWalk();
         // Probably first commit..
-        if(previousCommit == null) {
+        if(previousCommitHashId.isEmpty()) {
             // Get the FileObject's HeatObject for this commit
             HeatObject heatObject = fileObject.createOrGetHeatObjectAtCommit(processCommit.getName());
             heatObject.setFilename(fileObject.getFilename());
@@ -228,10 +249,11 @@ public class RepositoryAnalyzer {
             return;
         }
 
-        // Start off a HeatObject by making it the have the values of the previous heat object
+        // Start off a new HeatObject with the values of the previous heat object
         // The steps after this one will overwrite any that have updated.
-        HeatObject previousHeatObject = fileObject.createOrGetHeatObjectAtCommit(previousCommit.getName());
-        HeatObject processHeatObject = fileObject.createOrGetHeatObjectAtCommit(processCommit.getName());
+        HeatObject previousHeatObject = fileObject.getHeatObjectAtCommit(previousCommitHashId); // if this is null this is a problem or something needs update
+        HeatObject processHeatObject = fileObject.createOrGetHeatObjectAtCommit(processCommit.getName()); // this should always be a creation
+
         // TODO in the future we can add the some sort of drop off here so as they don't change over commits they become less hot.
         processHeatObject.setFilename(fileObject.getFilename()); // I think this is necessary
         processHeatObject.setLineCount(previousHeatObject.getLineCount());
@@ -240,7 +262,7 @@ public class RepositoryAnalyzer {
         processHeatObject.setNumberOfAuthors(previousHeatObject.getNumberOfAuthors());
     }
 
-    public void updateLineCountAndFileSizeMetrics(TreeWalk treeWalk, FileObject fileObject, String commitHash) throws IOException {
+    public void updateLineCountAndFileSizeMetrics(@NotNull TreeWalk treeWalk, @NotNull FileObject fileObject, String commitHash) throws IOException {
         // Create an input stream that has the old version of the file open
         ObjectId objectId = treeWalk.getObjectId(0);
         ObjectLoader loader = git.getRepository().open(objectId);
@@ -257,12 +279,11 @@ public class RepositoryAnalyzer {
         heatObject.setFileSize(fileSize);
     }
 
-
     private void incrementNumberOfTimesChanged(@NotNull FileObject fileObject, String commitHash) {
         // Get info about the previous commit
         int oldNumberOfCommits = 0;
-        String prevCommit = fileObject.getLatestCommit();
-        if (prevCommit != null) {
+        String prevCommit = fileObject.getLatestCommitInTreeWalk();
+        if (!prevCommit.isEmpty()) {
             if (DEBUG_FILE) {
                 if (fileObject.getFilename().equals(DEBUG_FILENAME)) {
                     System.out.printf("%s's latest commit is %s.%n", DEBUG_FILENAME, prevCommit);
@@ -303,16 +324,17 @@ public class RepositoryAnalyzer {
         }
     }
 
-    private List<DiffEntry> diffCommit(String hashID) throws IOException {
+    private List<DiffEntry> diffCommit(String commitHash) throws IOException {
         // Get the commit you are looking for.
         RevCommit newCommit;
         try (RevWalk walk = new RevWalk(git.getRepository())) {
-            newCommit = walk.parseCommit(git.getRepository().resolve(hashID));
+            newCommit = walk.parseCommit(git.getRepository().resolve(commitHash));
         }
 
         if (DEBUG_DIFF_ENTRY) {
-            System.out.printf("LogCommit: %s%n", newCommit);
+            System.out.printf("\nLogCommit: %s%n", newCommit);
             System.out.printf("LogMessage: %s%n", newCommit.getFullMessage());
+            System.out.printf("Parent Count: %s%n", newCommit.getParentCount());
         }
 
         // Compute diff and return
@@ -346,10 +368,10 @@ public class RepositoryAnalyzer {
                 .setNewTree(newTreeIterator)
                 .call();
 
-        if (DEBUG_DIFF_ENTRY) {
-            System.out.println("\n~~~~~!!!PRE-FORMAT!!!~~~~~");
+       if (DEBUG_DIFF_ENTRY) {
+//            System.out.println("\n~~~~~!!!PRE-FORMAT!!!~~~~~");
             for (DiffEntry diffEntry : diffs) {
-                System.out.println("~~~~~NEW FILE~~~~~");
+                System.out.println("~~~~~FILE FOUND IN DIFF TREE~~~~~");
                 System.out.printf("DiffEntry ChangeType: %s%n", diffEntry.getChangeType());
                 System.out.printf("DiffEntry OldPath: %s%n", diffEntry.getOldPath());
                 System.out.printf("DiffEntry NewPath: %s%n", diffEntry.getNewPath());
@@ -367,17 +389,19 @@ public class RepositoryAnalyzer {
             diffs = formatter.getRenameDetector().compute();
         }
 
-        if (DEBUG_DIFF_ENTRY) {
-            System.out.println("\n~~~~~!!!POST FORMAT!!!~~~~~");
+//        if (DEBUG_DIFF_ENTRY) {
+//            System.out.println("\n~~~~~!!!POST FORMAT!!!~~~~~");
             for (DiffEntry diffEntry : diffs) {
-                System.out.println("~~~~~NEW FILE~~~~~");
-                System.out.printf("DiffEntry ChangeType: %s%n", diffEntry.getChangeType());
-                System.out.printf("DiffEntry OldPath: %s%n", diffEntry.getOldPath());
-                System.out.printf("DiffEntry NewPath: %s%n", diffEntry.getNewPath());
-                System.out.printf("DiffEntry OldId: %s%n", diffEntry.getOldId().toObjectId().getName());
-                System.out.printf("DiffEntry NewId: %s%n", diffEntry.getNewId().toObjectId().getName());
+                if (getFilename(diffEntry.getNewPath()).equals(DEBUG_FILENAME)) {
+                    System.out.println("~~~~~FILE FOUND IN DIFF TREE~~~~~");
+                    System.out.printf("DiffEntry ChangeType: %s%n", diffEntry.getChangeType());
+                    System.out.printf("DiffEntry OldPath: %s%n", diffEntry.getOldPath());
+                    System.out.printf("DiffEntry NewPath: %s%n", diffEntry.getNewPath());
+                    System.out.printf("DiffEntry OldId: %s%n", diffEntry.getOldId().toObjectId().getName());
+                    System.out.printf("DiffEntry NewId: %s%n", diffEntry.getNewId().toObjectId().getName());
+                }
             }
-        }
+//        }
 
         return diffs;
     }

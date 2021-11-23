@@ -24,8 +24,8 @@ public class FileObject {
     private Set<String> uniqueAuthors;
     private Set<String> uniqueAuthorEmails;
     // This would maintain the latest key commit hash added in the map to avoid any traversal again
-    private String latestCommit;
-
+    private String latestCommitInTreeWalk; // last time this file appeared in the TreeWalk
+    private String latestCommitInDiffEntryList; // last time this file appeared in the DiffEntry
     // FIXME implement me properly along with latest commit
     //  This is just an easy hacky way to sort FileObjects in a list.
     public int latestCommitHeatLevel;
@@ -42,6 +42,8 @@ public class FileObject {
         this.commitHashToHeatObjectMap = new LinkedHashMap<>();
         this.uniqueAuthors = new LinkedHashSet<>();
         this.uniqueAuthorEmails = new LinkedHashSet<>();
+        this.latestCommitInTreeWalk = "";
+        this.latestCommitInDiffEntryList = "";
     }
     // endregion
 
@@ -73,6 +75,22 @@ public class FileObject {
         return uniqueAuthorEmails;
     }
 
+    public String getLatestCommitInTreeWalk() {
+        return latestCommitInTreeWalk;
+    }
+
+    public void setLatestCommitInTreeWalk(String latestCommitInTreeWalk) {
+        this.latestCommitInTreeWalk = latestCommitInTreeWalk;
+    }
+
+    public String getLatestCommitInDiffEntryList() {
+        return latestCommitInDiffEntryList;
+    }
+
+    public void setLatestCommitInDiffEntryList(String latestCommitInDiffEntryList) {
+        this.latestCommitInDiffEntryList = latestCommitInDiffEntryList;
+    }
+
     public int getLatestCommitHeatLevel() {
         return latestCommitHeatLevel;
     }
@@ -99,21 +117,13 @@ public class FileObject {
         return commitHashToHeatObjectMap;
     }
 
-    public String getLatestCommit() {
-        return latestCommit;
-    }
-
-    public void setLatestCommit(String latestCommit) {
-        this.latestCommit = latestCommit;
-    }
-
     public void setHeatForCommit(String commitHash, HeatObject heat) {
         // commitHash already present - was this intentional?
         if (commitHashToHeatObjectMap.putIfAbsent(commitHash, heat) != null) {
             throw new UnsupportedOperationException(String.format("Commit hash %s is already present in %s's commitHashToHeatObjectMap.", commitHash, filename));
         }
 
-        this.latestCommit = commitHash;
+        this.latestCommitInTreeWalk = commitHash;
     }
 
     public int getOverallHeat() {
