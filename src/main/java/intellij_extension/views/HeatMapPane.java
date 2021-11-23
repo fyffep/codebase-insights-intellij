@@ -10,7 +10,6 @@ import intellij_extension.utility.HeatCalculationUtility;
 import javafx.application.Platform;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
@@ -31,10 +30,6 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
         this.setPadding(Constants.HEATMAP_PADDING);
 
         //this.setStyle("-fx-background-color: #2b2b2b");
-        //Set size of this container
-        //this.setPrefWidth(FlowPane.USE_COMPUTED_SIZE);
-        //this.setMinHeight(FlowPane.USE_COMPUTED_SIZE);
-        //this.setPrefHeight(FlowPane.USE_COMPUTED_SIZE);
 
         //Register self as an observer of the model
         Codebase model = Codebase.getInstance();
@@ -61,7 +56,7 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
     public void refreshHeatMap(Codebase codebase) {
         System.out.println("Called refresh");
 
-        HashMap<String, ArrayList<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(codebase);
+        Map<String, ArrayList<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(codebase);
         Platform.runLater(() -> {
             clear();
             for (Map.Entry<String, ArrayList<FileObject>> entry : packageToFileMap.entrySet())

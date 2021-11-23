@@ -4,7 +4,6 @@ import intellij_extension.Constants;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import javafx.util.Duration;
 
 import java.util.ArrayList;
 
@@ -85,12 +84,13 @@ public class HeatFileContainer extends GridPane
 
     private void addOrUpdateTooltip()
     {
-        //Add a tooltip
+        //These package name tool tips were blocking the file tool tips, so they're removed for now
+        /*//Add a tooltip
         if (tooltip != null)
             Tooltip.uninstall(this, tooltip);
         tooltip = new Tooltip(String.format("%s\nFiles: %d", title, children.size()));
         tooltip.setFont(Constants.TOOLTIP_FONT);
         tooltip.setShowDelay(Duration.seconds(0));
-        Tooltip.install(this, tooltip);
+        Tooltip.install(this, tooltip);*/
     }
 }

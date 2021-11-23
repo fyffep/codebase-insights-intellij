@@ -23,17 +23,21 @@ public class HeatMapSplitPane extends SplitPane {
         scrollPane.prefWidthProperty().bind(this.widthProperty());
         this.getItems().add(scrollPane);
 
+        //Create ScrollPane and the AnchorPane inside it
         AnchorPane anchorPane = new AnchorPane();
         anchorPane.prefWidthProperty().bind(scrollPane.widthProperty());
         anchorPane.prefHeightProperty().bind(scrollPane.heightProperty());
         scrollPane.setContent(anchorPane);
+        scrollPane.prefWidthProperty().bind(anchorPane.widthProperty());
+        scrollPane.maxWidthProperty().bind(anchorPane.widthProperty());
 
+        //Create HeatMapPane
         heatMapPane = new HeatMapPane();
         heatMapPane.prefWidthProperty().bind(scrollPane.widthProperty());
         anchorPane.getChildren().add(heatMapPane);
 
 
-        //Bottom half
+        //Bottom half: SelectedFileTitledPane
         selectedFileView = new SelectedFileTitledPane();
         this.getItems().add(selectedFileView);
     }
