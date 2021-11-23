@@ -130,7 +130,7 @@ public class HeatCalculationUtility //can be renamed if adding more methods
 //    //  It's never called
 //    //  -Ethan
 //    public static HeatObject computeHeatObjectFromHistory(LinkedHashMap<String, HeatObject> commitHashMap, FileObject existingFileObject, String fileName, String filePath, ObjectLoader loader) {
-//        HeatObject previousHeat = commitHashMap.get(existingFileObject.getLatestCommit());
+//        HeatObject previousHeat = commitHashMap.get(existingFileObject.getLatestCommitInTreeWalk());
 //        float latestHeatLevel = previousHeat.getHeatLevel();
 //        int prevNumOfCommits = previousHeat.getNumberOfCommits();
 //
