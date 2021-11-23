@@ -20,21 +20,31 @@ public class GroupFileObjectUtility
      * "C:\Users\Dummy\my-project\package1\package2\my-file.java", then the package name for my-file.java
      * will be "\package1\package2\"
      */
-    public static HashMap<String, ArrayList<FileObject>> groupByPackage(Codebase codebase)
+    public static Map<String, ArrayList<FileObject>> groupByPackage(Codebase codebase)
     {
         final String projectRootPath = codebase.getProjectRootPath();
-        HashMap<String, ArrayList<FileObject>> packageToFileMap = new HashMap<>();
-        Iterator<FileObject> fileObjectIterator = codebase.getActiveFileObjects().iterator();
-        while (fileObjectIterator.hasNext())
+        LinkedHashMap<String, ArrayList<FileObject>> packageToFileMap = new LinkedHashMap<>(); //currently no real reason to have this kind of Map
+        for (FileObject fileObject : codebase.getActiveFileObjects())
         {
-            FileObject fileObject = fileObjectIterator.next();
-
             //Obtain the package name by removing the FileObject's absolute path part and file name from its path
             String packageName = fileObject.getPath().toString().replace(projectRootPath, "")
                     .replace(fileObject.getFilename(), "");
             //Add the FileObject under the package name
             packageToFileMap.computeIfAbsent(packageName, k -> new ArrayList<>()).add(fileObject);
         }
+
+        //Sort the files within each package alphabetically
+        Comparator<FileObject> FILE_NAME = Comparator.comparing(FileObject::getFilename);
+        for (ArrayList<FileObject> fileObjectArrayList : packageToFileMap.values())
+        {
+            fileObjectArrayList.sort(FILE_NAME);
+        }
+        /*//Sort the LinkedHashMap by package path alphabetically
+        //Ehh, we're better off using a Package class for this.
+        LinkedHashMap<String, ArrayList<FileObject>> outputMap = new LinkedHashMap<>();
+        packageToFileMap.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry -> outputMap.put(entry.getKey(), entry.getValue()));*/
 
         return packageToFileMap;
     }
