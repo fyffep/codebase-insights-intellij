@@ -86,16 +86,9 @@ public class Codebase implements CodeBaseObservable {
         // Failed to find file associated with param id
         if (selectedFile == null) {
             // Create and return new FileObject
-            if(RepositoryAnalyzer.getFilename(path).equals("CodeBaseObservable.java")) {
-                System.out.printf("!!!Creating FileObject!!!%n");
-            }
             selectedFile = new FileObject(Paths.get(path));
             activeFileObjects.add(selectedFile);
-        } else {
-            if(RepositoryAnalyzer.getFilename(path).equals("CodeBaseObservable.java")) {
-                System.out.printf("!!!Getting FileObject!!!%n");
-            }        }
-
+        }
         return selectedFile;
     }
 
