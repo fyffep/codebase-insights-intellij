@@ -41,7 +41,7 @@ public class RepositoryAnalyzer {
     private static final boolean DEBUG_FILE = false;
     private static final boolean DEBUG_DIFF_ENTRY = false;
     private static final String DEBUG_COMMIT_HASH = "commit 0cdfe6bf92eddb57763f491b6db6edc6f56324f5 1636656382 ------p";
-    private static final String DEBUG_FILENAME = "CodeBaseObservable.java";
+    private static final String DEBUG_FILENAME = "CodebaseInsightsToolWindowFactory.java";
     private final Git git;
 
     // Init git variable based on local repo
@@ -100,7 +100,7 @@ public class RepositoryAnalyzer {
                 processCommit = commitIterator.next();
                 if (DEBUG_COMMIT) {
                     PersonIdent authorInfo = processCommit.getAuthorIdent();
-                    System.out.printf("\nProcessing commit: %s%n Commit Author: %s%n Commit Time: %s%n", processCommit.getName(), authorInfo.getName(), authorInfo.getWhen());
+                    System.out.printf("\nProcessing commit: %s%n Commit Author: %s%n Commit Email: %s%n Commit Time: %s%n", processCommit.getName(), authorInfo.getName(), authorInfo.getEmailAddress(), authorInfo.getWhen());
                     System.out.printf("LogMessage: %s%n", processCommit.getShortMessage());
                     System.out.printf("Parent Count: %s%n", processCommit.getParentCount());
                 }
@@ -289,7 +289,10 @@ public class RepositoryAnalyzer {
                     System.out.printf("%s's latest commit is %s.%n", DEBUG_FILENAME, prevCommit);
                 }
             }
-            oldNumberOfCommits = fileObject.getHeatObjectAtCommit(prevCommit).getNumberOfCommits();
+            // Default is -1 so we ignore that. Just start at 0 instead of taking old value.
+            if(fileObject.getHeatObjectAtCommit(prevCommit).getNumberOfCommits() > 0) {
+                oldNumberOfCommits = fileObject.getHeatObjectAtCommit(prevCommit).getNumberOfCommits();
+            }
         }
 
         // Retrieve the HeatObject that holds the number of commits for the target file
