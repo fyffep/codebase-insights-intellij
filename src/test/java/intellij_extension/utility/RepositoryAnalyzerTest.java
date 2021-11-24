@@ -13,12 +13,16 @@ import java.io.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// If you fail any of these tests locally it might be because you don't have the branches checked out.
+/**
+ * If you fail any of these tests locally it might be because you don't have the branches checked out.
+ */
 public class RepositoryAnalyzerTest
 {
     public static final File PROJECT_ROOT = new File(".");
-    public static final File BOOGUS_PROJECT_ROOT = new File("BOOGUS PROJECT ROOT $#^&(#$*)!(_@");
+    public static final File BOOGUS_PROJECT_ROOT_1 = new File("BOOGUS PROJECT ROOT $#^&(#$*)!(_@");
+    public static final File BOOGUS_PROJECT_ROOT_2 = new File("./false/true/exception");
 
+    // This test just infinitely loops, guessing automatically finding the repo doesn't work...
 //    @Test
 //    void constructor_Default_Success()
 //    {
@@ -28,7 +32,7 @@ public class RepositoryAnalyzerTest
 //    }
 
     @Test
-    void constructor_FilepathParameter_Success()
+    void constructor_FilePathParameter_Success()
     {
         assertDoesNotThrow(() -> {
            new RepositoryAnalyzer(PROJECT_ROOT);
@@ -36,32 +40,15 @@ public class RepositoryAnalyzerTest
     }
 
     @Test
-    void constructor_FilepathParameter_ThrowsIOException()
+    void constructor_FilePathParameter_ThrowsIllegalArgumentException()
     {
-        assertThrows(IOException.class, () -> {
-            new RepositoryAnalyzer(BOOGUS_PROJECT_ROOT);
+        assertThrows(IllegalArgumentException.class, () -> {
+            new RepositoryAnalyzer(BOOGUS_PROJECT_ROOT_1);
         });
     }
 
     @Test
-    void attachBranchNameListTest_BranchesMasterDevelopment_Success() throws IOException, GitAPIException
-    {
-        // Set up test data...
-        Codebase codebase = Codebase.getInstance();
-        RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(PROJECT_ROOT);
-        repositoryAnalyzer.attachBranchNameList(codebase); //method being tested
-
-        //Our branch list is always changing, so I just check if there are at least 3 branches.
-        assertTrue(codebase.getBranchNameList().size() >= 3);
-        // Ensure certain branches are present
-        assertTrue(codebase.getBranchNameList().contains("master"));
-        assertTrue(codebase.getBranchNameList().contains("development"));
-        // We could check more but everyone might not have the same branches checked out
-        // Master/development are reasonable to have and should be sufficient for the test.
-    }
-
-    @Test
-    void attachCodebaseData_BranchesMasterDevelopment_Success() throws IOException, GitAPIException
+    void attachBranchNameList_BranchesMasterDevelopment_Success() throws IOException, GitAPIException
     {
         // Set up test data...
         Codebase codebase = Codebase.getInstance();
