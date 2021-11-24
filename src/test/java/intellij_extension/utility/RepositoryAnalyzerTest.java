@@ -4,23 +4,19 @@ import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.models.redesign.HeatObject;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * If you fail any of these tests locally it might be because you don't have the branches checked out.
  */
-public class RepositoryAnalyzerTest
-{
+public class RepositoryAnalyzerTest {
     public static final File PROJECT_ROOT = new File(".");
     public static final File BOOGUS_PROJECT_ROOT_1 = new File("BOOGUS PROJECT ROOT $#^&(#$*)!(_@");
-    public static final File BOOGUS_PROJECT_ROOT_2 = new File("./false/true/exception");
 
     // This test just infinitely loops, guessing automatically finding the repo doesn't work...
 //    @Test
@@ -32,24 +28,21 @@ public class RepositoryAnalyzerTest
 //    }
 
     @Test
-    void constructor_FilePathParameter_Success()
-    {
+    void constructor_FilePathParameter_Success() {
         assertDoesNotThrow(() -> {
-           new RepositoryAnalyzer(PROJECT_ROOT);
+            new RepositoryAnalyzer(PROJECT_ROOT);
         });
     }
 
     @Test
-    void constructor_FilePathParameter_ThrowsIllegalArgumentException()
-    {
+    void constructor_FilePathParameter_ThrowsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> {
             new RepositoryAnalyzer(BOOGUS_PROJECT_ROOT_1);
         });
     }
 
     @Test
-    void attachBranchNameList_BranchesMasterDevelopment_Success() throws IOException, GitAPIException
-    {
+    void attachBranchNameList_BranchesMasterDevelopment_Success() throws IOException, GitAPIException {
         // Set up test data...
         Codebase codebase = Codebase.getInstance();
         RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(PROJECT_ROOT);
