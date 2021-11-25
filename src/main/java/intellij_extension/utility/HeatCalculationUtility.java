@@ -1,6 +1,7 @@
 package intellij_extension.utility;
 
 import intellij_extension.Constants;
+import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.utility.filesize.FileSizeCalculator;
@@ -9,60 +10,15 @@ import org.eclipse.jgit.lib.ObjectLoader;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
-public class HeatCalculationUtility //can be renamed if adding more methods
+public class HeatCalculationUtility
 {
     private HeatCalculationUtility() {
         //This is a utility class
     }
 
-    /**
-     * Converts the input heat level to a color.
-     * Higher heat levels are indicated by higher intensities of red.
-     * @param heatLevel a number from 1 to 10
-     * @return a hexadecimal String of the form "FFFFFF" representing a color
-     */
-    /*public static String colorOfHeat(int heatLevel)
-    {
-        Color choice;
-        switch (heatLevel)
-        {
-            case 1:
-                choice = Constants.HEAT_COLOR_1;
-                break;
-            case 2:
-                choice = Constants.HEAT_COLOR_2;
-                break;
-            case 3:
-                choice = Constants.HEAT_COLOR_3;
-                break;
-            case 4:
-                choice = Constants.HEAT_COLOR_4;
-                break;
-            case 5:
-                choice = Constants.HEAT_COLOR_5;
-                break;
-            case 6:
-                choice = Constants.HEAT_COLOR_6;
-                break;
-            case 7:
-                choice = Constants.HEAT_COLOR_7;
-                break;
-            case 8:
-                choice = Constants.HEAT_COLOR_8;
-                break;
-            case 9:
-                choice = Constants.HEAT_COLOR_9;
-                break;
-            case 10:
-                choice = Constants.HEAT_COLOR_10;
-                break;
-            default:
-                choice = Color.BLACK;
-        }
-        //Convert color to hex
-        return String.format("%02x%02x%02x", (int)(choice.getRed() * 255), (int)(choice.getGreen() * 255), (int)(choice.getBlue() * 255));
-    }*/ //UNUSED UNTIL FURTHER NOTICE
 
     /**
      * Converts the input heat level to a color.
@@ -107,34 +63,72 @@ public class HeatCalculationUtility //can be renamed if adding more methods
     }
 
 
-    /**
-     * Returns the level of heat caused by the HeatObject's number of commits
-     *
-     * @param heatObject this should have its lineCount already assigned
-     */
-    public static int calculateHeatForNumberOfCommits(@NotNull HeatObject heatObject) {
-        int heatLevel;
+    public static void assignHeatLevelsFileSize(Codebase codebase)
+    {
+        final int REQUIRED_NUM_COMMITS_WITHOUT_CHANGING = 5; //the number of consecutive commits where no increase in a file's size is recorded needed in order to reduce the accumulated heat level.
+        final int REQUIRED_SIZE_CHANGE = 200;
+        final int SIZE_INCREASE_HEAT_CONSEQUENCE = 2; //how much the heat increases when the file size increases
+        final int SIZE_DECREASE_HEAT_CONSEQUENCE = -1; //how much the heat decreases when the file size decreases
+        final int SIZE_NO_CHANGE_HEAT_CONSEQUENCE = -1; //how much the heat decreases if the file size stays the same for long enough
 
-        //TODO this does not take commit **history** into account. It needs to consider how a file's heat should decrease as its commit frequency decreases
+        Set<FileObject> fileObjectSet = codebase.getActiveFileObjects();
+        for (FileObject fileObject : fileObjectSet)
+        {
+            //The oldest commits are at the front of the LinkedHashMap
+            LinkedHashMap<String, HeatObject> commitHashToHeatObjectMap = fileObject.getCommitHashToHeatObjectMap();
 
-        int commitCount = heatObject.getNumberOfCommits();
-        heatLevel = commitCount; //TEMP
+            HeatObject lastHeatObject = null;
+            int numberOfConsecutiveCommitsWithNoSizeIncrease = 0;
 
-        if (heatLevel > Constants.HEAT_MAX)
-            heatLevel = Constants.HEAT_MAX;
+            for (Map.Entry<String, HeatObject> commitToHeatObjectEntry : commitHashToHeatObjectMap.entrySet())
+            {
+                HeatObject newerHeatObject = commitToHeatObjectEntry.getValue();
+                if (lastHeatObject != null)
+                {
+                    newerHeatObject.setHeatLevel(lastHeatObject.getHeatLevel()); //use previous heat, then modify
 
-        return heatLevel;
+                    //If the file size increased at all, incur 2 heat
+                    long oldFileSize = lastHeatObject.getFileSize();
+                    long newFileSize = newerHeatObject.getFileSize();
+                    if (fileObject.getFilename().equals("HeatMapPane.java"))
+                    {
+                        System.out.println("New Hash: "+commitToHeatObjectEntry.getKey());
+                        System.out.println("oldFileSize: "+oldFileSize);
+                        System.out.println("newFileSize: "+newFileSize);
+                    }
+                    if (newFileSize > oldFileSize)
+                    {
+                        newerHeatObject.setHeatLevel(newerHeatObject.getHeatLevel() + SIZE_INCREASE_HEAT_CONSEQUENCE);
+                        numberOfConsecutiveCommitsWithNoSizeIncrease = 0;
+                    }
+                    //File size decrease -> lose 1 heat
+                    else if (oldFileSize - newFileSize >= REQUIRED_SIZE_CHANGE)
+                    {
+                        newerHeatObject.setHeatLevel(newerHeatObject.getHeatLevel() + SIZE_DECREASE_HEAT_CONSEQUENCE);
+                        numberOfConsecutiveCommitsWithNoSizeIncrease++;
+                    }
+                    //File size stayed equal ↓
+                    else
+                    {
+                        numberOfConsecutiveCommitsWithNoSizeIncrease++;
+
+                        //If file went unchanged for long enough, the heat improved
+                        if (numberOfConsecutiveCommitsWithNoSizeIncrease >= REQUIRED_NUM_COMMITS_WITHOUT_CHANGING)
+                        {
+                            newerHeatObject.setHeatLevel(newerHeatObject.getHeatLevel() + SIZE_NO_CHANGE_HEAT_CONSEQUENCE);
+                            numberOfConsecutiveCommitsWithNoSizeIncrease = 0;
+                        }
+                    }
+                }
+                else
+                {
+                    newerHeatObject.setHeatLevel(Constants.HEAT_MIN); //No in/decreases in file size yet
+                }
+                if (fileObject.getFilename().equals("HeatMapPane.java"))
+                    System.out.println("Heat: "+newerHeatObject.getHeatLevel()+"\n");
+
+                lastHeatObject = newerHeatObject;
+            }
+        }
     }
-
-    /**
-     *
-     */
-    public static HeatObject computeHeatObjectFromHistory(LinkedHashMap<String, HeatObject> commitHashMap, FileObject existingFileObject, String fileName, String filePath, ObjectLoader loader) {
-        HeatObject previousHeat = commitHashMap.get(existingFileObject.getLatestCommit());
-        float latestHeatLevel = previousHeat.getHeatLevel();
-        int prevNumOfCommits = previousHeat.getNumberOfCommits();
-
-        return new HeatObject(++latestHeatLevel, fileName, FileSizeCalculator.getLineCount(filePath), loader.getSize(), ++prevNumOfCommits);
-    }
-
 }

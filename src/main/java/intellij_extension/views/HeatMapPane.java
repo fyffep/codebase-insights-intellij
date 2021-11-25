@@ -56,6 +56,9 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
     public void refreshHeatMap(Codebase codebase) {
         System.out.println("Called refresh");
 
+        //Calculate heat based on file size (SHOULD BE MOVED)
+        HeatCalculationUtility.assignHeatLevelsFileSize(codebase);
+
         Map<String, ArrayList<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(codebase);
         Platform.runLater(() -> {
             clear();
@@ -66,14 +69,10 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
                 heatFileContainer.maxWidthProperty().bind(this.widthProperty());
                 for (FileObject fileObject : entry.getValue())
                 {
-                    //Assign heat (SHOULD BE MOVED)
-                    ArrayList<Commit> associatedCommits = (ArrayList<Commit>) codebase.getActiveCommits().stream()
-                            .filter(commit -> commit.getFileSet().contains(fileObject.getFilename()))
-                            .collect(Collectors.toList());
-                    fileObject.latestCommitHeatLevel = associatedCommits.size();
+                    int heatLevel = fileObject.getHeatObjectAtCommit(codebase.getLatestCommitHash()).getHeatLevel();
 
                     //Generate color
-                    Color fileHeatColor = HeatCalculationUtility.colorOfHeat(fileObject.latestCommitHeatLevel);
+                    Color fileHeatColor = HeatCalculationUtility.colorOfHeat(heatLevel);
                     //Convert color to hex
                     String colorString = String.format("%02x%02x%02x", (int) (fileHeatColor.getRed() * 255), (int) (fileHeatColor.getGreen() * 255), (int) (fileHeatColor.getBlue() * 255));
 
@@ -85,7 +84,7 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
 
                     //Add a tooltip to the file pane
                     String fileName = fileObject.getFilename();
-                    Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d", fileName, fileObject.latestCommitHeatLevel));
+                    Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d", fileName, heatLevel));
                     tooltip.setFont(Constants.TOOLTIP_FONT);
                     tooltip.setShowDelay(Duration.seconds(0));
                     Tooltip.install(heatFileComponent, tooltip);

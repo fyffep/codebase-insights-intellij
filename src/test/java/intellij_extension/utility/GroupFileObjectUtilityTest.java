@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,7 +30,7 @@ public class GroupFileObjectUtilityTest
         codebase.createOrGetFileObjectFromPath(PROJECT_ROOT + "\\package3\\package4\\myfileG.java");
         codebase.createOrGetFileObjectFromPath(PROJECT_ROOT + "\\package5\\package6\\myfileH.java");
 
-        HashMap<String, ArrayList<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(codebase); //method being tested
+        Map<String, ArrayList<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(codebase); //method being tested
 
         //Verify that some of the above files were categorized under the correct packages
         assertTrue(packageToFileMap.containsKey("\\package1\\"));
