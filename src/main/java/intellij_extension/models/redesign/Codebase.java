@@ -17,6 +17,7 @@ public class Codebase implements CodeBaseObservable {
     private LinkedHashSet<Commit> activeCommits;
     private LinkedHashSet<FileObject> activeFileObjects;
     private String projectRootPath;
+    private String latestCommitHash;
 
 
     public Codebase() {
@@ -83,6 +84,14 @@ public class Codebase implements CodeBaseObservable {
 
     public void setProjectRootPath(String projectRootPath) {
         this.projectRootPath = projectRootPath;
+    }
+
+    public String getLatestCommitHash() {
+        return latestCommitHash;
+    }
+
+    public void setLatestCommitHash(String latestCommitHash) {
+        this.latestCommitHash = latestCommitHash;
     }
 
     /**

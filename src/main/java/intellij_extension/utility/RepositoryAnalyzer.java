@@ -75,7 +75,7 @@ public class RepositoryAnalyzer {
         heatObject.setNumberOfCommits(oldNumberOfCommits + 1);
 
         //TEMP
-        if (new File(filePath).getName().equals("CodebaseInsightsToolWindowFactory.java"))
+        /*if (new File(filePath).getName().equals("CodebaseInsightsToolWindowFactory.java"))
         {
             System.out.println("File CodebaseInsightsToolWindowFactory has "+heatObject.getNumberOfCommits()+" commits as of "+commitHash);
         }
@@ -241,7 +241,7 @@ public class RepositoryAnalyzer {
             while (commitIterator.hasNext()) {
 
                 RevCommit newerRevCommit = commitIterator.next();
-                System.out.println("Comparing old="+olderRevCommit.getName()+" to new="+newerRevCommit.getName());
+                //System.out.println("Comparing old="+olderRevCommit.getName()+" to new="+newerRevCommit.getName());
 
                 //Find the difference between the olderRevCommit and newerRevCommit
                 final List<DiffEntry> diffs = git.diff()
@@ -266,7 +266,7 @@ public class RepositoryAnalyzer {
                         commitExtract.getFileSet().add(fileName);
 
 
-                        System.out.println("\t"+fileName+" changed with "+diffEntry.getChangeType());
+                        //System.out.println("\t"+fileName+" changed with "+diffEntry.getChangeType());
                     }
                 }
 
@@ -280,7 +280,11 @@ public class RepositoryAnalyzer {
             }
             //Set project root
             codebase.setProjectRootPath(repository.getDirectory().getAbsoluteFile().getParentFile().getParent());
-        } catch (IOException | GitAPIException e) {
+
+            //Record latestCommitHash
+            codebase.setLatestCommitHash(olderRevCommit.getName());
+        }
+        catch (IOException | GitAPIException e) {
             Constants.LOG.error(e);
             Constants.LOG.error(e.getMessage());
         }

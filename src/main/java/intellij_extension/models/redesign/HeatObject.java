@@ -1,32 +1,35 @@
 package intellij_extension.models.redesign;
 
-import intellij_extension.utility.HeatCalculationUtility;
+import intellij_extension.Constants;
 
 /**
- * filename acts as ID
+ * Records a file's metrics and its heat level for the state
+ * of that file at a particular Git commit.
+ * filename uniquely identifies the file.
  */
 public class HeatObject {
 
-    private float heatLevel;
+    private int heatLevel;
     private String filename;
     private long lineCount;
     private long fileSize;
     private int numberOfCommits = 1;
 
+    //This constructor allows the metrics to be filled out gradually
     public HeatObject() {
-        //This allows the metrics to be filled out gradually
+        this.heatLevel = Constants.HEAT_MIN;
     }
 
-    public HeatObject(float heatLevel, String filename, long lineCount, long fileSize, int numberOfCommits) {
+    public HeatObject(int heatLevel, String filename, long lineCount, long fileSize, int numberOfCommits) {
         this.heatLevel = heatLevel;
+        constrainHeatLevel();
         this.filename = filename;
         this.lineCount = lineCount;
         this.fileSize = fileSize;
         this.numberOfCommits = numberOfCommits;
     }
 
-    //TODO this should be deleted in favor of computeHeatLevel()
-    public float getHeatLevel() {
+    public int getHeatLevel() {
         return heatLevel;
     }
 
@@ -58,28 +61,17 @@ public class HeatObject {
         this.numberOfCommits = numberOfCommits;
     }
 
-
-    /**
-     * Assigns a heat level to this HeatObject based on its metrics.
-     * @return a value from 1 to 10, with 10 being the hottest
-     */
-    public int computeHeatLevel() //maybe this class (a model) is not the best place for this method
+    public void setHeatLevel(int heatLevel)
     {
-        //Currently, this does not support accumulated heat FIXME
+        this.heatLevel = heatLevel;
+        constrainHeatLevel();
+    }
 
-        //Compute the heat of each metric
-        //File size
-        int sizeHeat = HeatCalculationUtility.calculateHeatForFileSize(this);
-        //Number of commits
-        int numberOfCommitsHeat = HeatCalculationUtility.calculateHeatForNumberOfCommits(this);
-        System.out.println("sizeHeat="+sizeHeat+" for linecount2="+lineCount+" and numberOfCommitsHeat="+numberOfCommitsHeat);
-
-        //Average all the metrics
-        /*return (
-                sizeHeat +
-                numberOfCommitsHeat
-                //Add more metrics here...
-        ) / 2;*/
-        return numberOfCommits; //FIXME AHHHH IT'S NOT WORKING BUT IT'S SUNDAY NIGHT
+    public void constrainHeatLevel()
+    {
+        if (this.heatLevel < Constants.HEAT_MIN)
+            this.heatLevel = Constants.HEAT_MIN;
+        else if (this.heatLevel > Constants.HEAT_MAX)
+            this.heatLevel = Constants.HEAT_MAX;
     }
 }
