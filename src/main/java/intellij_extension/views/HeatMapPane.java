@@ -12,6 +12,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 
@@ -52,6 +53,10 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         topHorizontalBanner.setSpacing(Constants.BANNER_SPACING);
         topHorizontalBanner.setPadding(Constants.BANNER_INSETS);
 
+        // Label for heatMetric ComboBox
+        Label heatMetricTitle = new Label();
+        topHorizontalBanner.getChildren().add(heatMetricTitle);
+        heatMetricTitle.setText(Constants.HEAT_METRIC_COMBOBOX_TITLE);
         // Create heatMetric comboBox
         heatMetricComboBox = new ComboBox<>();
         topHorizontalBanner.getChildren().add(heatMetricComboBox);
@@ -61,6 +66,10 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         // Set up the select action
         heatMetricComboBox.setOnAction(this::heatMetricOptionSelectedAction);
 
+        // Label for branch ComboBox
+        Label branchTitle = new Label();
+        topHorizontalBanner.getChildren().add(branchTitle);
+        branchTitle.setText(Constants.BRANCH_COMBOBOX_TITLE);
         // Create branch comboBox
         branchComboBox = new ComboBox<>();
         topHorizontalBanner.getChildren().add(branchComboBox);
