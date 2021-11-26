@@ -19,7 +19,7 @@ public interface IHeatMapController
      * Orders the file metrics calculators to analyze the current CodeBase.
      * After this is called, populateHeatMap() can be used to display the processed data.
      */
-    void recalculateHeat();
+    void extractData();
 
     /**
      * Assuming this.recalculateHeat() has already been

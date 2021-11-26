@@ -14,6 +14,8 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
     private static HeatMapController instance;
 
     private Codebase codeBase;
+    private RepositoryAnalyzer repoAnalyzer; // TODO, should this be saved?
+
 
     private HeatMapController() {
         this.codeBase = Codebase.getInstance();
@@ -27,15 +29,15 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
         return instance;
     }
 
-    public void recalculateHeat() {
+    public void extractData() {
         //Obtain file metrics by analyzing the code base
         try {
             //Calculate file sizes for every commit
-            RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer();
-            repositoryAnalyzer.attachBranchNameList(codeBase); // FIXME bad place to obtain the list of branches for a Codebase?
-//            codeBase.branchSelected("development");
+            // TODO, is this a static class or not?
+            repoAnalyzer = new RepositoryAnalyzer();
+            repoAnalyzer.attachBranchNameList(codeBase); // FIXME bad place to obtain the list of branches for a Codebase?
             codeBase.selectDefaultBranch();
-            repositoryAnalyzer.attachCodebaseData(codeBase);
+            repoAnalyzer.attachCodebaseData(codeBase);
 
             //Now the Codebase contains all the data it needs
         } catch (IOException | GitAPIException e) {
@@ -50,7 +52,7 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
     @Override
     public void preload(@NotNull ProgressIndicator indicator) {
         System.out.println("Preloading HeatMapController..."); //logger fails here
-        recalculateHeat();
+        extractData();
         codeBase.notifyObserversOfRefreshHeatMap();
         System.out.println("Finished preloading HeatMapController.");
     }
@@ -75,8 +77,8 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
     // What do we do now?
     // We need to tell model about this so the model can rebuild all the data with this new branch.
     // This causes HeatMapPane to change, FileCommitHistoryPane to clear, CommitDetails to clear, and SelectedFileTerminalPane to hide.
-    public void branchSelected(String branchName) {
-        codeBase.branchSelected(branchName);
+    public void newBranchSelected(String branchName) {
+        codeBase.newBranchSelected(branchName);
     }
 
     // Where did this action occur in the View?

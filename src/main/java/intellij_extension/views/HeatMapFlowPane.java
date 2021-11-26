@@ -165,7 +165,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     }
 
     @Override
-    public void branchSelected() {
+    public void newBranchSelected() {
         // TODO
         //  Update heat map with latest commit in branch
     }
