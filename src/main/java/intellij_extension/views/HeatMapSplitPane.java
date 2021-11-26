@@ -12,10 +12,9 @@ public class HeatMapSplitPane implements IContainerView {
     //region Vars
     // Basically this class' main node
     private SplitPane parent;
-    private MainScene mainScene;
 
-    // Top is Heat Map for a single commit + the history since the commit
-    private HeatMapFlowPane heatMapFlowPane;
+    // Top is banner plus tab view.
+    private HeatMapPane heatMapPane;
 
     // Bottom is for a selected file
     private SelectedFileTitledPane selectedFileView;
@@ -26,30 +25,15 @@ public class HeatMapSplitPane implements IContainerView {
     }
 
     public HeatMapSplitPane(MainScene mainScene) {
-        this.mainScene = mainScene;
-
         parent = new SplitPane();
         parent.setOrientation(Orientation.VERTICAL);
+        parent.prefHeightProperty().bind(mainScene.heightProperty());
 
-        // Top half: insert HeatMapPane inside an AnchorPane inside a ScrollPane
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.prefWidthProperty().bind(parent.widthProperty());
-        scrollPane.maxWidthProperty().bind(parent.widthProperty());
-        parent.getItems().add(scrollPane);
+        // Top Half: heatMapPane (holds banner and tabbed view)
+        heatMapPane = new HeatMapPane();
+        parent.getItems().add(heatMapPane.getNode());
 
-        // Create ScrollPane and the AnchorPane inside it
-        AnchorPane anchorPane = new AnchorPane();
-        anchorPane.prefWidthProperty().bind(scrollPane.widthProperty());
-        anchorPane.prefHeightProperty().bind(scrollPane.heightProperty());
-        scrollPane.setContent(anchorPane);
-
-        // Create HeatMapPane
-        heatMapFlowPane = new HeatMapFlowPane();
-        heatMapFlowPane.prefWidthProperty().bind(scrollPane.widthProperty());
-        anchorPane.getChildren().add(heatMapFlowPane);
-
-
-        //Bottom half: SelectedFileTitledPane
+        // Bottom half: SelectedFileTitledPane
         selectedFileView = new SelectedFileTitledPane();
         parent.getItems().add(selectedFileView);
     }
@@ -59,11 +43,6 @@ public class HeatMapSplitPane implements IContainerView {
     @Override
     public Node getNode() {
         return parent;
-    }
-
-    @Override
-    public void setProperties() {
-        parent.prefHeightProperty().bind(mainScene.heightProperty());
     }
     //endregion
 }

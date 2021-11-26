@@ -7,7 +7,9 @@ import intellij_extension.models.redesign.FileObject;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.utility.GroupFileObjectUtility;
 import intellij_extension.utility.HeatCalculationUtility;
+import intellij_extension.views.interfaces.IContainerView;
 import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
@@ -21,31 +23,35 @@ import java.util.Map;
  * A view that holds rectangles to represent files for a particular commit.
  * Each rectangle is colored based on the heat values assigned to its corresponding file.
  */
-public class HeatMapFlowPane extends FlowPane implements CodeBaseObserver {
+public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
 
+    //region Vars
+    // Basically this class' main node
+    private FlowPane parent;
+    //endregion
+
+    //region Constructors
     public HeatMapFlowPane() {
-        super();
-        //Set margin around the heat boxes.
-        this.setVgap(Constants.HEATMAP_VERTICAL_SPACING);
-        this.setHgap(Constants.HEATMAP_HORIZONTAL_SPACING);
-        this.setPadding(Constants.HEATMAP_PADDING);
+        parent = new FlowPane();
+        // Set margin around the heat boxes.
+        parent.setVgap(Constants.HEATMAP_VERTICAL_SPACING);
+        parent.setHgap(Constants.HEATMAP_HORIZONTAL_SPACING);
+        parent.setPadding(Constants.HEATMAP_PADDING);
 
-        //this.setStyle("-fx-background-color: #2b2b2b");
-
-        //Register self as an observer of the model
+        // Register self as an observer of the model
         Codebase model = Codebase.getInstance();
         model.registerObserver(this);
-        //refreshHeatMap(model); //use latest appearance
     }
+    //endregion
 
-    /**
-     * Clears the heat container, removing all child components.
-     */
-    public void clear() {
-        getChildren().clear();
+    //region IContainerView methods
+    @Override
+    public Node getNode() {
+        return parent;
     }
+    //endregion
 
-
+    //region CodeBaseObserver methods
     /**
      * Clears the pane, then displays all files present in the latest commit.
      * Each file is represented by a rectangular pane.
@@ -62,11 +68,11 @@ public class HeatMapFlowPane extends FlowPane implements CodeBaseObserver {
 
         Map<String, ArrayList<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(codebase);
         Platform.runLater(() -> {
-            clear();
+            parent.getChildren().clear();
             for (Map.Entry<String, ArrayList<FileObject>> entry : packageToFileMap.entrySet()) {
                 String packageName = entry.getKey();
                 HeatFileContainer heatFileContainer = new HeatFileContainer(packageName);
-                heatFileContainer.maxWidthProperty().bind(this.widthProperty());
+                heatFileContainer.maxWidthProperty().bind(parent.widthProperty());
                 for (FileObject fileObject : entry.getValue()) {
                     // TODO need Model to create a HeatObject at every commit for every FileObject regardless if in the TreeWalk or not.
                     //  Currently it only creates a HeatObject if found in the TreeWalk.
@@ -96,7 +102,7 @@ public class HeatMapFlowPane extends FlowPane implements CodeBaseObserver {
                 }
 
                 heatFileContainer.setStyle("-fx-background-color: #BBBBBB");
-                this.getChildren().add(heatFileContainer);
+                parent.getChildren().add(heatFileContainer);
             }
         });
 
@@ -172,4 +178,5 @@ public class HeatMapFlowPane extends FlowPane implements CodeBaseObserver {
     public void commitSelected(Commit commit) {
         // Nothing to do for this action
     }
+    //endregion
 }
