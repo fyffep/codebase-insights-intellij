@@ -13,8 +13,9 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * A view that holds rectangles to represent files for a particular commit.
@@ -62,14 +63,15 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
         Map<String, ArrayList<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(codebase);
         Platform.runLater(() -> {
             clear();
-            for (Map.Entry<String, ArrayList<FileObject>> entry : packageToFileMap.entrySet())
-            {
+            for (Map.Entry<String, ArrayList<FileObject>> entry : packageToFileMap.entrySet()) {
                 String packageName = entry.getKey();
                 HeatFileContainer heatFileContainer = new HeatFileContainer(packageName);
                 heatFileContainer.maxWidthProperty().bind(this.widthProperty());
-                for (FileObject fileObject : entry.getValue())
-                {
-                    int heatLevel = fileObject.getHeatObjectAtCommit(codebase.getLatestCommitHash()).getHeatLevel();
+                for (FileObject fileObject : entry.getValue()) {
+                    // TODO need Model to create a HeatObject at every commit for every FileObject regardless if in the TreeWalk or not.
+                    //  Currently it only creates a HeatObject if found in the TreeWalk.
+                    int heatLevel = fileObject.getHeatObjectAtCommit(fileObject.getLatestCommitInTreeWalk()).getHeatLevel();
+//                  int heatLevel = fileObject.getHeatObjectAtCommit(codebase.getLatestCommitHash()).getHeatLevel();
 
                     //Generate color
                     Color fileHeatColor = HeatCalculationUtility.colorOfHeat(heatLevel);
