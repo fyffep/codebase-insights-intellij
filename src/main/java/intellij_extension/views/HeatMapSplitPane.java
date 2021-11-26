@@ -1,7 +1,9 @@
 package intellij_extension.views;
 
 import javafx.geometry.Orientation;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
+import javafx.scene.layout.AnchorPane;
 
 public class HeatMapSplitPane extends SplitPane {
 
@@ -16,11 +18,26 @@ public class HeatMapSplitPane extends SplitPane {
 
         setOrientation(Orientation.VERTICAL);
 
-        // Top half
-        heatMapPane = new HeatMapPane();
-        this.getItems().add(heatMapPane);
+        // Top half: insert HeatMapPane inside an AnchorPane inside a ScrollPane
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.prefWidthProperty().bind(this.widthProperty());
+        this.getItems().add(scrollPane);
 
-        //Bottom half
+        //Create ScrollPane and the AnchorPane inside it
+        AnchorPane anchorPane = new AnchorPane();
+        anchorPane.prefWidthProperty().bind(scrollPane.widthProperty());
+        anchorPane.prefHeightProperty().bind(scrollPane.heightProperty());
+        scrollPane.setContent(anchorPane);
+        scrollPane.prefWidthProperty().bind(anchorPane.widthProperty());
+        scrollPane.maxWidthProperty().bind(anchorPane.widthProperty());
+
+        //Create HeatMapPane
+        heatMapPane = new HeatMapPane();
+        heatMapPane.prefWidthProperty().bind(scrollPane.widthProperty());
+        anchorPane.getChildren().add(heatMapPane);
+
+
+        //Bottom half: SelectedFileTitledPane
         selectedFileView = new SelectedFileTitledPane();
         this.getItems().add(selectedFileView);
     }
