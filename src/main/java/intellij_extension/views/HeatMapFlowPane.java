@@ -74,9 +74,12 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                 HeatFileContainer heatFileContainer = new HeatFileContainer(packageName);
                 heatFileContainer.maxWidthProperty().bind(parent.widthProperty());
                 for (FileObject fileObject : entry.getValue()) {
-                    // TODO need Model to create a HeatObject at every commit for every FileObject regardless if in the TreeWalk or not.
-                    //  Currently it only creates a HeatObject if found in the TreeWalk.
+
                     int heatLevel = fileObject.getHeatObjectAtCommit(fileObject.getLatestCommitInTreeWalk()).getHeatLevel();
+                    // TODO need Model to create a HeatObject at every commit for every FileObject regardless if in the TreeWalk or not?
+                    //  Currently it only creates a HeatObject if found in the TreeWalk.
+                    //  But this is probably what we want - two different branches can have different looking repos...
+                    //  The above change would force them to look the same when they in reality aren't the same.
 //                  int heatLevel = fileObject.getHeatObjectAtCommit(codebase.getLatestCommitHash()).getHeatLevel();
 
                     //Generate color
@@ -87,13 +90,13 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                     String colorString = fileHeatColor.toString();
                     String colorFormat = String.format("-fx-background-color: #%s", colorString.substring(colorString.indexOf("x") + 1));
 
-                    //Add a pane (rectangle) to the screen
+                    // Add a pane (rectangle) to the screen
                     HeatFileComponent heatFileComponent = new HeatFileComponent(fileObject);
                     heatFileComponent.setStyle(colorFormat);
-                    //heatFileContainer.getChildren().add(heatFileComponent);
+                    // heatFileContainer.getChildren().add(heatFileComponent);
                     heatFileContainer.addNode(heatFileComponent);
 
-                    //Add a tooltip to the file pane
+                    // Add a tooltip to the file pane
                     String fileName = fileObject.getFilename();
                     Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d", fileName, heatLevel));
                     tooltip.setFont(Constants.TOOLTIP_FONT);
