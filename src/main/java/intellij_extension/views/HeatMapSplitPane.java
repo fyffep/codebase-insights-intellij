@@ -34,6 +34,7 @@ public class HeatMapSplitPane implements IContainerView {
         // Top half: insert HeatMapPane inside an AnchorPane inside a ScrollPane
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.prefWidthProperty().bind(parent.widthProperty());
+        scrollPane.maxWidthProperty().bind(parent.widthProperty());
         parent.getItems().add(scrollPane);
 
         // Create ScrollPane and the AnchorPane inside it
@@ -41,8 +42,6 @@ public class HeatMapSplitPane implements IContainerView {
         anchorPane.prefWidthProperty().bind(scrollPane.widthProperty());
         anchorPane.prefHeightProperty().bind(scrollPane.heightProperty());
         scrollPane.setContent(anchorPane);
-        scrollPane.prefWidthProperty().bind(parent.widthProperty());
-        scrollPane.maxWidthProperty().bind(parent.widthProperty());
 
         // Create HeatMapPane
         heatMapFlowPane = new HeatMapFlowPane();
