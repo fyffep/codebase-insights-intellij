@@ -41,7 +41,6 @@ public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory {
 
             // Left Half of Tools Windows
             HeatMapSplitPane heatMapSplit = new HeatMapSplitPane(mainScene);
-            heatMapSplit.setProperties();
             root.getItems().add(heatMapSplit.getNode());
 
             // Right Half of Tools Window
