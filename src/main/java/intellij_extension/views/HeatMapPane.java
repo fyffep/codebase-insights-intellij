@@ -5,17 +5,15 @@ import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.observer.CodeBaseObserver;
+import intellij_extension.utility.GroupFileObjectUtility;
 import intellij_extension.utility.HeatCalculationUtility;
 import javafx.application.Platform;
-import javafx.scene.Node;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -30,6 +28,9 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
         this.setVgap(Constants.HEATMAP_VERTICAL_SPACING);
         this.setHgap(Constants.HEATMAP_HORIZONTAL_SPACING);
         this.setPadding(Constants.HEATMAP_PADDING);
+
+        //this.setStyle("-fx-background-color: #2b2b2b");
+
         //Register self as an observer of the model
         Codebase model = Codebase.getInstance();
         model.registerObserver(this);
@@ -43,10 +44,6 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
         getChildren().clear();
     }
 
-    public void addNode(Node node) {
-        getChildren().add(node);
-    }
-
 
     /**
      * Clears the pane, then displays all files present in the latest commit.
@@ -58,7 +55,47 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
     @Override
     public void refreshHeatMap(Codebase codebase) {
         System.out.println("Called refresh");
+
+        //Calculate heat based on file size (SHOULD BE MOVED)
+        HeatCalculationUtility.assignHeatLevelsFileSize(codebase);
+
+        Map<String, ArrayList<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(codebase);
         Platform.runLater(() -> {
+            clear();
+            for (Map.Entry<String, ArrayList<FileObject>> entry : packageToFileMap.entrySet())
+            {
+                String packageName = entry.getKey();
+                HeatFileContainer heatFileContainer = new HeatFileContainer(packageName);
+                heatFileContainer.maxWidthProperty().bind(this.widthProperty());
+                for (FileObject fileObject : entry.getValue())
+                {
+                    int heatLevel = fileObject.getHeatObjectAtCommit(codebase.getLatestCommitHash()).getHeatLevel();
+
+                    //Generate color
+                    Color fileHeatColor = HeatCalculationUtility.colorOfHeat(heatLevel);
+                    //Convert color to hex
+                    String colorString = String.format("%02x%02x%02x", (int) (fileHeatColor.getRed() * 255), (int) (fileHeatColor.getGreen() * 255), (int) (fileHeatColor.getBlue() * 255));
+
+                    //Add a pane (rectangle) to the screen
+                    HeatFileComponent heatFileComponent = new HeatFileComponent(fileObject);
+                    heatFileComponent.setStyle("-fx-background-color: #" + colorString);
+                    //heatFileContainer.getChildren().add(heatFileComponent);
+                    heatFileContainer.addNode(heatFileComponent);
+
+                    //Add a tooltip to the file pane
+                    String fileName = fileObject.getFilename();
+                    Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d", fileName, heatLevel));
+                    tooltip.setFont(Constants.TOOLTIP_FONT);
+                    tooltip.setShowDelay(Duration.seconds(0));
+                    Tooltip.install(heatFileComponent, tooltip);
+                }
+
+                heatFileContainer.setStyle("-fx-background-color: #BBBBBB");
+                this.getChildren().add(heatFileContainer);
+            }
+        });
+
+        /*Platform.runLater(() -> {
             clear();
 
             //Iterate through the files and add them to the screen
@@ -107,7 +144,7 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
 
                 System.out.println("Added a file pane for " + fileName + " with heat level " + fileObject.latestCommitHeatLevel); // logger only works sometimes here
             }
-        });
+        });*/
         System.out.println("Finished adding panes to the heat map.");
     }
 
