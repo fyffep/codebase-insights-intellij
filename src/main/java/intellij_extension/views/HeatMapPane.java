@@ -75,12 +75,15 @@ public class HeatMapPane extends FlowPane implements CodeBaseObserver {
 
                     //Generate color
                     Color fileHeatColor = HeatCalculationUtility.colorOfHeat(heatLevel);
-                    //Convert color to hex
-                    String colorString = String.format("%02x%02x%02x", (int) (fileHeatColor.getRed() * 255), (int) (fileHeatColor.getGreen() * 255), (int) (fileHeatColor.getBlue() * 255));
+                    // Convert color to hex
+                    // This has a bug and doesn't properly convert colors - off by 1 or 2 error
+//                    String colorString = String.format("%02x%02x%02x", (int) (fileHeatColor.getRed() * 255), (int) (fileHeatColor.getGreen() * 255), (int) (fileHeatColor.getBlue() * 255));
+                    String colorString = fileHeatColor.toString();
+                    String colorFormat = String.format("-fx-background-color: #%s", colorString.substring(colorString.indexOf("x") + 1));
 
                     //Add a pane (rectangle) to the screen
                     HeatFileComponent heatFileComponent = new HeatFileComponent(fileObject);
-                    heatFileComponent.setStyle("-fx-background-color: #" + colorString);
+                    heatFileComponent.setStyle(colorFormat);
                     //heatFileContainer.getChildren().add(heatFileComponent);
                     heatFileContainer.addNode(heatFileComponent);
 
