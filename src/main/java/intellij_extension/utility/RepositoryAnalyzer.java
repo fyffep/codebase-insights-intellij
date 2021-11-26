@@ -42,17 +42,17 @@ public class RepositoryAnalyzer {
     private static final boolean DEBUG_DIFF_ENTRY = false;
     private static final String DEBUG_COMMIT_HASH = "commit 0cdfe6bf92eddb57763f491b6db6edc6f56324f5 1636656382 ------p";
     private static final String DEBUG_FILENAME = "CodebaseInsightsToolWindowFactory.java";
-    private final Git git;
+    private static Git git;
 
     // Init git variable based on local repo
     public RepositoryAnalyzer() throws IOException {
         Repository repo = JGitHelper.openLocalRepository();
-        this.git = new Git(repo);
+        git = new Git(repo);
     }
 
     // Init git variable based on supplied path
     public RepositoryAnalyzer(File projectPath) throws IOException {
-        this.git = new Git(JGitHelper.openLocalRepository(projectPath));
+        git = new Git(JGitHelper.openLocalRepository(projectPath));
     }
 
     // This method assumes "x/y/v/target";
@@ -63,12 +63,12 @@ public class RepositoryAnalyzer {
     }
 
     // Only for testing =/
-    public Git getGit() {
+    public static Git getGit() {
         return git;
     }
 
     // Builds list of strings based on local checked out branches
-    public void attachBranchNameList(Codebase codebase) throws GitAPIException {
+    public static void attachBranchNameList(Codebase codebase) throws GitAPIException {
         // Get the list of all LOCAL branches
         List<Ref> call = git.branchList().call();
         // Alternatively: Get the list of all branches, both local and REMOTE --> call = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
@@ -86,7 +86,7 @@ public class RepositoryAnalyzer {
 
     // Massive data gathering method
     // For every file gets line count, file size, # of authors/commits at every commit.
-    public void attachCodebaseData(@NotNull Codebase codebase) {
+    public static void attachCodebaseData(@NotNull Codebase codebase) {
         try {
 
             // Get all commits in the repos for active branch
@@ -177,7 +177,7 @@ public class RepositoryAnalyzer {
         }
     }
 
-    public Iterator<RevCommit> getCommitsByBranch(String branchName) throws IOException, GitAPIException {
+    private static Iterator<RevCommit> getCommitsByBranch(String branchName) throws IOException, GitAPIException {
         // Get branch id
         ObjectId branchId = git.getRepository().resolve(branchName);
         // Get commits based on branch id
@@ -204,7 +204,7 @@ public class RepositoryAnalyzer {
     // And copy HeatObject from previousCommit into new HeatObject
     // So we don't walk the tree again, after above is done, calculate fileSize and line count for new HeatObjects
     // TODO can we do this in the DiffEntry b/c we'll know the file's fileSize / LineCount changed if they appear in the DiffEntry list
-    public void processHeatMetrics(Codebase codeBase, @NotNull RevCommit processCommit, RevCommit previousCommit) throws IOException {
+    private static void processHeatMetrics(Codebase codeBase, @NotNull RevCommit processCommit, RevCommit previousCommit) throws IOException {
         // Prepare a TreeWalk that can walk through the version of the repo at revCommit
         RevTree tree = processCommit.getTree();
         TreeWalk treeWalk = new TreeWalk(git.getRepository());
@@ -244,7 +244,7 @@ public class RepositoryAnalyzer {
         }
     }
 
-    public void transferHeatMetricsFromLatestToCurrent(FileObject fileObject, RevCommit processCommit) {
+    private static void transferHeatMetricsFromLatestToCurrent(FileObject fileObject, RevCommit processCommit) {
         String previousCommitHashId = fileObject.getLatestCommitInTreeWalk();
         // Probably first commit..
         if (previousCommitHashId.isEmpty()) {
@@ -268,7 +268,7 @@ public class RepositoryAnalyzer {
         processHeatObject.setNumberOfAuthors(previousHeatObject.getNumberOfAuthors());
     }
 
-    public void updateLineCountAndFileSizeMetrics(@NotNull TreeWalk treeWalk, @NotNull FileObject fileObject, String commitHash) throws IOException {
+    private static void updateLineCountAndFileSizeMetrics(@NotNull TreeWalk treeWalk, @NotNull FileObject fileObject, String commitHash) throws IOException {
         // Create an input stream that has the old version of the file open
         ObjectId objectId = treeWalk.getObjectId(0);
         ObjectLoader loader = git.getRepository().open(objectId);
@@ -285,7 +285,7 @@ public class RepositoryAnalyzer {
         heatObject.setFileSize(fileSize);
     }
 
-    private void incrementNumberOfTimesChanged(@NotNull FileObject fileObject, String commitHash) {
+    private static void incrementNumberOfTimesChanged(@NotNull FileObject fileObject, String commitHash) {
         // Get info about the previous commit
         int oldNumberOfCommits = 0;
         String prevCommit = fileObject.getLatestCommitInTreeWalk();
@@ -313,7 +313,7 @@ public class RepositoryAnalyzer {
         }
     }
 
-    private void incrementNumberOfAuthors(@NotNull FileObject fileObject, @NotNull RevCommit commit) {
+    private static void incrementNumberOfAuthors(@NotNull FileObject fileObject, @NotNull RevCommit commit) {
         // Extract and add author info to FileObject
         PersonIdent authorInfo = commit.getAuthorIdent();
         // These are sets so if the string already exists nothing will happen
@@ -333,7 +333,7 @@ public class RepositoryAnalyzer {
         }
     }
 
-    private List<DiffEntry> diffCommit(String commitHash) throws IOException {
+    private static List<DiffEntry> diffCommit(String commitHash) throws IOException {
         // Get the commit you are looking for.
         RevCommit newCommit;
         try (RevWalk walk = new RevWalk(git.getRepository())) {
@@ -358,7 +358,7 @@ public class RepositoryAnalyzer {
     }
 
     // Helper gets the DiffEntry list
-    private List<DiffEntry> getDiffOfCommit(RevCommit newCommit) throws IOException, GitAPIException {
+    private static List<DiffEntry> getDiffOfCommit(RevCommit newCommit) throws IOException, GitAPIException {
         // Get commit that is previous to the current one.
         RevCommit oldCommit = getPrevHash(newCommit);
         if (oldCommit == null) {
@@ -416,7 +416,7 @@ public class RepositoryAnalyzer {
     }
 
     // Helper function to get the previous commit. Written by Whitecat from https://stackoverflow.com/questions/39935160/how-to-use-jgit-to-get-list-of-changes-in-files
-    public RevCommit getPrevHash(RevCommit commit) {
+    private static RevCommit getPrevHash(RevCommit commit) {
         // Make a rev walk
         try (RevWalk walk = new RevWalk(git.getRepository())) {
             // Set starting point of RevWalk based on RevCommit
@@ -442,7 +442,7 @@ public class RepositoryAnalyzer {
 
     // Helper function to get the tree of the changes in a commit. Written by Rüdiger Herrmann from https://www.codeaffine.com/2016/06/16/jgit-diff/
     @Contract("_ -> new")
-    private @NotNull AbstractTreeIterator getCanonicalTreeParser(ObjectId commitId) throws IOException {
+    private static @NotNull AbstractTreeIterator getCanonicalTreeParser(ObjectId commitId) throws IOException {
         try (RevWalk walk = new RevWalk(git.getRepository())) {
             RevCommit commit = walk.parseCommit(commitId);
             ObjectId treeId = commit.getTree().getId();

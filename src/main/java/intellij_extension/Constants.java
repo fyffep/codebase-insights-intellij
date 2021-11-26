@@ -2,6 +2,8 @@ package intellij_extension;
 
 import com.intellij.openapi.diagnostic.Logger;
 import intellij_extension.models.redesign.Codebase;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.paint.Color;
@@ -10,52 +12,16 @@ import javafx.scene.text.FontWeight;
 
 public class Constants {
 
-
-    //Prevent instantiation
-    private Constants() {
-    }
-
     public static final Logger LOG = Logger.getInstance(Codebase.class); // TODO This should probably change to a more reasonable class?
 
     // Heat
     public static final int HEAT_MIN = 1;
     public static final int HEAT_MAX = 10;
 
-
-    /***************************/
-    /* USER INTERFACE CONSTANTS*/
-    /***************************/
-    // File Commit History Pane
-    public static final String FCH_BANNER_ID = "FCH_BANNER_01";
-    public static final String FCH_HEADER_TEXT_ID = "FCH_BRANCH_LABEL_01";
-    public static final String FCH_BRANCH_COMBOBOX_ID = "FCH_BRANCH_COMBOBOX_01";
-    public static final String FCH_BRANCH_TABLEVIEW_ID = "FCH_TABLEVIEW_01";
-    // Commit Details Pane
-    public static final String CD_BANNER_ID = "CD_BANNER_01";
-    public static final String CD_HEADER_TEXT_ID = "CD_BANNER_01";
-    public static final String CD_DESCRIPTION_TEXT_ID = "CD_DESCRIPTION_01";
-    public static final String CD_AUTHOR_TEXT_ID = "CD_AUTHOR_01";
-    public static final String CD_DATE_TEXT_ID = "CD_DATE_01";
-    public static final String CD_HASH_TEXT_ID = "CD_HASH_01";
-    public static final String CD_FILE_LIST_CONTAINER_ID = "CD_FILE_LIST_CONTAINER_01";
-    public static final String CD_FILE_LIST_ID = "CD_FILE_LIST_01";
-    public static final String CD_FILE_TEXT_PREFIX = "CD_FILE_TEXT_";
-    public static final String CD_CHANGE_HEADER_TEXT_PREFIX = "CD_HEADER_FILE_TEXT_";
-
-    // Selected File Pane
-    public static final String SF_VBOX_ID = "SF_VBOX";
-    public static final String SF_FILENAME_TEXT_ID = "SF_FILENAME_01";
-    public static final String SF_PACKAGE_NAME_TEXT_ID = "SF_PACKAGE_NAME_01";
-    public static final String SF_AUTHOR_TEXT_ID = "SF_AUTHOR_01";
+    //region UI Properties
     // Banners
     public static final int BANNER_MIN_HEIGHT = 40;
-    // General Properties
     public static final double BANNER_SIZE_MULTIPLIER = 0.40f;
-
-
-    /***************************/
-    /* UI Properties           */
-    /***************************/
     // HeatMap FlowPane
     public static final int HEATMAP_VERTICAL_SPACING = 10;
     public static final int HEATMAP_HORIZONTAL_SPACING = 10;
@@ -96,12 +62,11 @@ public class Constants {
     // Commit Details File List
     public static final double CD_DETAILS_WRAPPING_PERCENTAGE = 0.9f;
     public static final int FILE_LIST_MIN_HEIGHT = 0;
+    //endregion
+
+    //region UI Strings
     public static final String FCH_DEFAULT_HEADER_TEXT = "File's Commit History:";
     public static final String FCH_HEADER_SUFFIX_TEXT = "'s Commit History:";
-
-    /***************************/
-    /* UI Strings              */
-    /***************************/
     public static final String CD_HEADER_TEXT = "Commit Details:";
     public static final String CD_DESCRIPTION = "Description: ";
     public static final String CD_AUTHOR = "Author: ";
@@ -118,4 +83,17 @@ public class Constants {
     public static final String SF_TEXT_AUTHORS = "Authors: ";
     public static final String SF_TEXT_SEPERATOR = ":";
     public static final String[] DEFAULT_BRANCHES = {"development", "master", "main"};
+    public static final String BRANCH_COMBOBOX_TITLE = "Evaluating Branch:";
+    public static final String HEAT_METRIC_COMBOBOX_TITLE = "Heat Data:";
+    // Heat Metric List
+    public static final ObservableList<String> HEAT_METRIC_OPTIONS = FXCollections.observableArrayList(
+            "Line Count",
+            "Number of Commits",
+            "Number of Authors"
+    );
+    //endregion
+
+    //Prevent instantiation
+    private Constants() {
+    }
 }

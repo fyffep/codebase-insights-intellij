@@ -1,10 +1,14 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
+import intellij_extension.views.interfaces.IContainerView;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.control.SplitPane;
 
-public class InfoSplitPane extends SplitPane {
+public class InfoSplitPane implements IContainerView {
+
+    private SplitPane parent;
 
     // Top half is Commit History for a single branch
     private FileHistoryPane fileHistoryPane;
@@ -13,18 +17,22 @@ public class InfoSplitPane extends SplitPane {
     private CommitDetailsPane commitDetailsPane;
 
     public InfoSplitPane() {
-        super();
-
-        setOrientation(Orientation.VERTICAL);
+        parent = new SplitPane();
+        parent.setOrientation(Orientation.VERTICAL);
         // Ensure heat map can take over full tool  window
-        setMinWidth(Constants.INFO_SPLIT_PANE_MIN_WIDTH);
+        parent.setMinWidth(Constants.INFO_SPLIT_PANE_MIN_WIDTH);
 
         // Top half
         fileHistoryPane = new FileHistoryPane();
-        this.getItems().add(fileHistoryPane); // SplitPane isn't a pane, so we cannot use ViewFactory.setPaneChild
+        parent.getItems().add(fileHistoryPane.getNode());
 
         //Bottom half
         commitDetailsPane = new CommitDetailsPane();
-        this.getItems().add(commitDetailsPane); // SplitPane isn't a pane, so we cannot use ViewFactory.setPaneChild
+        parent.getItems().add(commitDetailsPane.getNode());
+    }
+
+    @Override
+    public Node getNode() {
+        return parent;
     }
 }
