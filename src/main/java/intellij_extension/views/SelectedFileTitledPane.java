@@ -6,10 +6,13 @@ import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.observer.CodeBaseObserver;
+import intellij_extension.views.interfaces.IContainerView;
+import javafx.scene.Node;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,74 +21,76 @@ import java.util.Iterator;
  * The following Class is responsible for displaying the details of  file selected in the heat map
  * It is a TitledPane . It offers a terminal kind view where the user can maximize and minimize the window
  */
-public class SelectedFileTitledPane extends TitledPane implements CodeBaseObserver {
+public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver {
+
+    //region Vars
+    private TitledPane parent;
 
     private final Text fileName;
     private final Text packageName;
     private final Text authors;
+    //endregion
 
+    //region Constructor
     public SelectedFileTitledPane() {
-        super();
+        parent = new TitledPane();
 
         setTitledPaneProperties();
 
         // Create vbox that lays out text
-        VBox vbox = ViewFactory.getInstance().createOrGetVBox(Constants.SF_VBOX_ID);
-        this.setContent(vbox);
+        VBox vbox = new VBox();
+        parent.setContent(vbox);
 
         // Filename
-        fileName = ViewFactory.getInstance().createOrGetText(Constants.SF_FILENAME_TEXT_ID); // create a Text node
+        fileName = new Text();
         setFileDetailsTextProperties(fileName); // set the font
         fileName.setText(Constants.SF_TEXT_FILENAME);
-        ViewFactory.setPaneChild(vbox, fileName); //add the Text Node to VBox
+        vbox.getChildren().add(fileName);
 
         // Package Name Node
-        packageName = ViewFactory.getInstance().createOrGetText(Constants.SF_PACKAGE_NAME_TEXT_ID);
+        packageName = new Text();
         setFileDetailsTextProperties(packageName);
         packageName.setText(Constants.SF_TEXT_PACKAGE_NAME);
-        ViewFactory.setPaneChild(vbox, packageName);
+        vbox.getChildren().add(packageName);
 
         // Author Node
-        authors = ViewFactory.getInstance().createOrGetText(Constants.SF_AUTHOR_TEXT_ID);
+        authors = new Text();
         setFileDetailsTextProperties(authors);
         authors.setText(Constants.SF_TEXT_AUTHORS);
-        ViewFactory.setPaneChild(vbox, authors);
+        vbox.getChildren().add(authors);
 
         //Register self as an observer of the model
         Codebase model = Codebase.getInstance();
         model.registerObserver(this);
     }
+    //endregion
 
-    /*
-        UI Property Settings
-    */
+    //region Properties setting
     private void setTitledPaneProperties() {
-        setText(Constants.SF_TITLE_TEXT);
-        setPrefHeight(10);
-        this.setExpanded(false);
-        this.setCollapsible(true);
-        this.setAnimated(true);
+        parent.setText(Constants.SF_TITLE_TEXT);
+        parent.setPrefHeight(10);
+        parent.setExpanded(false);
+        parent.setCollapsible(true);
+        parent.setAnimated(true);
     }
 
     public void setFileDetailsTextProperties(Text text) {
         text.setFont(Font.font(Constants.SF_TEXT_FONT, Constants.SF_TEXT_FONT_WEIGHT, Constants.SF_TEXT_SIZE));
-        text.wrappingWidthProperty().bind(this.widthProperty().multiply(0.9f));
+        text.wrappingWidthProperty().bind(parent.widthProperty().multiply(0.9f));
     }
+    //endregion
 
-    /*
-        UI Actions
-    */
+    //region UI Action
     public void showPane() {
-        this.setExpanded(true);
+        parent.setExpanded(true);
     }
 
     public void hidePane() {
-        this.setExpanded(false);
+        parent.setExpanded(false);
     }
+    //endregion
 
-    /*
-        Codebase Observer Implementation
-    */
+    //region CodeBaseObserver methods
     @Override
     public void refreshHeatMap(Codebase codeBase) {
         // Nothing to do for this action
@@ -97,7 +102,7 @@ public class SelectedFileTitledPane extends TitledPane implements CodeBaseObserv
     }
 
     @Override
-    public void branchSelected() {
+    public void newBranchSelected() {
         fileName.setText(Constants.SF_TEXT_FILENAME);
         packageName.setText(Constants.SF_TEXT_PACKAGE_NAME);
         authors.setText(Constants.SF_TEXT_AUTHORS);
@@ -105,7 +110,7 @@ public class SelectedFileTitledPane extends TitledPane implements CodeBaseObserv
     }
 
     @Override
-    public void fileSelected(FileObject selectedFile, Iterator<Commit> filesCommits) {
+    public void fileSelected(@NotNull FileObject selectedFile, Iterator<Commit> filesCommits) {
         // Filename
         fileName.setText(String.format("%s%s", Constants.SF_TEXT_FILENAME, selectedFile.getFilename()));
 
@@ -153,4 +158,12 @@ public class SelectedFileTitledPane extends TitledPane implements CodeBaseObserv
     public void commitSelected(Commit commit) {
         // Nothing to do for this action
     }
+    //endregion
+
+    //region IContainerView methods
+    @Override
+    public Node getNode() {
+        return parent;
+    }
+    //endregion
 }

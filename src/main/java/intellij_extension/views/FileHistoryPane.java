@@ -6,9 +6,11 @@ import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.observer.CodeBaseObserver;
+import intellij_extension.views.interfaces.IContainerView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -21,44 +23,37 @@ import javafx.scene.text.Text;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class FileHistoryPane extends VBox implements CodeBaseObserver {
+public class FileHistoryPane implements IContainerView, CodeBaseObserver {
 
-    private final HBox topHorizontalBanner;
-    private final Text headerText;
-    private final ComboBox<String> branchComboBox; // This might have to change from String to something else.
-    private final TableView<CommitInfoRow> commitList;
+    private VBox parent;
+
+    private HBox topHorizontalBanner;
+    private Text headerText;
+    private TableView<CommitInfoRow> commitList;
 
     // This is all the lines we created so far - we should never remove from this list
     private final ArrayList<CommitInfoRow> commitLines = new ArrayList<>();
     // These are active lines in the TableView
     private final ObservableList<CommitInfoRow> activeCommitLines = FXCollections.observableArrayList();
-    // Branch list for ComboBox
-    private final ObservableList<String> activeBranchList = FXCollections.observableArrayList();
 
     public FileHistoryPane() {
-        super();
+        parent = new VBox();
 
         // Create the top horizontal banner
-        topHorizontalBanner = ViewFactory.getInstance().createOrGetHBox(Constants.FCH_BANNER_ID);
+        topHorizontalBanner = new HBox();
         setBannerProperties();
-        ViewFactory.setPaneChild(this, topHorizontalBanner);
+        parent.getChildren().add(topHorizontalBanner);
 
         // Create the banner text
-        headerText = ViewFactory.getInstance().createOrGetText(Constants.FCH_HEADER_TEXT_ID);
+        headerText = new Text();
         setHeaderTextProperties();
-        ViewFactory.setPaneChild(topHorizontalBanner, headerText);
-
-        // Create the banner combo box
-        branchComboBox = ViewFactory.getInstance().createOrGetComboBox(Constants.FCH_BRANCH_COMBOBOX_ID);
-        setBranchComboBoxProperties();
-        // Disabling for 11/15/21 demo since it's not fully functional
-//        ViewFactory.setPaneChild(topHorizontalBanner, branchComboBox);
+        topHorizontalBanner.getChildren().add(headerText);
 
         // Create Tableview with data
-        commitList = ViewFactory.getInstance().createOrGetTableView(Constants.FCH_BRANCH_TABLEVIEW_ID);
+        commitList = new TableView<>();
         setCommitListProperties();
         setCommitListColumns();
-        ViewFactory.setPaneChild(this, commitList);
+        parent.getChildren().add(commitList);
 
         //Register self as an observer of the model
         Codebase model = Codebase.getInstance();
@@ -66,15 +61,13 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
         HeatMapController.getInstance().branchListRequested();
     }
 
-    /*
-        UI Property Settings
-     */
+    //region Properties setting
     private void setBannerProperties() {
         // Add constraints to width/height
         topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT);
-        topHorizontalBanner.prefHeightProperty().bind(this.heightProperty().multiply(Constants.BANNER_SIZE_MULTIPLIER));
-        topHorizontalBanner.maxHeightProperty().bind(this.heightProperty().multiply(Constants.BANNER_SIZE_MULTIPLIER));
-        topHorizontalBanner.prefWidthProperty().bind(this.widthProperty());
+        topHorizontalBanner.prefHeightProperty().bind(parent.heightProperty().multiply(Constants.BANNER_SIZE_MULTIPLIER));
+        topHorizontalBanner.maxHeightProperty().bind(parent.heightProperty().multiply(Constants.BANNER_SIZE_MULTIPLIER));
+        topHorizontalBanner.prefWidthProperty().bind(parent.widthProperty());
 
         // Child layout properties
         topHorizontalBanner.setAlignment(Constants.BANNER_ALIGNMENT);
@@ -85,13 +78,6 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
     private void setHeaderTextProperties() {
         headerText.setFont(Font.font(Constants.HEADER_FONT, Constants.HEADER_TEXT_FONT_WEIGHT, Constants.HEADER_TEXT_SIZE));
         headerText.setText(Constants.FCH_DEFAULT_HEADER_TEXT);
-    }
-
-    private void setBranchComboBoxProperties() {
-        // Set up observable list
-        branchComboBox.setItems(activeBranchList);
-        // Set up the select action
-        branchComboBox.setOnAction(this::branchSelectedAction);
     }
 
     private void setCommitListProperties() {
@@ -105,8 +91,8 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
 
         // Set up constraints on width/height
         commitList.setMinHeight(Constants.FCH_COMMIT_LIST_MIN_HEIGHT);
-        commitList.prefWidthProperty().bind(this.widthProperty());
-        commitList.prefHeightProperty().bind(this.heightProperty());
+        commitList.prefWidthProperty().bind(parent.widthProperty());
+        commitList.prefHeightProperty().bind(parent.heightProperty());
 
         // Add click method to rows
         commitList.setRowFactory(tableView -> {
@@ -120,6 +106,7 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
             return row;
         });
     }
+    //endregion
 
     private void setCommitListColumns() {
         // Number Column
@@ -152,19 +139,7 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
         commitList.getColumns().addAll(rowColumn, descriptionColumn, authorColumn, dateColumn, hashColumn);
     }
 
-    /*
-        UI Actions
-     */
-    private void branchSelectedAction(ActionEvent event) {
-        String selectedValue = branchComboBox.getValue();
-        Constants.LOG.info("The " + selectedValue + " branch was selected. Update HeatMap, CommitHistory, and CommitDetails, Hide SelectedFileTerminal Window");
-
-        HeatMapController.getInstance().branchSelected(selectedValue);
-    }
-
-    /*
-        Codebase Observer Implementation
-    */
+    //region CodeBaseObservable methods
     @Override
     public void refreshHeatMap(Codebase codeBase) {
         // Nothing to do for this action
@@ -172,18 +147,11 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
 
     @Override
     public void branchListRequested(String activeBranch, Iterator<String> branchList) {
-        activeBranchList.clear();
-
-        while (branchList.hasNext()) {
-            String branchName = branchList.next();
-            activeBranchList.add(branchName);
-        }
-
-        branchComboBox.getSelectionModel().select(activeBranch);
+        // Nothing to do for this action
     }
 
     @Override
-    public void branchSelected() {
+    public void newBranchSelected() {
         activeCommitLines.clear();
     }
 
@@ -223,6 +191,14 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
     public void commitSelected(Commit commit) {
         // Nothing to do for this action
     }
+    //endregion
+
+    //region IContainerView methods
+    @Override
+    public Node getNode() {
+        return parent;
+    }
+    //endregion
 }
 
 

@@ -1,175 +1,166 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
+import intellij_extension.controllers.HeatMapController;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.observer.CodeBaseObserver;
-import intellij_extension.utility.GroupFileObjectUtility;
-import intellij_extension.utility.HeatCalculationUtility;
-import javafx.application.Platform;
-import javafx.scene.control.Tooltip;
+import intellij_extension.views.interfaces.IContainerView;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.scene.Node;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.paint.Color;
-import javafx.util.Duration;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Map;
 
-/**
- * A view that holds rectangles to represent files for a particular commit.
- * Each rectangle is colored based on the heat values assigned to its corresponding file.
- */
-public class HeatMapPane extends FlowPane implements CodeBaseObserver {
+public class HeatMapPane implements IContainerView, CodeBaseObserver {
 
+    //region Vars
+    // Basically this class' main node
+    private VBox parent;
+    // Banner that holds heat metric and branch comboBoxes
+    private HBox topHorizontalBanner;
+    private ComboBox<String> heatMetricComboBox;
+    private ComboBox<String> branchComboBox;
+    private final ObservableList<String> activeBranchList = FXCollections.observableArrayList();
+
+    // Holds HeatMapPane and CommitGroupingPane
+    // private HeatMapTabbedPane heatMapTabbedPane;
+    // Heat Map for a single commit + the history up to the commit
+    // TODO move out when HeatMapTabbedPane is ready
+    private HeatMapFlowPane heatMapFlowPane;
+    //endregion
+
+    //region Constructors
     public HeatMapPane() {
-        super();
-        //Set margin around the heat boxes.
-        this.setVgap(Constants.HEATMAP_VERTICAL_SPACING);
-        this.setHgap(Constants.HEATMAP_HORIZONTAL_SPACING);
-        this.setPadding(Constants.HEATMAP_PADDING);
+        parent = new VBox();
 
-        //this.setStyle("-fx-background-color: #2b2b2b");
+        // Create the top horizontal banner
+        topHorizontalBanner = new HBox();
+        parent.getChildren().add(topHorizontalBanner);
+        // Add constraints to width/height
+        topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT);
+        topHorizontalBanner.prefWidthProperty().bind(parent.widthProperty());
+        // Child layout properties
+        topHorizontalBanner.setAlignment(Constants.BANNER_ALIGNMENT);
+        topHorizontalBanner.setSpacing(Constants.BANNER_SPACING);
+        topHorizontalBanner.setPadding(Constants.BANNER_INSETS);
 
-        //Register self as an observer of the model
+        // Label for heatMetric ComboBox
+        Text heatMetricTitle = new Text();
+        topHorizontalBanner.getChildren().add(heatMetricTitle);
+        heatMetricTitle.setText(Constants.HEAT_METRIC_COMBOBOX_TITLE);
+
+        // Create heatMetric comboBox
+        heatMetricComboBox = new ComboBox<>();
+        topHorizontalBanner.getChildren().add(heatMetricComboBox);
+        // Set up observable list
+        heatMetricComboBox.setItems(Constants.HEAT_METRIC_OPTIONS);
+        heatMetricComboBox.getSelectionModel().select(0);
+        // Set up the select action
+        heatMetricComboBox.setOnAction(this::heatMetricOptionSelectedAction);
+
+        // Label for branch ComboBox
+        Text branchTitle = new Text();
+        topHorizontalBanner.getChildren().add(branchTitle);
+        branchTitle.setText(Constants.BRANCH_COMBOBOX_TITLE);
+
+        // Create branch comboBox
+        branchComboBox = new ComboBox<>();
+        topHorizontalBanner.getChildren().add(branchComboBox);
+        // Set up observable list
+        branchComboBox.setItems(activeBranchList);
+        // Set up the select action
+        branchComboBox.setOnAction(this::branchSelectedAction);
+
+        // HeatMapFlowPane inside an AnchorPane inside a ScrollPane
+        // TODO this will eventually become a TabbedView
+        ScrollPane scrollPane = new ScrollPane();
+        parent.getChildren().add(scrollPane);
+        scrollPane.prefWidthProperty().bind(parent.widthProperty());
+        scrollPane.maxWidthProperty().bind(parent.widthProperty());
+
+        // Create ScrollPane and the AnchorPane inside it
+        AnchorPane anchorPane = new AnchorPane();
+        scrollPane.setContent(anchorPane);
+        anchorPane.prefWidthProperty().bind(scrollPane.widthProperty());
+        anchorPane.prefHeightProperty().bind(scrollPane.heightProperty());
+
+        // Create HeatMapFlowPane
+        heatMapFlowPane = new HeatMapFlowPane();
+        anchorPane.getChildren().add(heatMapFlowPane.getNode());
+        FlowPane flowPane = (FlowPane) heatMapFlowPane.getNode();
+        flowPane.prefWidthProperty().bind(scrollPane.widthProperty());
+
         Codebase model = Codebase.getInstance();
         model.registerObserver(this);
-        //refreshHeatMap(model); //use latest appearance
+        HeatMapController.getInstance().branchListRequested();
+    }
+    //endregion
+
+    //region UI actions
+    private void branchSelectedAction(ActionEvent event) {
+        String selectedValue = branchComboBox.getValue();
+        System.out.printf("The %s branch was selected. Update HeatMap, CommitHistory, and CommitDetails, Hide SelectedFileTerminal Window.%n", selectedValue);
+
+        HeatMapController.getInstance().newBranchSelected(selectedValue);
     }
 
-    /**
-     * Clears the heat container, removing all child components.
-     */
-    public void clear() {
-        getChildren().clear();
+    private void heatMetricOptionSelectedAction(ActionEvent event) {
+        String selectedValue = heatMetricComboBox.getValue();
+        System.out.printf("The %s option was selected. Update HeatMap with info based on it.%n", selectedValue);
+
+        HeatMapController.getInstance().newHeatMetricSelected(selectedValue);
     }
+    //endregion
 
-
-    /**
-     * Clears the pane, then displays all files present in the latest commit.
-     * Each file is represented by a rectangular pane.
-     *
-     * @param codebase the model whose fileMetricMap will be read to extract
-     *                 file-to-heat data.
-     */
+    //region IContainerView methods
     @Override
-    public void refreshHeatMap(Codebase codebase) {
-        System.out.println("Called refresh");
-
-        //Calculate heat based on file size (SHOULD BE MOVED)
-        HeatCalculationUtility.assignHeatLevelsFileSize(codebase);
-
-        Map<String, ArrayList<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(codebase);
-        Platform.runLater(() -> {
-            clear();
-            for (Map.Entry<String, ArrayList<FileObject>> entry : packageToFileMap.entrySet()) {
-                String packageName = entry.getKey();
-                HeatFileContainer heatFileContainer = new HeatFileContainer(packageName);
-                heatFileContainer.maxWidthProperty().bind(this.widthProperty());
-                for (FileObject fileObject : entry.getValue()) {
-                    // TODO need Model to create a HeatObject at every commit for every FileObject regardless if in the TreeWalk or not.
-                    //  Currently it only creates a HeatObject if found in the TreeWalk.
-                    int heatLevel = fileObject.getHeatObjectAtCommit(fileObject.getLatestCommitInTreeWalk()).getHeatLevel();
-//                  int heatLevel = fileObject.getHeatObjectAtCommit(codebase.getLatestCommitHash()).getHeatLevel();
-
-                    //Generate color
-                    Color fileHeatColor = HeatCalculationUtility.colorOfHeat(heatLevel);
-                    // Convert color to hex
-                    // This has a bug and doesn't properly convert colors - off by 1 or 2 error
-//                    String colorString = String.format("%02x%02x%02x", (int) (fileHeatColor.getRed() * 255), (int) (fileHeatColor.getGreen() * 255), (int) (fileHeatColor.getBlue() * 255));
-                    String colorString = fileHeatColor.toString();
-                    String colorFormat = String.format("-fx-background-color: #%s", colorString.substring(colorString.indexOf("x") + 1));
-
-                    //Add a pane (rectangle) to the screen
-                    HeatFileComponent heatFileComponent = new HeatFileComponent(fileObject);
-                    heatFileComponent.setStyle(colorFormat);
-                    //heatFileContainer.getChildren().add(heatFileComponent);
-                    heatFileContainer.addNode(heatFileComponent);
-
-                    //Add a tooltip to the file pane
-                    String fileName = fileObject.getFilename();
-                    Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d", fileName, heatLevel));
-                    tooltip.setFont(Constants.TOOLTIP_FONT);
-                    tooltip.setShowDelay(Duration.seconds(0));
-                    Tooltip.install(heatFileComponent, tooltip);
-                }
-
-                heatFileContainer.setStyle("-fx-background-color: #BBBBBB");
-                this.getChildren().add(heatFileContainer);
-            }
-        });
-
-        /*Platform.runLater(() -> {
-            clear();
-
-            //Iterate through the files and add them to the screen
-            Iterator<FileObject> fileObjectIterator = codebase.getActiveFileObjects().iterator();
-            System.out.println("Updating the heatmap view");
-            // A list for sorting them by heat level
-            ArrayList<FileObject> sortedFileObject = new ArrayList<>();
-            while (fileObjectIterator.hasNext()) {
-                FileObject fileObject = fileObjectIterator.next();
-
-                // TODO maybe add a "current commit" field to the Codebase?
-                //  Yea.. building the model should automatically set the latest commit as the current commit.
-                // String commitHash = fileObject.getCo();
-                int heatLevel = fileObject.getHeatObjectAtCommit("df24464eb2394991112ed60f5252ccf8c59da455").computeHeatLevel(); //retrieve or calculate heat level
-
-                // Get commits associated with file
-                ArrayList<Commit> associatedCommits = (ArrayList<Commit>) codebase.getActiveCommits().stream()
-                        .filter(commit -> commit.getFileSet().contains(fileObject.getFilename()))
-                        .collect(Collectors.toList());
-                heatLevel = associatedCommits.size();
-
-                fileObject.latestCommitHeatLevel = heatLevel;
-                sortedFileObject.add(fileObject);
-            }
-            Collections.sort(sortedFileObject, (a, b) -> b.compareTo(a));
-
-
-            for (FileObject fileObject : sortedFileObject) {
-                //Generate color
-                Color fileHeatColor = HeatCalculationUtility.colorOfHeat(fileObject.latestCommitHeatLevel);
-
-                //Convert color to hex
-                String colorString = String.format("%02x%02x%02x", (int) (fileHeatColor.getRed() * 255), (int) (fileHeatColor.getGreen() * 255), (int) (fileHeatColor.getBlue() * 255));
-
-                //Add a pane (rectangle) to the screen
-                HeatFileComponent heatFileComponent = new HeatFileComponent(fileObject);
-                heatFileComponent.setStyle("-fx-background-color: #" + colorString);
-                this.addNode(heatFileComponent);
-
-                //Add a tooltip to the file pane
-                String fileName = fileObject.getFilename();
-                Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d", fileName, fileObject.latestCommitHeatLevel));
-                tooltip.setFont(Constants.TOOLTIP_FONT);
-                tooltip.setShowDelay(Duration.seconds(0));
-                Tooltip.install(heatFileComponent, tooltip);
-
-                System.out.println("Added a file pane for " + fileName + " with heat level " + fileObject.latestCommitHeatLevel); // logger only works sometimes here
-            }
-        });*/
-        System.out.println("Finished adding panes to the heat map.");
+    public Node getNode() {
+        return parent;
     }
+    //endregion
 
+    //region CodeBaseObserver methods
     @Override
-    public void branchListRequested(String activeBranch, Iterator<String> branchList) {
+    public void refreshHeatMap(Codebase codeBase) {
         // Nothing to do for this action
     }
 
     @Override
-    public void branchSelected() {
-        // TODO
-        //  Update heat map with latest commit in branch
+    public void branchListRequested(String activeBranch, Iterator<String> branchList) {
+        activeBranchList.clear();
+
+        while (branchList.hasNext()) {
+            String branchName = branchList.next();
+            activeBranchList.add(branchName);
+        }
+
+        branchComboBox.getSelectionModel().select(activeBranch);
+    }
+
+    @Override
+    public void newBranchSelected() {
+        // Nothing to do for this action
     }
 
     @Override
     public void fileSelected(FileObject selectedFile, Iterator<Commit> filesCommits) {
         // Nothing to do for this action
+
     }
 
+    @Override
     public void commitSelected(Commit commit) {
         // Nothing to do for this action
     }
+    //endregion
 }
