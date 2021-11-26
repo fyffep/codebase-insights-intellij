@@ -40,9 +40,9 @@ public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory {
             root.prefHeightProperty().bind(mainScene.heightProperty());
 
             // Left Half of Tools Windows
-            HeatMapSplitPane heatMapSplit = new HeatMapSplitPane();
-            heatMapSplit.prefHeightProperty().bind(mainScene.heightProperty());
-            root.getItems().add(heatMapSplit);
+            HeatMapSplitPane heatMapSplit = new HeatMapSplitPane(mainScene);
+            heatMapSplit.setProperties();
+            root.getItems().add(heatMapSplit.getNode());
 
             // Right Half of Tools Window
             // Will split into two sections
