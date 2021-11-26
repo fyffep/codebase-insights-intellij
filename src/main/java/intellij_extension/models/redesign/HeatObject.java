@@ -13,28 +13,44 @@ public class HeatObject {
     private String filename;
     private long lineCount;
     private long fileSize;
-    private int numberOfCommits = 1;
+    private int numberOfCommits;
+    private int numberOfAuthors;
 
-    //This constructor allows the metrics to be filled out gradually
     public HeatObject() {
-        this.heatLevel = Constants.HEAT_MIN;
+        //This allows the metrics to be filled out gradually
+        heatLevel = Constants.HEAT_MIN;
+        filename = "";
+        lineCount = -1;
+        fileSize = -1;
+        numberOfCommits = -1;
+        numberOfAuthors = -1;
     }
 
-    public HeatObject(int heatLevel, String filename, long lineCount, long fileSize, int numberOfCommits) {
+    public HeatObject(int heatLevel, String filename, long lineCount, long fileSize, int numberOfCommits, int numberOfAuthors) {
         this.heatLevel = heatLevel;
         constrainHeatLevel();
         this.filename = filename;
         this.lineCount = lineCount;
         this.fileSize = fileSize;
         this.numberOfCommits = numberOfCommits;
+        this.numberOfAuthors = numberOfAuthors;
     }
 
     public int getHeatLevel() {
         return heatLevel;
     }
 
+    public void setHeatLevel(int heatLevel) {
+        this.heatLevel = heatLevel;
+        constrainHeatLevel();
+    }
+
     public String getFilename() {
         return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 
     public long getLineCount() {
@@ -61,14 +77,15 @@ public class HeatObject {
         this.numberOfCommits = numberOfCommits;
     }
 
-    public void setHeatLevel(int heatLevel)
-    {
-        this.heatLevel = heatLevel;
-        constrainHeatLevel();
+    public int getNumberOfAuthors() {
+        return numberOfAuthors;
     }
 
-    public void constrainHeatLevel()
-    {
+    public void setNumberOfAuthors(int numberOfAuthors) {
+        this.numberOfAuthors = numberOfAuthors;
+    }
+
+    public void constrainHeatLevel() {
         if (this.heatLevel < Constants.HEAT_MIN)
             this.heatLevel = Constants.HEAT_MIN;
         else if (this.heatLevel > Constants.HEAT_MAX)
