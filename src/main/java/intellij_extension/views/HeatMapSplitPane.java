@@ -35,7 +35,7 @@ public class HeatMapSplitPane implements IContainerView {
 
         // Bottom half: SelectedFileTitledPane
         selectedFileView = new SelectedFileTitledPane();
-        parent.getItems().add(selectedFileView);
+        parent.getItems().add(selectedFileView.getNode());
     }
     //endregion
 
