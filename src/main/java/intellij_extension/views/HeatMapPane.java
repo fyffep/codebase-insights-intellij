@@ -12,9 +12,12 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 
 import java.util.Iterator;
 
@@ -23,7 +26,6 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
     //region Vars
     // Basically this class' main node
     private VBox parent;
-
     // Banner that holds heat metric and branch comboBoxes
     private HBox topHorizontalBanner;
     private ComboBox<String> heatMetricComboBox;
@@ -32,7 +34,6 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
 
     // Holds HeatMapPane and CommitGroupingPane
     // private HeatMapTabbedPane heatMapTabbedPane;
-
     // Heat Map for a single commit + the history up to the commit
     // TODO move out when HeatMapTabbedPane is ready
     private HeatMapFlowPane heatMapFlowPane;
@@ -54,9 +55,10 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         topHorizontalBanner.setPadding(Constants.BANNER_INSETS);
 
         // Label for heatMetric ComboBox
-        Label heatMetricTitle = new Label();
+        Text heatMetricTitle = new Text();
         topHorizontalBanner.getChildren().add(heatMetricTitle);
         heatMetricTitle.setText(Constants.HEAT_METRIC_COMBOBOX_TITLE);
+
         // Create heatMetric comboBox
         heatMetricComboBox = new ComboBox<>();
         topHorizontalBanner.getChildren().add(heatMetricComboBox);
@@ -67,9 +69,10 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         heatMetricComboBox.setOnAction(this::heatMetricOptionSelectedAction);
 
         // Label for branch ComboBox
-        Label branchTitle = new Label();
+        Text branchTitle = new Text();
         topHorizontalBanner.getChildren().add(branchTitle);
         branchTitle.setText(Constants.BRANCH_COMBOBOX_TITLE);
+
         // Create branch comboBox
         branchComboBox = new ComboBox<>();
         topHorizontalBanner.getChildren().add(branchComboBox);
@@ -79,7 +82,7 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         branchComboBox.setOnAction(this::branchSelectedAction);
 
         // HeatMapFlowPane inside an AnchorPane inside a ScrollPane
-        // TODO this will eventually become a TabView
+        // TODO this will eventually become a TabbedView
         ScrollPane scrollPane = new ScrollPane();
         parent.getChildren().add(scrollPane);
         scrollPane.prefWidthProperty().bind(parent.widthProperty());
@@ -94,7 +97,7 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         // Create HeatMapFlowPane
         heatMapFlowPane = new HeatMapFlowPane();
         anchorPane.getChildren().add(heatMapFlowPane.getNode());
-        FlowPane flowPane = (FlowPane)heatMapFlowPane.getNode();
+        FlowPane flowPane = (FlowPane) heatMapFlowPane.getNode();
         flowPane.prefWidthProperty().bind(scrollPane.widthProperty());
 
         Codebase model = Codebase.getInstance();
@@ -115,7 +118,7 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         String selectedValue = heatMetricComboBox.getValue();
         System.out.printf("The %s option was selected. Update HeatMap with info based on it.%n", selectedValue);
 
-       HeatMapController.getInstance().newHeatMetricSelected(selectedValue);
+        HeatMapController.getInstance().newHeatMetricSelected(selectedValue);
     }
     //endregion
 
