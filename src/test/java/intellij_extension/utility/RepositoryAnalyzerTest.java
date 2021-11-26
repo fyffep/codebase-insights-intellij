@@ -67,7 +67,7 @@ public class RepositoryAnalyzerTest {
         Codebase codebase = Codebase.getInstance();
         RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(PROJECT_ROOT);
         repositoryAnalyzer.attachBranchNameList(codebase);
-        codebase.branchSelected("view-model-communication");
+        codebase.newBranchSelected("view-model-communication");
         repositoryAnalyzer.attachCodebaseData(codebase); // method being tested
 
         assertEquals(EXPECTED_BRANCH_SIZE, codebase.getActiveCommits().size());
@@ -83,7 +83,7 @@ public class RepositoryAnalyzerTest {
         Codebase codebase = Codebase.getInstance();
         RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(PROJECT_ROOT);
         repositoryAnalyzer.attachBranchNameList(codebase);
-        codebase.branchSelected("ui-development-commit-history");
+        codebase.newBranchSelected("ui-development-commit-history");
         repositoryAnalyzer.attachCodebaseData(codebase); // method being tested
 
         assertEquals(EXPECTED_BRANCH_SIZE, codebase.getActiveCommits().size());
@@ -189,7 +189,7 @@ public class RepositoryAnalyzerTest {
         Codebase codebase = Codebase.getInstance();
         RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(PROJECT_ROOT);
         repositoryAnalyzer.attachBranchNameList(codebase);
-        codebase.branchSelected("development");
+        codebase.newBranchSelected("development");
         repositoryAnalyzer.attachCodebaseData(codebase); //method being tested
 
         // Verify the results
@@ -406,7 +406,7 @@ public class RepositoryAnalyzerTest {
         Codebase codebase = Codebase.getInstance();
         RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(PROJECT_ROOT);
         repositoryAnalyzer.attachBranchNameList(codebase);
-        codebase.branchSelected("development");
+        codebase.newBranchSelected("development");
         repositoryAnalyzer.attachCodebaseData(codebase); //method being tested
 
         // Verify the results
@@ -555,7 +555,7 @@ public class RepositoryAnalyzerTest {
         Codebase codebase = Codebase.getInstance();
         RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(PROJECT_ROOT);
         repositoryAnalyzer.attachBranchNameList(codebase);
-        codebase.branchSelected("view-model-communication");
+        codebase.newBranchSelected("view-model-communication");
         repositoryAnalyzer.attachCodebaseData(codebase); //method being tested
 
         // Verify the results

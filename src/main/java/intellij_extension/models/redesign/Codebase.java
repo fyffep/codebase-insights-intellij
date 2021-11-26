@@ -148,7 +148,7 @@ public class Codebase implements CodeBaseObservable {
         notifyObserversOfBranchList();
     }
 
-    public void branchSelected(String branchName) {
+    public void newBranchSelected(String branchName) {
         // Branch doesn't exist - or we don't know about it some how...
         if (!branchNameList.contains(branchName) && !branchName.isEmpty()) {
             throw new UnsupportedOperationException(String.format("Branch %s was selected but is not present in branchNameList.", branchName));
@@ -161,8 +161,9 @@ public class Codebase implements CodeBaseObservable {
         activeCommits = new LinkedHashSet<>();
         activeFileObjects.clear();
         activeFileObjects = new LinkedHashSet<>();
+        latestCommitHash = "";
 
-        // TODO REBUILD MODEL DATA
+        RepositoryAnalyzer.attachCodebaseData(this);
 
         notifyObserversOfBranchChange();
     }
@@ -186,6 +187,12 @@ public class Codebase implements CodeBaseObservable {
     // endregion
 
     // region Observable Methods
+    // TODO this needs to be changed.
+    // refreshHeatMap should be abandoned.
+    // It's name is not descriptive and isn't tied to any sort of interaction
+    // It passes the whole model which is absolutely insane and a bad choice by all of us.
+    // When we need to refresh the HeatMapFlowPane..
+    // ...we should only be passing a set of sets like discussed in our WhatsApp group.
     @Override
     public void notifyObserversOfRefreshHeatMap() {
         for (CodeBaseObserver observer : observerList) {
@@ -203,7 +210,13 @@ public class Codebase implements CodeBaseObservable {
     @Override
     public void notifyObserversOfBranchChange() {
         for (CodeBaseObserver observer : observerList) {
-            observer.branchSelected();
+            // TODO this needs to be changed.
+            // refreshHeatMap should be abandoned.
+            // It passes the whole model which is absolutely insane and a bad choice by all of us.
+            // When we need to refresh the HeatMapFlowPane..
+            // ...we should only be passing a set of sets like discussed in our WhatsApp group.
+            observer.refreshHeatMap(this);
+            // observer.newBranchSelected();
         }
     }
 

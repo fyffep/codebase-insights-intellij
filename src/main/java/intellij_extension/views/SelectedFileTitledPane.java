@@ -97,7 +97,7 @@ public class SelectedFileTitledPane extends TitledPane implements CodeBaseObserv
     }
 
     @Override
-    public void branchSelected() {
+    public void newBranchSelected() {
         fileName.setText(Constants.SF_TEXT_FILENAME);
         packageName.setText(Constants.SF_TEXT_PACKAGE_NAME);
         authors.setText(Constants.SF_TEXT_AUTHORS);

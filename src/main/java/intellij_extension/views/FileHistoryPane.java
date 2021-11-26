@@ -25,15 +25,13 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
 
     private final HBox topHorizontalBanner;
     private final Text headerText;
-    private final ComboBox<String> branchComboBox; // This might have to change from String to something else.
     private final TableView<CommitInfoRow> commitList;
 
     // This is all the lines we created so far - we should never remove from this list
     private final ArrayList<CommitInfoRow> commitLines = new ArrayList<>();
     // These are active lines in the TableView
     private final ObservableList<CommitInfoRow> activeCommitLines = FXCollections.observableArrayList();
-    // Branch list for ComboBox
-    private final ObservableList<String> activeBranchList = FXCollections.observableArrayList();
+
 
     public FileHistoryPane() {
         super();
@@ -47,12 +45,6 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
         headerText = ViewFactory.getInstance().createOrGetText(Constants.FCH_HEADER_TEXT_ID);
         setHeaderTextProperties();
         ViewFactory.setPaneChild(topHorizontalBanner, headerText);
-
-        // Create the banner combo box
-        branchComboBox = ViewFactory.getInstance().createOrGetComboBox(Constants.FCH_BRANCH_COMBOBOX_ID);
-        setBranchComboBoxProperties();
-        // Disabling for 11/15/21 demo since it's not fully functional
-//        ViewFactory.setPaneChild(topHorizontalBanner, branchComboBox);
 
         // Create Tableview with data
         commitList = ViewFactory.getInstance().createOrGetTableView(Constants.FCH_BRANCH_TABLEVIEW_ID);
@@ -85,13 +77,6 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
     private void setHeaderTextProperties() {
         headerText.setFont(Font.font(Constants.HEADER_FONT, Constants.HEADER_TEXT_FONT_WEIGHT, Constants.HEADER_TEXT_SIZE));
         headerText.setText(Constants.FCH_DEFAULT_HEADER_TEXT);
-    }
-
-    private void setBranchComboBoxProperties() {
-        // Set up observable list
-        branchComboBox.setItems(activeBranchList);
-        // Set up the select action
-        branchComboBox.setOnAction(this::branchSelectedAction);
     }
 
     private void setCommitListProperties() {
@@ -153,16 +138,6 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
     }
 
     /*
-        UI Actions
-     */
-    private void branchSelectedAction(ActionEvent event) {
-        String selectedValue = branchComboBox.getValue();
-        Constants.LOG.info("The " + selectedValue + " branch was selected. Update HeatMap, CommitHistory, and CommitDetails, Hide SelectedFileTerminal Window");
-
-        HeatMapController.getInstance().branchSelected(selectedValue);
-    }
-
-    /*
         Codebase Observer Implementation
     */
     @Override
@@ -172,18 +147,11 @@ public class FileHistoryPane extends VBox implements CodeBaseObserver {
 
     @Override
     public void branchListRequested(String activeBranch, Iterator<String> branchList) {
-        activeBranchList.clear();
-
-        while (branchList.hasNext()) {
-            String branchName = branchList.next();
-            activeBranchList.add(branchName);
-        }
-
-        branchComboBox.getSelectionModel().select(activeBranch);
+        // Nothing to do for this action
     }
 
     @Override
-    public void branchSelected() {
+    public void newBranchSelected() {
         activeCommitLines.clear();
     }
 

@@ -29,7 +29,7 @@ class HeatCalculationUtilityTest
         Codebase codebase = Codebase.getInstance();
         RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer(PROJECT_ROOT);
         repositoryAnalyzer.attachBranchNameList(codebase);
-        codebase.branchSelected("development");
+        codebase.newBranchSelected("development");
         repositoryAnalyzer.attachCodebaseData(codebase);
 
         HeatCalculationUtility.assignHeatLevelsFileSize(codebase); //method being tested
