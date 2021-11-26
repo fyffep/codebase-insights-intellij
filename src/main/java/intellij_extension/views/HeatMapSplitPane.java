@@ -12,7 +12,6 @@ public class HeatMapSplitPane implements IContainerView {
     //region Vars
     // Basically this class' main node
     private SplitPane parent;
-    // I dont like this...
     private MainScene mainScene;
 
     // Top is Heat Map for a single commit + the history since the commit
@@ -42,8 +41,8 @@ public class HeatMapSplitPane implements IContainerView {
         anchorPane.prefWidthProperty().bind(scrollPane.widthProperty());
         anchorPane.prefHeightProperty().bind(scrollPane.heightProperty());
         scrollPane.setContent(anchorPane);
-        scrollPane.prefWidthProperty().bind(anchorPane.widthProperty());
-        scrollPane.maxWidthProperty().bind(anchorPane.widthProperty());
+        scrollPane.prefWidthProperty().bind(parent.widthProperty());
+        scrollPane.maxWidthProperty().bind(parent.widthProperty());
 
         // Create HeatMapPane
         heatMapFlowPane = new HeatMapFlowPane();
