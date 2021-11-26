@@ -18,6 +18,8 @@ public class Codebase implements CodeBaseObservable {
     private String activeBranch;
     private LinkedHashSet<Commit> activeCommits;
     private LinkedHashSet<FileObject> activeFileObjects;
+    private String projectRootPath;
+    private String latestCommitHash;
     // endregion
 
     // region Singleton Constructor
@@ -61,7 +63,15 @@ public class Codebase implements CodeBaseObservable {
         activeBranch = branch;
     }
 
-    // region Getters
+    // region Getters/Setters
+    public String getActiveBranch() {
+        return activeBranch;
+    }
+
+    public LinkedHashSet<String> getBranchNameList() {
+        return branchNameList;
+    }
+
     public LinkedHashSet<Commit> getActiveCommits() {
         return activeCommits;
     }
@@ -70,12 +80,20 @@ public class Codebase implements CodeBaseObservable {
         return activeFileObjects;
     }
 
-    public String getActiveBranch() {
-        return activeBranch;
+    public String getProjectRootPath() {
+        return projectRootPath;
     }
 
-    public LinkedHashSet<String> getBranchNameList() {
-        return branchNameList;
+    public void setProjectRootPath(String projectRootPath) {
+        this.projectRootPath = projectRootPath;
+    }
+
+    public String getLatestCommitHash() {
+        return latestCommitHash;
+    }
+
+    public void setLatestCommitHash(String latestCommitHash) {
+        this.latestCommitHash = latestCommitHash;
     }
 
     // Should only be used when building model data
