@@ -28,8 +28,8 @@ public class HeatMapSplitPane extends SplitPane {
         anchorPane.prefWidthProperty().bind(scrollPane.widthProperty());
         anchorPane.prefHeightProperty().bind(scrollPane.heightProperty());
         scrollPane.setContent(anchorPane);
-        scrollPane.prefWidthProperty().bind(anchorPane.widthProperty());
-        scrollPane.maxWidthProperty().bind(anchorPane.widthProperty());
+        scrollPane.prefWidthProperty().bind(this.widthProperty());
+        scrollPane.maxWidthProperty().bind(this.widthProperty());
 
         //Create HeatMapPane
         heatMapPane = new HeatMapPane();
