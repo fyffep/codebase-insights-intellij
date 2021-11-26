@@ -168,6 +168,11 @@ public class Codebase implements CodeBaseObservable {
         notifyObserversOfBranchChange();
     }
 
+    public void newHeatMetricSelected(String heatMetric) {
+        // TODO does this need to come back to the mode?
+        //  or can the view hold all heat metric info and just update when comboBox is changed (I'm against this).
+    }
+
     public void commitSelected(String commitHash) {
         Commit selectedCommit = getCommitFromCommitHash(commitHash);
 
