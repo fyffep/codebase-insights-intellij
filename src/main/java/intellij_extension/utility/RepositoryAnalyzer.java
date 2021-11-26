@@ -164,6 +164,12 @@ public class RepositoryAnalyzer {
 
                 // Update previous Commit
                 previousCommit = processCommit;
+
+                // Set project root
+                codebase.setProjectRootPath(git.getRepository().getDirectory().getAbsoluteFile().getParentFile().getParent());
+
+                // Record latest commit hash
+                codebase.setLatestCommitHash(processCommit.getName());
             }
         } catch (IOException | GitAPIException e) {
             Constants.LOG.error(e);

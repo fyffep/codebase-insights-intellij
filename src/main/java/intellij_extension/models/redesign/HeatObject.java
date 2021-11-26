@@ -3,7 +3,9 @@ package intellij_extension.models.redesign;
 import intellij_extension.utility.HeatCalculationUtility;
 
 /**
- * filename acts as ID
+ * Records a file's metrics and its heat level for the state
+ * of that file at a particular Git commit.
+ * filename uniquely identifies the file.
  */
 public class HeatObject {
 
@@ -16,7 +18,7 @@ public class HeatObject {
 
     public HeatObject() {
         //This allows the metrics to be filled out gradually
-        heatLevel = -1;
+        heatLevel = Constants.HEAT_MIN;
         filename = "";
         lineCount = -1;
         fileSize = -1;
@@ -26,6 +28,7 @@ public class HeatObject {
 
 //    public HeatObject(float heatLevel, String filename, long lineCount, long fileSize, int numberOfCommits, int numberOfAuthors) {
 //        this.heatLevel = heatLevel;
+//        constrainHeatLevel();
 //        this.filename = filename;
 //        this.lineCount = lineCount;
 //        this.fileSize = fileSize;
@@ -36,6 +39,12 @@ public class HeatObject {
     //TODO this should be deleted in favor of computeHeatLevel()
     public float getHeatLevel() {
         return heatLevel;
+    }
+
+    public void setHeatLevel(int heatLevel)
+    {
+        this.heatLevel = heatLevel;
+        constrainHeatLevel();
     }
 
     public String getFilename() {
@@ -78,29 +87,11 @@ public class HeatObject {
         this.numberOfAuthors = numberOfAuthors;
     }
 
-
-    /**
-     * Assigns a heat level to this HeatObject based on its metrics.
-     *
-     * @return a value from 1 to 10, with 10 being the hottest
-     */
-    public int computeHeatLevel() //maybe this class (a model) is not the best place for this method
+    public void constrainHeatLevel()
     {
-        //Currently, this does not support accumulated heat FIXME
-
-        //Compute the heat of each metric
-        //File size
-        int sizeHeat = HeatCalculationUtility.calculateHeatForFileSize(this);
-        //Number of commits
-        int numberOfCommitsHeat = HeatCalculationUtility.calculateHeatForNumberOfCommits(this);
-        System.out.println("sizeHeat=" + sizeHeat + " for linecount2=" + lineCount + " and numberOfCommitsHeat=" + numberOfCommitsHeat);
-
-        //Average all the metrics
-        /*return (
-                sizeHeat +
-                numberOfCommitsHeat
-                //Add more metrics here...
-        ) / 2;*/
-        return numberOfCommits; //FIXME AHHHH IT'S NOT WORKING BUT IT'S SUNDAY NIGHT
+        if (this.heatLevel < Constants.HEAT_MIN)
+            this.heatLevel = Constants.HEAT_MIN;
+        else if (this.heatLevel > Constants.HEAT_MAX)
+            this.heatLevel = Constants.HEAT_MAX;
     }
 }
