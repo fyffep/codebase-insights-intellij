@@ -106,7 +106,7 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         String selectedValue = heatMetricComboBox.getValue();
         System.out.printf("The %s option was selected. Update HeatMap with info based on it.%n", selectedValue);
 
-//        HeatMapController.getInstance().heatMetricOptionSelected(selectedValue);
+       HeatMapController.getInstance().newHeatMetricSelected(selectedValue);
     }
     //endregion
 
