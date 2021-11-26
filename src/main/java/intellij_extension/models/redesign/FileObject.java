@@ -108,7 +108,7 @@ public class FileObject {
         }
     }
 
-    // Return null if not found - if null is returned there is an error in our code somewhere
+    // Return null if not found
     public HeatObject getHeatObjectAtCommit(String commitHash) {
         return commitHashToHeatObjectMap.get(commitHash);
     }

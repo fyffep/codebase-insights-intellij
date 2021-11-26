@@ -46,7 +46,7 @@ public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory {
             // Right Half of Tools Window
             // Will split into two sections
             InfoSplitPane commitInfoSplitPane = new InfoSplitPane();
-            root.getItems().add(commitInfoSplitPane);
+            root.getItems().add(commitInfoSplitPane.getNode());
 
             fxPanel.setScene(mainScene);
         });

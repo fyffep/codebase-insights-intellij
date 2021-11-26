@@ -4,6 +4,7 @@ import intellij_extension.Constants;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
+import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.utility.GroupFileObjectUtility;
 import intellij_extension.utility.HeatCalculationUtility;
@@ -75,12 +76,10 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                 heatFileContainer.maxWidthProperty().bind(parent.widthProperty());
                 for (FileObject fileObject : entry.getValue()) {
 
-                    int heatLevel = fileObject.getHeatObjectAtCommit(fileObject.getLatestCommitInTreeWalk()).getHeatLevel();
-                    // TODO need Model to create a HeatObject at every commit for every FileObject regardless if in the TreeWalk or not?
-                    //  Currently it only creates a HeatObject if found in the TreeWalk.
-                    //  But this is probably what we want - two different branches can have different looking repos...
-                    //  The above change would force them to look the same when they in reality aren't the same.
-//                  int heatLevel = fileObject.getHeatObjectAtCommit(codebase.getLatestCommitHash()).getHeatLevel();
+                    HeatObject heatObject = fileObject.getHeatObjectAtCommit(codebase.getLatestCommitHash());
+                    if(heatObject == null) continue;
+
+                    int heatLevel = heatObject.getHeatLevel();
 
                     //Generate color
                     Color fileHeatColor = HeatCalculationUtility.colorOfHeat(heatLevel);
@@ -105,7 +104,10 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                 }
 
                 heatFileContainer.setStyle("-fx-background-color: #BBBBBB");
-                parent.getChildren().add(heatFileContainer);
+                // Only add if we actually made children for it.
+                if(heatFileContainer.getChildren().size() > 0) {
+                    parent.getChildren().add(heatFileContainer);
+                }
             }
         });
 

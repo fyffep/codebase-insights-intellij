@@ -27,8 +27,6 @@ public class Constants {
     /***************************/
     // File Commit History Pane
     public static final String FCH_BANNER_ID = "FCH_BANNER_01";
-
-
     /***************************/
     /* USER INTERFACE CONSTANTS*/
     public static final String FCH_HEADER_TEXT_ID = "FCH_BRANCH_LABEL_01";

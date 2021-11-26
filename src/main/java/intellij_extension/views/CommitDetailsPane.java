@@ -5,6 +5,8 @@ import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.observer.CodeBaseObserver;
+import intellij_extension.views.interfaces.IContainerView;
+import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -14,10 +16,9 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Iterator;
 
-public class CommitDetailsPane extends VBox implements CodeBaseObserver {
+public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
     private final VBox topHorizontalBanner;
     private final VBox fileList;
@@ -25,73 +26,102 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
     private final Text authorText;
     private final Text dateText;
     private final Text hashText;
-
-    // These are active lines in the VBox fileList
-    // While the ViewFactory will hold reference to all created file text lines
-    // this class will hold reference to the ones that are currently displaying.
-    private final ArrayList<Text> activeFileTexts = new ArrayList<>();
+    private final Text addHeader;
+    private final Text addBody;
+    private final Text copyHeader;
+    private final Text copyBody;
+    private final Text modifyHeader;
+    private final Text modifyBody;
+    private final Text renameHeader;
+    private final Text renameBody;
+    private final Text deleteHeader;
+    private final Text deleteBody;
+    private VBox parent;
 
     public CommitDetailsPane() {
-        super();
+        parent = new VBox();
 
         // Create the top horizontal banner
-        topHorizontalBanner = ViewFactory.getInstance().createOrGetVBox(Constants.CD_BANNER_ID);
+        topHorizontalBanner = new VBox();
         setBannerProperties();
-        ViewFactory.setPaneChild(this, topHorizontalBanner);
+        parent.getChildren().add(topHorizontalBanner);
 
-        // If we need references we can ask the ViewFactory and supply the ID
         // Create the banner text
-        createHeaderText(Constants.CD_HEADER_TEXT_ID, Constants.CD_HEADER_TEXT, topHorizontalBanner);
+        createHeaderText(Constants.CD_HEADER_TEXT, topHorizontalBanner);
         // Create the commit details text
-        descriptionText = createCommitDetailsText(Constants.CD_DESCRIPTION_TEXT_ID, Constants.CD_DESCRIPTION, topHorizontalBanner);
-        authorText = createCommitDetailsText(Constants.CD_AUTHOR_TEXT_ID, Constants.CD_AUTHOR, topHorizontalBanner);
-        dateText = createCommitDetailsText(Constants.CD_DATE_TEXT_ID, Constants.CD_DATE, topHorizontalBanner);
-        hashText = createCommitDetailsText(Constants.CD_HASH_TEXT_ID, Constants.CD_HASH, topHorizontalBanner);
+        descriptionText = createCommitDetailsText(Constants.CD_DESCRIPTION, topHorizontalBanner);
+        authorText = createCommitDetailsText(Constants.CD_AUTHOR, topHorizontalBanner);
+        dateText = createCommitDetailsText(Constants.CD_DATE, topHorizontalBanner);
+        hashText = createCommitDetailsText(Constants.CD_HASH, topHorizontalBanner);
 
         // Create the Commit Detail's file list container (i.e. scroll view)
-        ScrollPane fileListContainer = ViewFactory.getInstance().createOrGetScrollPane(Constants.CD_FILE_LIST_CONTAINER_ID);
+        ScrollPane fileListContainer = new ScrollPane();
         setFileListContainerProperties(fileListContainer);
-        ViewFactory.setPaneChild(this, fileListContainer);
+        parent.getChildren().add(fileListContainer);
 
-        // Create the Commit Detail's file list
-        fileList = ViewFactory.getInstance().createOrGetVBox(Constants.CD_FILE_LIST_ID);
+        fileList = new VBox();
         setFileListProperties();
         fileListContainer.setContent(fileList);
+
+        addHeader = new Text();
+        setChangeHeaderTextProperties(addHeader);
+        addHeader.setText(Constants.CD_ADDED_FILES);
+        addBody = new Text();
+        setChangeTextProperties(addBody);
+
+        copyHeader = new Text();
+        setChangeHeaderTextProperties(copyHeader);
+        copyHeader.setText(Constants.CD_COPIED_FILES);
+        copyBody = new Text();
+        setChangeTextProperties(copyBody);
+
+        modifyHeader = new Text();
+        setChangeHeaderTextProperties(modifyHeader);
+        modifyHeader.setText(Constants.CD_MODIFIED_FILES);
+        modifyBody = new Text();
+        setChangeTextProperties(modifyBody);
+
+        renameHeader = new Text();
+        setChangeHeaderTextProperties(renameHeader);
+        renameHeader.setText(Constants.CD_RENAMED_FILES);
+        renameBody = new Text();
+        setChangeTextProperties(renameBody);
+
+        deleteHeader = new Text();
+        setChangeHeaderTextProperties(deleteHeader);
+        deleteHeader.setText(Constants.CD_DELETED_FILES);
+        deleteBody = new Text();
+        setChangeTextProperties(deleteBody);
 
         //Register self as an observer of the model
         Codebase model = Codebase.getInstance();
         model.registerObserver(this);
     }
 
-    /*
-        Creation Methods
-        -These don't really 'create' text, that's the ViewFactory's job
-        -Their main purpose is to remove duplicated code.
-     */
-    private void createHeaderText(String id, String label, Pane parent) {
-        Text headerText = createText(id, label, parent);
+    //region Creation methods
+    private void createHeaderText(String label, Pane parent) {
+        Text headerText = createText(label, parent);
         setHeaderTextProperties(headerText);
     }
 
-    private Text createCommitDetailsText(String id, String label, Pane parent) {
-        Text text = createText(id, label, parent);
+    private @NotNull Text createCommitDetailsText(String label, Pane parent) {
+        Text text = createText(label, parent);
         setCommitDetailsTextProperties(text);
         return text;
     }
 
-    private @NotNull Text createText(String id, String label, Pane parent) {
-        Text text = ViewFactory.getInstance().createOrGetText(id);
+    private @NotNull Text createText(String label, @NotNull Pane parent) {
+        Text text = new Text(); // ViewFactory.getInstance().createOrGetText(id);
         text.setText(label);
-        ViewFactory.setPaneChild(parent, text);
+        parent.getChildren().add(text); // ViewFactory.setPaneChild(parent, text);
         return text;
     }
+    //endregion
 
-    /*
-        UI Property Settings
-    */
+    //region Properties setting
     private void setBannerProperties() {
         // Set up constraints on width/height
-        topHorizontalBanner.prefWidthProperty().bind(this.widthProperty());
+        topHorizontalBanner.prefWidthProperty().bind(parent.widthProperty());
 
         // Child layout properties
         topHorizontalBanner.setAlignment(Constants.CD_BANNER_ALIGNMENT);
@@ -104,19 +134,19 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
     }
 
     private void setCommitDetailsTextProperties(@NotNull Text text) {
-        text.wrappingWidthProperty().bind(this.widthProperty().multiply(Constants.CD_DETAILS_WRAPPING_PERCENTAGE));
+        text.wrappingWidthProperty().bind(parent.widthProperty().multiply(Constants.CD_DETAILS_WRAPPING_PERCENTAGE));
     }
 
     private void setFileListContainerProperties(@NotNull ScrollPane fileListContainer) {
         // Set up constraints on width/height
-        fileListContainer.minHeightProperty().bind(this.heightProperty().multiply(Constants.FILE_LIST_SIZE_MULTIPLIER));
-        fileListContainer.prefWidthProperty().bind(this.widthProperty());
+        fileListContainer.minHeightProperty().bind(parent.heightProperty().multiply(Constants.FILE_LIST_SIZE_MULTIPLIER));
+        fileListContainer.prefWidthProperty().bind(parent.widthProperty());
     }
 
     private void setFileListProperties() {
         // Set up constraints on width/height
         fileList.setMinHeight(Constants.FILE_LIST_MIN_HEIGHT);
-        fileList.prefWidthProperty().bind(this.widthProperty());
+        fileList.prefWidthProperty().bind(parent.widthProperty());
 
         // Child layout properties
         fileList.setAlignment(Constants.CD_BANNER_ALIGNMENT);
@@ -128,13 +158,12 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
         // Any formatting for text goes here.
     }
 
-    private void setChangeHeaderTextProperties(Text headerText) {
+    private void setChangeHeaderTextProperties(@NotNull Text headerText) {
         headerText.setFont(Font.font(Constants.HEADER_FONT, Constants.HEADER_TEXT_FONT_WEIGHT, headerText.getFont().getSize()));
     }
+    //endregion
 
-    /*
-        Codebase Observer Implementation
-    */
+    //region CodeBaseObservable methods
     @Override
     public void refreshHeatMap(Codebase codeBase) {
         // Nothing to do for this action
@@ -154,7 +183,6 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
         hashText.setText(Constants.CD_HASH);
 
         // Clear
-        activeFileTexts.clear();
         fileList.getChildren().clear();
     }
 
@@ -164,7 +192,7 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
     }
 
     @Override
-    public void commitSelected(Commit commit) {
+    public void commitSelected(@NotNull Commit commit) {
         // Update Commit detail texts
         descriptionText.setText(Constants.CD_DESCRIPTION + commit.getShortMessage());
         authorText.setText(Constants.CD_AUTHOR + commit.getAuthor());
@@ -172,7 +200,6 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
         hashText.setText(Constants.CD_HASH + commit.getHash());
 
         // Clear and start fresh
-        activeFileTexts.clear();
         fileList.getChildren().clear();
 
         StringBuilder addBuilder = new StringBuilder();
@@ -186,7 +213,7 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
             // Grab the diff for a file
             DiffEntry diffEntry = commitDiffs.next();
 
-            switch(diffEntry.getChangeType()) {
+            switch (diffEntry.getChangeType()) {
                 case ADD:
                     addBuilder.append(new File(diffEntry.getNewPath()).getName() + "\n");
                     break;
@@ -207,40 +234,38 @@ public class CommitDetailsPane extends VBox implements CodeBaseObserver {
             }
         }
 
-        if(!addBuilder.toString().isEmpty()) {
-            buildChangeHeaderText(Constants.CD_ADDED_FILES, DiffEntry.ChangeType.ADD);
-            buildChangeText(addBuilder, DiffEntry.ChangeType.ADD);
+        if (!addBuilder.toString().isEmpty()) {
+            fileList.getChildren().add(addHeader);
+            addBody.setText(addBuilder.toString());
+            fileList.getChildren().add(addBody);
         }
-        if(!copyBuilder.toString().isEmpty()) {
-            buildChangeHeaderText(Constants.CD_COPIED_FILES, DiffEntry.ChangeType.COPY);
-            buildChangeText(copyBuilder, DiffEntry.ChangeType.COPY);
+        if (!copyBuilder.toString().isEmpty()) {
+            fileList.getChildren().add(copyHeader);
+            copyBody.setText(copyBuilder.toString());
+            fileList.getChildren().add(copyBody);
         }
-        if(!modifyBuilder.toString().isEmpty()) {
-            buildChangeHeaderText(Constants.CD_MODIFIED_FILES, DiffEntry.ChangeType.MODIFY);
-            buildChangeText(modifyBuilder, DiffEntry.ChangeType.MODIFY);
+        if (!modifyBuilder.toString().isEmpty()) {
+            fileList.getChildren().add(modifyHeader);
+            modifyBody.setText(modifyBuilder.toString());
+            fileList.getChildren().add(modifyBody);
         }
-        if(!renameBuilder.toString().isEmpty()) {
-            buildChangeHeaderText(Constants.CD_RENAMED_FILES, DiffEntry.ChangeType.RENAME);
-            buildChangeText(renameBuilder, DiffEntry.ChangeType.RENAME);
+        if (!renameBuilder.toString().isEmpty()) {
+            fileList.getChildren().add(renameHeader);
+            renameBody.setText(renameBuilder.toString());
+            fileList.getChildren().add(renameBody);
         }
-        if(!deleteBuilder.toString().isEmpty()) {
-            buildChangeHeaderText(Constants.CD_DELETED_FILES, DiffEntry.ChangeType.DELETE);
-            buildChangeText(deleteBuilder, DiffEntry.ChangeType.DELETE);
+        if (!deleteBuilder.toString().isEmpty()) {
+            fileList.getChildren().add(deleteHeader);
+            deleteBody.setText(deleteBuilder.toString());
+            fileList.getChildren().add(deleteBody);
         }
     }
+    //endregion
 
-    public void buildChangeHeaderText(String text, DiffEntry.ChangeType changeType) {
-        Text changeHeaderText = ViewFactory.getInstance().createOrGetText(Constants.CD_FILE_TEXT_PREFIX + changeType);
-        setChangeHeaderTextProperties(changeHeaderText);
-        changeHeaderText.setText(text);
-        ViewFactory.setPaneChild(fileList, changeHeaderText);
+    //region IContainerView
+    @Override
+    public Node getNode() {
+        return parent;
     }
-
-    public void buildChangeText(StringBuilder builder, DiffEntry.ChangeType changeType) {
-        Text fileText = ViewFactory.getInstance().createOrGetText(Constants.CD_CHANGE_HEADER_TEXT_PREFIX + changeType);
-        setChangeTextProperties(fileText);
-        fileText.setText(builder.toString());
-        activeFileTexts.add(fileText);
-        ViewFactory.setPaneChild(fileList, fileText);
-    }
+    //endregion
 }
