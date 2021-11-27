@@ -25,10 +25,18 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
     //region Vars
     private TitledPane parent;
+    private Commit commit;
 
     private final Text fileName;
     private final Text packageName;
     private final Text authors;
+    private final Text noOfCommits;
+    private final Text fileSize;
+    private final Text lineCount;
+
+
+    private int totalCommits;
+
     //endregion
 
     //region Constructor
@@ -58,6 +66,23 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         setFileDetailsTextProperties(authors);
         authors.setText(Constants.SF_TEXT_AUTHORS);
         vbox.getChildren().add(authors);
+
+        noOfCommits=new Text();
+        setFileDetailsTextProperties(noOfCommits);
+        noOfCommits.setText(Constants.SF_TEXT_NO_OF_COMMITS);
+        vbox.getChildren().add(noOfCommits);
+
+        // File Size  Node:
+        fileSize = new Text();
+        setFileDetailsTextProperties(fileSize);
+        fileSize.setText(Constants.SF_TEXT_FILE_SIZE);
+        vbox.getChildren().add(fileSize);
+
+        // Line Count  Node:
+        lineCount = new Text();
+        setFileDetailsTextProperties(lineCount);
+        lineCount.setText(Constants.SF_TEXT_LINE_COUNT);
+        vbox.getChildren().add(lineCount);
 
         //Register self as an observer of the model
         Codebase model = Codebase.getInstance();
@@ -106,6 +131,10 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         fileName.setText(Constants.SF_TEXT_FILENAME);
         packageName.setText(Constants.SF_TEXT_PACKAGE_NAME);
         authors.setText(Constants.SF_TEXT_AUTHORS);
+        noOfCommits.setText(Constants.SF_TEXT_NO_OF_COMMITS);
+        fileSize.setText(Constants.SF_TEXT_FILE_SIZE);
+        lineCount.setText(Constants.SF_TEXT_LINE_COUNT);
+
         hidePane();
     }
 
@@ -123,7 +152,9 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
         // Gather all authors from list of commits
         ArrayList<String> uniqueAuthors = new ArrayList<>();
+        totalCommits=0;
         while (filesCommits.hasNext()) {
+            totalCommits++;
             Commit commit = filesCommits.next();
             if (!uniqueAuthors.contains(commit.getAuthor())) {
                 uniqueAuthors.add(commit.getAuthor());
@@ -149,6 +180,15 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
         // Authors
         authors.setText(String.format("%s%s", Constants.SF_TEXT_AUTHORS, fileAuthors));
+        noOfCommits.setText(String.format("%s%s", Constants.SF_TEXT_NO_OF_COMMITS, totalCommits));
+
+        //File Size
+        String commitHash = commit.getHash();
+        System.out.println("Commit hAsh:"+commitHash);
+        fileSize.setText(String.format("%s%s", Constants.SF_TEXT_FILE_SIZE, selectedFile.getHeatObjectAtCommit(commitHash).getFileSize()));
+
+        //line count
+        lineCount.setText(String.format("%s%s", Constants.SF_TEXT_LINE_COUNT, selectedFile.getHeatObjectAtCommit(commitHash).getLineCount()));
 
         // Show the Pane
         showPane();
@@ -156,7 +196,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
     @Override
     public void commitSelected(Commit commit) {
-        // Nothing to do for this action
+        this.commit=commit;
     }
     //endregion
 

@@ -81,6 +81,9 @@ public class Constants {
     public static final String SF_TEXT_FILENAME = "Filename: ";
     public static final String SF_TEXT_PACKAGE_NAME = "Package Name: ";
     public static final String SF_TEXT_AUTHORS = "Authors: ";
+    public static final String SF_TEXT_FILE_SIZE = "File Size: ";
+    public static final String SF_TEXT_NO_OF_COMMITS = "No of Commits: ";
+    public static final String SF_TEXT_LINE_COUNT = "Line Count: ";
     public static final String SF_TEXT_SEPERATOR = ":";
     public static final String[] DEFAULT_BRANCHES = {"development", "master", "main"};
     public static final String BRANCH_COMBOBOX_TITLE = "Evaluating Branch:";
