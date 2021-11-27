@@ -10,14 +10,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-public enum GroupingMode {
-    Commits,
-    Packages
-}
-
 public class Constants {
 
     public static final Logger LOG = Logger.getInstance(Codebase.class); // TODO This should probably change to a more reasonable class?
+
+    public static enum GroupingMode {
+        Commits,
+        Packages
+    }
 
     // Heat
     public static final int HEAT_MIN = 1;

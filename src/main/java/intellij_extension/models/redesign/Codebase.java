@@ -1,7 +1,7 @@
 package intellij_extension.models.redesign;
 
 import intellij_extension.Constants;
-import intellij_extension.GroupingMode;
+import intellij_extension.Constants.GroupingMode;
 import intellij_extension.observer.CodeBaseObservable;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.utility.RepositoryAnalyzer;
