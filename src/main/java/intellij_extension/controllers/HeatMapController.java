@@ -80,13 +80,13 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
     public void newHeatMetricSelected(String heatMetricOption) {
         HeatMetricOptions newOption;
         if (heatMetricOption.equals(Constants.HEAT_METRIC_OPTIONS.get(0))) {
-            newOption = HeatMetricOptions.LINE_COUNT;
-        } else if (heatMetricOption.equals(Constants.HEAT_METRIC_OPTIONS.get(1))) {
-            newOption = HeatMetricOptions.NUM_OF_COMMITS;
-        } else if (heatMetricOption.equals(Constants.HEAT_METRIC_OPTIONS.get(2))) {
-            newOption = HeatMetricOptions.NUM_OF_AUTHORS;
-        } else {
             newOption = HeatMetricOptions.OVERALL;
+        } else if (heatMetricOption.equals(Constants.HEAT_METRIC_OPTIONS.get(1))) {
+            newOption = HeatMetricOptions.FILE_SIZE;
+        } else if (heatMetricOption.equals(Constants.HEAT_METRIC_OPTIONS.get(2))) {
+            newOption = HeatMetricOptions.NUM_OF_COMMITS;
+        } else {
+            newOption = HeatMetricOptions.NUM_OF_AUTHORS;
         }
 
         codeBase.newHeatMetricSelected(newOption);

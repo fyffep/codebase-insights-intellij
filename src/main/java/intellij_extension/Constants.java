@@ -24,15 +24,16 @@ public class Constants {
     }
 
     // Heat Metric List
+    //Note that this affects HeatMapController::newHeatMetricSelected()
     public static final ObservableList<String> HEAT_METRIC_OPTIONS = FXCollections.observableArrayList(
-            "Line Count",
+            "Overall Heat",
+            "File Size",
             "Number of Commits",
-            "Number of Authors",
-            "Overall Heat"
+            "Number of Authors"
     );
     public static enum HeatMetricOptions {
         OVERALL,
-        LINE_COUNT,
+        FILE_SIZE,
         NUM_OF_COMMITS,
         NUM_OF_AUTHORS
     }
