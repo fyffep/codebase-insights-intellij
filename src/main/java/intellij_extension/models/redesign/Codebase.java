@@ -28,7 +28,7 @@ public class Codebase implements CodeBaseObservable {
     private String targetCommit;
 
     private GroupingMode currentGroupingMode = GroupingMode.PACKAGES;
-    private HeatMetricOptions currentHeatMetricOption = HeatMetricOptions.LINE_COUNT;
+    private HeatMetricOptions currentHeatMetricOption = HeatMetricOptions.FILE_SIZE;
     // endregion
 
     // region Singleton Constructor
@@ -228,31 +228,21 @@ public class Codebase implements CodeBaseObservable {
     public TreeMap<String, TreeSet<FileObject>> groupDataByCommits() {
         System.out.println("groupDataByCommits called");
 
-        // Calculate heat based on file size (SHOULD BE MOVED)
-        // TODO Implement current selected HeatMetric
-        //  we now have currentHeatMetricOption
-        // maybe something like this?
-//        HeatCalculationUtility.assignHeatLevels(this, currentHeatMetricOption);
-        HeatCalculationUtility.assignHeatLevelsFileSize(this);
+        // Calculate heat based on the selected metric
+        HeatCalculationUtility.assignHeatLevels(this, currentHeatMetricOption);
 
-        TreeMap<String, TreeSet<FileObject>> commitsToFileMap = GroupFileObjectUtility.groupByCommit();
-
-        return commitsToFileMap;
+        //Group by commit
+        return GroupFileObjectUtility.groupByCommit();
     }
 
     public TreeMap<String, TreeSet<FileObject>> groupDataByPackages() {
         System.out.println("groupDataByPackages called");
 
-        // Calculate heat based on file size (SHOULD BE MOVED)
-        // TODO Implement current selected HeatMetric
-        //  we now have currentHeatMetricOption
-        // maybe something like this?
-//        HeatCalculationUtility.assignHeatLevels(this, currentHeatMetricOption);
-        HeatCalculationUtility.assignHeatLevelsFileSize(this);
+        // Calculate heat based on the selected metric
+        HeatCalculationUtility.assignHeatLevels(this, currentHeatMetricOption);
 
-        TreeMap<String, TreeSet<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(getProjectRootPath(), activeFileObjects);
-
-        return packageToFileMap;
+        //Group by package
+        return GroupFileObjectUtility.groupByPackage(getProjectRootPath(), activeFileObjects);
     }
 
     //endregion

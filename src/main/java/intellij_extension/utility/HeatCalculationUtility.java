@@ -63,6 +63,7 @@ public class HeatCalculationUtility
 
     public static void assignHeatLevelsFileSize(Codebase codebase)
     {
+        System.out.println("Calculating heat based on file size...");
         final int REQUIRED_NUM_COMMITS_WITHOUT_CHANGING = 5; //the number of consecutive commits where no increase in a file's size is recorded needed in order to reduce the accumulated heat level.
         final int REQUIRED_SIZE_CHANGE = 200;
         final int SIZE_INCREASE_HEAT_CONSEQUENCE = 2; //how much the heat increases when the file size increases
@@ -128,11 +129,13 @@ public class HeatCalculationUtility
                 lastHeatObject = newerHeatObject;
             }
         }
+        System.out.println("Finished calculating heat based on file size.");
     }
 
 
     public static void assignHeatLevelsNumberOfCommits(Codebase codebase)
     {
+        System.out.println("Calculating heat based on number of commits...");
         final int REQUIRED_NUM_COMMITS_WITHOUT_CHANGING = 5; //the number of consecutive commits where the file is not modified in order to reduce the accumulated heat level.
         final int COMMIT_HEAT_CONSEQUENCE = 2; //how much the heat increases when the file is modified
         final int COMMIT_ABSENCE_HEAT_CONSEQUENCE = -1; //how much the heat decreases if the file is not modified for enough consecutive commits
@@ -188,6 +191,29 @@ public class HeatCalculationUtility
 
                 lastHeatObject = newerHeatObject;
             }
+        }
+        System.out.println("Finished calculating heat based on number of commits.");
+    }
+
+
+    public static void assignHeatLevels(Codebase codebase, Constants.HeatMetricOptions heatMetricOption)
+    {
+        switch (heatMetricOption)
+        {
+            case OVERALL:
+                System.err.println("NOT YET SUPPORTED: Overall heat calculation");
+                break;
+            case FILE_SIZE:
+                assignHeatLevelsFileSize(codebase);
+                break;
+            case NUM_OF_COMMITS:
+                assignHeatLevelsNumberOfCommits(codebase);
+                break;
+            case NUM_OF_AUTHORS:
+                System.err.println("NOT YET SUPPORTED: Number of authors heat");
+                break;
+            default:
+                System.err.println("Invalid heat metric selected in HeatCalculationUtility.assignHeatLevels(...)");
         }
     }
 }

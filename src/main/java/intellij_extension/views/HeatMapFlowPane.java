@@ -87,17 +87,15 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     /**
      * Clears the pane, then displays all files present in the target commit.
      * Each file is represented by a rectangular pane.
+     * @param setOfFiles a sorted grouping of files in a Codebase. Each HeatObject
+     * inside the FileObject must already have its heatLevel according to the current
+     * heat metric(s).
      */
     @Override
     public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         // If not our grouping mode, then don't do anything
         if(!this.groupingMode.equals(groupingMode)) return;
 
-        //Calculate heat based on file size (SHOULD BE MOVED)
-        //HeatCalculationUtility.assignHeatLevelsFileSize(codebase);
-        HeatCalculationUtility.assignHeatLevelsNumberOfCommits(codebase);
-
-        Map<String, ArrayList<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(codebase);
         Platform.runLater(() -> {
             flowPane.getChildren().clear();
 
@@ -107,7 +105,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                 // Create a container for it
                 HeatFileContainer heatFileContainer = new HeatFileContainer(groupingKey);
                 heatFileContainer.maxWidthProperty().bind(flowPane.widthProperty());
-                setContainerToolTip(heatFileContainer, groupingKey);
+                //setContainerToolTip(heatFileContainer, groupingKey);
 
                 // Add files to the package container
                 for (FileObject fileObject : entry.getValue()) {
@@ -115,7 +113,6 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                     HeatObject heatObject = fileObject.getHeatObjectAtCommit(targetCommit);
                     if (heatObject == null) continue;
 
-                    // TODO Need to consider heat metric here?
                     int heatLevel = heatObject.getHeatLevel();
 
                     // Generate color
@@ -130,7 +127,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                     heatFileComponent.setStyle(colorFormat);
                     heatFileContainer.addNode(heatFileComponent);
 
-                    setFileToolTip(fileObject, heatLevel, heatFileComponent);
+                    setFileToolTip(fileObject, heatLevel, groupingKey, heatFileComponent);
                 }
 
                 heatFileContainer.setStyle("-fx-background-color: #BBBBBB");
@@ -139,23 +136,24 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                     flowPane.getChildren().add(heatFileContainer);
                 }
             }
-        });
 
-        System.out.println("Finished adding panes to the heat map.");
+            System.out.println("Finished adding panes to the heat map.");
+        });
     }
 
-    private void setContainerToolTip(@NotNull HeatFileContainer container, String info) {
+    //UNUSED. It's glitchy to have multiple tool tips over the same area in JavaFX.
+    /*private void setContainerToolTip(@NotNull HeatFileContainer container, String info) {
         // Add a tooltip to the file pane
         Tooltip tooltip = new Tooltip(info);
         tooltip.setFont(Constants.TOOLTIP_FONT);
         tooltip.setShowDelay(Duration.seconds(0.5f));
         Tooltip.install(container, tooltip);
-    }
+    }*/
 
-    private void setFileToolTip(@NotNull FileObject fileObject, int heatLevel, HeatFileComponent heatFileComponent) {
+    private void setFileToolTip(@NotNull FileObject fileObject, int heatLevel, String groupName, HeatFileComponent heatFileComponent) {
         // Add a tooltip to the file pane
         String fileName = fileObject.getFilename();
-        Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d", fileName, heatLevel));
+        Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d\n\nGroup: %s", fileName, heatLevel, groupName));
         tooltip.setFont(Constants.TOOLTIP_FONT);
         tooltip.setShowDelay(Duration.seconds(0));
         Tooltip.install(heatFileComponent, tooltip);
