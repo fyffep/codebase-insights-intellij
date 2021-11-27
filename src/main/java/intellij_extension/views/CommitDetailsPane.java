@@ -178,7 +178,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
     }
 
     @Override
-    public void newBranchSelected() {
+    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         // Clear
         descriptionText.setText(Constants.CD_DESCRIPTION);
         authorText.setText(Constants.CD_AUTHOR);

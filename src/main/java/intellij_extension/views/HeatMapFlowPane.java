@@ -162,9 +162,8 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     }
 
     @Override
-    public void newBranchSelected() {
-        // TODO
-        //  Update heat map with latest commit in branch
+    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
+        refreshHeatMap(setOfFiles, targetCommit, groupingMode);
     }
 
     @Override

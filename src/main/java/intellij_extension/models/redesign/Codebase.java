@@ -7,12 +7,6 @@ import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.utility.GroupFileObjectUtility;
 import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.utility.RepositoryAnalyzer;
-import intellij_extension.views.HeatFileComponent;
-import intellij_extension.views.HeatFileContainer;
-import javafx.application.Platform;
-import javafx.scene.control.Tooltip;
-import javafx.scene.paint.Color;
-import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Paths;
@@ -179,7 +173,7 @@ public class Codebase implements CodeBaseObservable {
 
         RepositoryAnalyzer.attachCodebaseData(this);
 
-//        heatMapGroupingChanged(currentGroupingMode);
+        notifyObserversOfBranchChange(getSetOfFiles(), targetCommit, currentGroupingMode);
     }
 
     public void newHeatMetricSelected(String heatMetric) {
@@ -207,34 +201,48 @@ public class Codebase implements CodeBaseObservable {
     public void heatMapGroupingChanged(@NotNull GroupingMode newGroupingMode) {
         currentGroupingMode = newGroupingMode;
 
-        // Update views with data
-        switch (currentGroupingMode) {
-            case Commits:
-                groupDataByCommits();
-            case Packages:
-            default:
-                groupDataByPackages();
-
-        }
+        notifyObserversOfRefreshHeatMap(getSetOfFiles(), targetCommit, currentGroupingMode);
     }
     // endregion
 
     //region Data packaging
 
-    public void groupDataByCommits() {
-        System.out.println("groupDataByCommits called");
-
+    public TreeMap<String, TreeSet<FileObject>> getSetOfFiles() {
+        // Update views with data
+        TreeMap<String, TreeSet<FileObject>> setOfFiles;
+        switch (currentGroupingMode) {
+            case Commits:
+                setOfFiles = groupDataByCommits();
+                break;
+            case Packages:
+            default:
+                setOfFiles = groupDataByPackages();
+                break;
+        }
+        return setOfFiles;
     }
 
-    public void groupDataByPackages() {
+    public TreeMap<String, TreeSet<FileObject>> groupDataByCommits() {
+        System.out.println("groupDataByCommits called");
+        // Calculate heat based on file size (SHOULD BE MOVED)
+        // TODO Implement current selected HeatMetric
+        HeatCalculationUtility.assignHeatLevelsFileSize(this);
+
+        TreeMap<String, TreeSet<FileObject>> commitsToFileMap = GroupFileObjectUtility.groupByCommit();
+
+        return commitsToFileMap;
+    }
+
+    public TreeMap<String, TreeSet<FileObject>> groupDataByPackages() {
         System.out.println("groupDataByPackages called");
 
         // Calculate heat based on file size (SHOULD BE MOVED)
+        // TODO Implement current selected HeatMetric
         HeatCalculationUtility.assignHeatLevelsFileSize(this);
 
         TreeMap<String, TreeSet<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(getProjectRootPath(), activeFileObjects);
 
-        notifyObserversOfRefreshHeatMap(packageToFileMap, targetCommit, currentGroupingMode);
+        return packageToFileMap;
     }
 
     //endregion
@@ -255,9 +263,9 @@ public class Codebase implements CodeBaseObservable {
     }
 
     @Override
-    public void notifyObserversOfBranchChange() {
+    public void notifyObserversOfBranchChange(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         for (CodeBaseObserver observer : observerList) {
-            observer.newBranchSelected();
+            observer.newBranchSelected(setOfFiles, targetCommit, groupingMode);
         }
     }
 

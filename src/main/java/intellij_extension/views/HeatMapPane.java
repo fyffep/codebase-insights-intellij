@@ -87,7 +87,6 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         TabPane tabPane = new TabPane();
         parent.getChildren().add(tabPane);
         tabPane.prefHeightProperty().bind(parent.heightProperty());
-        tabPane.getSelectionModel().selectedItemProperty().addListener(this::tabSelectedAction);
         // Set  up tabs
         // Package tab
         Tab tab = new Tab();
@@ -103,6 +102,9 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         commitTabContent.setGroupingMode(Constants.GroupingMode.Commits);
         tab.setContent(commitTabContent.getNode());
         tabPane.getTabs().add(tab);
+
+        tabPane.getSelectionModel().selectedItemProperty().addListener(this::tabSelectedAction);
+
 
         Codebase model = Codebase.getInstance();
         model.registerObserver(this);
@@ -158,7 +160,7 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
     }
 
     @Override
-    public void newBranchSelected() {
+    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         // Nothing to do for this action
     }
 
