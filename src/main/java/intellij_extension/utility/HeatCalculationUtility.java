@@ -90,12 +90,12 @@ public class HeatCalculationUtility
                     //If the file size increased at all, incur 2 heat
                     long oldFileSize = lastHeatObject.getFileSize();
                     long newFileSize = newerHeatObject.getFileSize();
-                    if (fileObject.getFilename().equals("HeatMapPane.java"))
-                    {
-                        System.out.println("New Hash: "+commitToHeatObjectEntry.getKey());
-                        System.out.println("oldFileSize: "+oldFileSize);
-                        System.out.println("newFileSize: "+newFileSize);
-                    }
+//                    if (fileObject.getFilename().equals("HeatMapPane.java"))
+//                    {
+//                        System.out.println("New Hash: "+commitToHeatObjectEntry.getKey());
+//                        System.out.println("oldFileSize: "+oldFileSize);
+//                        System.out.println("newFileSize: "+newFileSize);
+//                    }
                     if (newFileSize > oldFileSize)
                     {
                         newerHeatObject.setHeatLevel(newerHeatObject.getHeatLevel() + SIZE_INCREASE_HEAT_CONSEQUENCE);
@@ -124,8 +124,8 @@ public class HeatCalculationUtility
                 {
                     newerHeatObject.setHeatLevel(Constants.HEAT_MIN); //No in/decreases in file size yet
                 }
-                if (fileObject.getFilename().equals("HeatMapPane.java"))
-                    System.out.println("Heat: "+newerHeatObject.getHeatLevel()+"\n");
+//                if (fileObject.getFilename().equals("HeatMapPane.java"))
+//                    System.out.println("Heat: "+newerHeatObject.getHeatLevel()+"\n");
 
                 lastHeatObject = newerHeatObject;
             }

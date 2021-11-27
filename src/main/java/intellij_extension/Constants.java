@@ -14,6 +14,9 @@ public class Constants {
 
     public static final Logger LOG = Logger.getInstance(Codebase.class); // TODO This should probably change to a more reasonable class?
 
+    // Default Branches
+    public static final String[] DEFAULT_BRANCHES = {"development", "master", "main"};
+
     public static final GroupingMode DEFAULT_GROUPING = GroupingMode.PACKAGES;
     public static enum GroupingMode {
         COMMITS,
@@ -102,7 +105,6 @@ public class Constants {
     public static final String SF_TEXT_PACKAGE_NAME = "Package Name: ";
     public static final String SF_TEXT_AUTHORS = "Authors: ";
     public static final String SF_TEXT_SEPERATOR = ":";
-    public static final String[] DEFAULT_BRANCHES = {"development", "master", "main"};
     public static final String BRANCH_COMBOBOX_TITLE = "Evaluating Branch:";
     public static final String HEAT_METRIC_COMBOBOX_TITLE = "Heat Data:";
     public static final String HEAT_GROUPING_TEXT = "Group by Package";
