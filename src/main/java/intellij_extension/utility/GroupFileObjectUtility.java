@@ -39,6 +39,7 @@ public class GroupFileObjectUtility
         {
             fileObjectArrayList.sort(FILE_NAME);
         }
+
         /*//Sort the LinkedHashMap by package path alphabetically
         //Ehh, we're better off using a Package class for this.
         LinkedHashMap<String, ArrayList<FileObject>> outputMap = new LinkedHashMap<>();

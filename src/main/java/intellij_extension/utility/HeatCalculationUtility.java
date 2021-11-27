@@ -4,9 +4,7 @@ import intellij_extension.Constants;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.models.redesign.HeatObject;
-import intellij_extension.utility.filesize.FileSizeCalculator;
 import javafx.scene.paint.Color;
-import org.eclipse.jgit.lib.ObjectLoader;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
@@ -90,12 +88,12 @@ public class HeatCalculationUtility
                     //If the file size increased at all, incur 2 heat
                     long oldFileSize = lastHeatObject.getFileSize();
                     long newFileSize = newerHeatObject.getFileSize();
-                    if (fileObject.getFilename().equals("HeatMapPane.java"))
-                    {
-                        System.out.println("New Hash: "+commitToHeatObjectEntry.getKey());
-                        System.out.println("oldFileSize: "+oldFileSize);
-                        System.out.println("newFileSize: "+newFileSize);
-                    }
+/*if (fileObject.getFilename().equals("HeatMapPane.java"))
+{
+    System.out.println("New Hash: "+commitToHeatObjectEntry.getKey());
+    System.out.println("oldFileSize: "+oldFileSize);
+    System.out.println("newFileSize: "+newFileSize);
+}*/
                     if (newFileSize > oldFileSize)
                     {
                         newerHeatObject.setHeatLevel(newerHeatObject.getHeatLevel() + SIZE_INCREASE_HEAT_CONSEQUENCE);
@@ -124,8 +122,69 @@ public class HeatCalculationUtility
                 {
                     newerHeatObject.setHeatLevel(Constants.HEAT_MIN); //No in/decreases in file size yet
                 }
-                if (fileObject.getFilename().equals("HeatMapPane.java"))
-                    System.out.println("Heat: "+newerHeatObject.getHeatLevel()+"\n");
+//if (fileObject.getFilename().equals("HeatMapPane.java"))
+    //System.out.println("Heat: "+newerHeatObject.getHeatLevel()+"\n");
+
+                lastHeatObject = newerHeatObject;
+            }
+        }
+    }
+
+
+    public static void assignHeatLevelsNumberOfCommits(Codebase codebase)
+    {
+        final int REQUIRED_NUM_COMMITS_WITHOUT_CHANGING = 5; //the number of consecutive commits where the file is not modified in order to reduce the accumulated heat level.
+        final int COMMIT_HEAT_CONSEQUENCE = 2; //how much the heat increases when the file is modified
+        final int COMMIT_ABSENCE_HEAT_CONSEQUENCE = -1; //how much the heat decreases if the file is not modified for enough consecutive commits
+
+        Set<FileObject> fileObjectSet = codebase.getActiveFileObjects();
+        for (FileObject fileObject : fileObjectSet)
+        {
+            //The oldest commits are at the front of the LinkedHashMap
+            LinkedHashMap<String, HeatObject> commitHashToHeatObjectMap = fileObject.getCommitHashToHeatObjectMap();
+
+            HeatObject lastHeatObject = null;
+            int numberOfConsecutiveCommitsWithNoModify = 0;
+
+            for (Map.Entry<String, HeatObject> commitToHeatObjectEntry : commitHashToHeatObjectMap.entrySet())
+            {
+                HeatObject newerHeatObject = commitToHeatObjectEntry.getValue();
+                if (lastHeatObject != null)
+                {
+                    newerHeatObject.setHeatLevel(lastHeatObject.getHeatLevel()); //use previous heat, then modify
+
+/*if (fileObject.getFilename().equals("HeatMapPane.java"))
+{
+    System.out.println("New Hash: "+commitToHeatObjectEntry.getKey());
+    System.out.println("oldFileSize: "+oldFileSize);
+    System.out.println("newFileSize: "+newFileSize);
+}*/
+
+                    //If the file was committed to, incur heat
+                    if (newerHeatObject.getNumberOfCommits() > lastHeatObject.getNumberOfCommits())
+                    {
+                        newerHeatObject.setHeatLevel(newerHeatObject.getHeatLevel() + COMMIT_HEAT_CONSEQUENCE);
+                        numberOfConsecutiveCommitsWithNoModify = 0;
+                    }
+                    //File was not touched in the commit ↓
+                    else
+                    {
+                        numberOfConsecutiveCommitsWithNoModify++;
+
+                        //If file went unchanged for long enough, the heat improved
+                        if (numberOfConsecutiveCommitsWithNoModify >= REQUIRED_NUM_COMMITS_WITHOUT_CHANGING)
+                        {
+                            newerHeatObject.setHeatLevel(newerHeatObject.getHeatLevel() + COMMIT_ABSENCE_HEAT_CONSEQUENCE);
+                            numberOfConsecutiveCommitsWithNoModify = 0;
+                        }
+                    }
+                }
+                else
+                {
+                    newerHeatObject.setHeatLevel(Constants.HEAT_MIN); //No commits to the file yet
+                }
+//if (fileObject.getFilename().equals("HeatMapPane.java"))
+    //System.out.println("Heat: "+newerHeatObject.getHeatLevel()+"\n");
 
                 lastHeatObject = newerHeatObject;
             }
