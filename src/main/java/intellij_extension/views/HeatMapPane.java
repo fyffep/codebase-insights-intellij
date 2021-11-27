@@ -26,8 +26,8 @@ import java.util.TreeSet;
 
 public class HeatMapPane implements IContainerView, CodeBaseObserver {
 
-    private final ObservableList<String> activeBranchList = FXCollections.observableArrayList();
     //region Vars
+    private final ObservableList<String> activeBranchList = FXCollections.observableArrayList();
     // Basically this class' main node
     private VBox parent;
     // Banner that holds heat metric and branch comboBoxes
@@ -92,14 +92,14 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         Tab tab = new Tab();
         tab.setText(Constants.HEAT_GROUPING_TEXT);
         HeatMapFlowPane heatMapTabContent = new HeatMapFlowPane(tabPane);
-        heatMapTabContent.setGroupingMode(Constants.GroupingMode.Packages);
+        heatMapTabContent.setGroupingMode(Constants.GroupingMode.PACKAGES);
         tab.setContent(heatMapTabContent.getNode());
         tabPane.getTabs().add(tab);
         // Commit tab
         tab = new Tab();
         tab.setText(Constants.COMMIT_GROUPING_TEXT);
         HeatMapFlowPane commitTabContent = new HeatMapFlowPane(tabPane);
-        commitTabContent.setGroupingMode(Constants.GroupingMode.Commits);
+        commitTabContent.setGroupingMode(Constants.GroupingMode.COMMITS);
         tab.setContent(commitTabContent.getNode());
         tabPane.getTabs().add(tab);
 

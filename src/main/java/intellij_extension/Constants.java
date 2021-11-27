@@ -14,10 +14,24 @@ public class Constants {
 
     public static final Logger LOG = Logger.getInstance(Codebase.class); // TODO This should probably change to a more reasonable class?
 
-    public static final GroupingMode DEFAULT_GROUPING = GroupingMode.Packages;
+    public static final GroupingMode DEFAULT_GROUPING = GroupingMode.PACKAGES;
     public static enum GroupingMode {
-        Commits,
-        Packages
+        COMMITS,
+        PACKAGES
+    }
+
+    // Heat Metric List
+    public static final ObservableList<String> HEAT_METRIC_OPTIONS = FXCollections.observableArrayList(
+            "Line Count",
+            "Number of Commits",
+            "Number of Authors",
+            "Overall Heat"
+    );
+    public static enum HeatMetricOptions {
+        OVERALL,
+        LINE_COUNT,
+        NUM_OF_COMMITS,
+        NUM_OF_AUTHORS
     }
 
     // Heat
@@ -93,12 +107,6 @@ public class Constants {
     public static final String HEAT_METRIC_COMBOBOX_TITLE = "Heat Data:";
     public static final String HEAT_GROUPING_TEXT = "Group by Package";
     public static final String COMMIT_GROUPING_TEXT = "Group by Commit";
-    // Heat Metric List
-    public static final ObservableList<String> HEAT_METRIC_OPTIONS = FXCollections.observableArrayList(
-            "Line Count",
-            "Number of Commits",
-            "Number of Authors"
-    );
     //endregion
 
     //Prevent instantiation

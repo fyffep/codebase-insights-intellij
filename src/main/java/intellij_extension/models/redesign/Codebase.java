@@ -2,6 +2,7 @@ package intellij_extension.models.redesign;
 
 import intellij_extension.Constants;
 import intellij_extension.Constants.GroupingMode;
+import intellij_extension.Constants.HeatMetricOptions;
 import intellij_extension.observer.CodeBaseObservable;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.utility.GroupFileObjectUtility;
@@ -26,7 +27,8 @@ public class Codebase implements CodeBaseObservable {
     private String latestCommitHash; // TODO should be replaced by target Commit completely (so we can select a previous commit when the time comes)
     private String targetCommit;
 
-    private GroupingMode currentGroupingMode = GroupingMode.Packages;
+    private GroupingMode currentGroupingMode = GroupingMode.PACKAGES;
+    private HeatMetricOptions currentHeatMetricOption = HeatMetricOptions.LINE_COUNT;
     // endregion
 
     // region Singleton Constructor
@@ -176,9 +178,10 @@ public class Codebase implements CodeBaseObservable {
         notifyObserversOfBranchChange(getSetOfFiles(), targetCommit, currentGroupingMode);
     }
 
-    public void newHeatMetricSelected(String heatMetric) {
-        // TODO does this need to come back to the mode?
-        //  or can the view hold all heat metric info and just update when comboBox is changed (I'm against this).
+    public void newHeatMetricSelected(HeatMetricOptions newHeatMetricOption) {
+        currentHeatMetricOption = newHeatMetricOption;
+
+        notifyObserversOfRefreshHeatMap(getSetOfFiles(), targetCommit, currentGroupingMode);
     }
 
     public void commitSelected(String commitHash) {
@@ -211,10 +214,10 @@ public class Codebase implements CodeBaseObservable {
         // Update views with data
         TreeMap<String, TreeSet<FileObject>> setOfFiles;
         switch (currentGroupingMode) {
-            case Commits:
+            case COMMITS:
                 setOfFiles = groupDataByCommits();
                 break;
-            case Packages:
+            case PACKAGES:
             default:
                 setOfFiles = groupDataByPackages();
                 break;
@@ -224,8 +227,12 @@ public class Codebase implements CodeBaseObservable {
 
     public TreeMap<String, TreeSet<FileObject>> groupDataByCommits() {
         System.out.println("groupDataByCommits called");
+
         // Calculate heat based on file size (SHOULD BE MOVED)
         // TODO Implement current selected HeatMetric
+        //  we now have currentHeatMetricOption
+        // maybe something like this?
+//        HeatCalculationUtility.assignHeatLevels(this, currentHeatMetricOption);
         HeatCalculationUtility.assignHeatLevelsFileSize(this);
 
         TreeMap<String, TreeSet<FileObject>> commitsToFileMap = GroupFileObjectUtility.groupByCommit();
@@ -238,6 +245,9 @@ public class Codebase implements CodeBaseObservable {
 
         // Calculate heat based on file size (SHOULD BE MOVED)
         // TODO Implement current selected HeatMetric
+        //  we now have currentHeatMetricOption
+        // maybe something like this?
+//        HeatCalculationUtility.assignHeatLevels(this, currentHeatMetricOption);
         HeatCalculationUtility.assignHeatLevelsFileSize(this);
 
         TreeMap<String, TreeSet<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(getProjectRootPath(), activeFileObjects);
