@@ -150,6 +150,17 @@ public class RepositoryAnalyzer {
                         // Update latest commit for fileObject
                         fileObject.setLatestCommitInDiffEntryList(processCommit.getName());
 
+                        // Check if file moved and update path
+                        if (diffEntry.getChangeType() == DiffEntry.ChangeType.RENAME) {
+                            if (DEBUG_FILE) {
+                                System.out.println(diffEntry.getOldPath());
+                                System.out.println(diffEntry.getNewPath());
+                                System.out.println();
+                            }
+                            // TODO consider tracking paths per change/commit
+                            fileObject.setPath(diffEntry.getNewPath());
+                        }
+
                         if (DEBUG_FILE) {
                             if (fileObject.getFilename().equals(DEBUG_FILENAME)) {
                                 HeatObject processHeatObject = fileObject.getHeatObjectAtCommit(processCommit.getName());
