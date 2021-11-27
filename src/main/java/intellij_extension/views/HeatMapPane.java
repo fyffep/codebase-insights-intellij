@@ -7,12 +7,15 @@ import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.views.interfaces.IContainerView;
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
@@ -81,29 +84,30 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         // Set up the select action
         branchComboBox.setOnAction(this::branchSelectedAction);
 
-        // HeatMapFlowPane inside an AnchorPane inside a ScrollPane
-        // TODO this will eventually become a TabbedView
-        ScrollPane scrollPane = new ScrollPane();
-        parent.getChildren().add(scrollPane);
-        scrollPane.prefWidthProperty().bind(parent.widthProperty());
-        scrollPane.maxWidthProperty().bind(parent.widthProperty());
-
-        // Create ScrollPane and the AnchorPane inside it
-        AnchorPane anchorPane = new AnchorPane();
-        scrollPane.setContent(anchorPane);
-        anchorPane.prefWidthProperty().bind(scrollPane.widthProperty());
-        anchorPane.prefHeightProperty().bind(scrollPane.heightProperty());
-
-        // Create HeatMapFlowPane
-        heatMapFlowPane = new HeatMapFlowPane();
-        anchorPane.getChildren().add(heatMapFlowPane.getNode());
-        FlowPane flowPane = (FlowPane) heatMapFlowPane.getNode();
-        flowPane.prefWidthProperty().bind(scrollPane.widthProperty());
+        // Tabbed view
+        TabPane tabPane = new TabPane();
+        parent.getChildren().add(tabPane);
+        tabPane.prefHeightProperty().bind(parent.heightProperty());
+        tabPane.getSelectionModel().selectedItemProperty().addListener(this::tabSelectedAction);
+        // Set  up tabs
+        // Package tab
+        Tab tab = new Tab();
+        tab.setText(Constants.HEAT_GROUPING_TEXT);
+        HeatMapFlowPane heatMapTabContent = new HeatMapFlowPane(tabPane);
+        tab.setContent(heatMapTabContent.getNode());
+        tabPane.getTabs().add(tab);
+        // Commit tab
+        tab = new Tab();
+        tab.setText(Constants.COMMIT_GROUPING_TEXT);
+        HeatMapFlowPane commitTabContent = new HeatMapFlowPane(tabPane);
+        tab.setContent(commitTabContent.getNode());
+        tabPane.getTabs().add(tab);
 
         Codebase model = Codebase.getInstance();
         model.registerObserver(this);
         HeatMapController.getInstance().branchListRequested();
     }
+
     //endregion
 
     //region UI actions
@@ -119,6 +123,11 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         System.out.printf("The %s option was selected. Update HeatMap with info based on it.%n", selectedValue);
 
         HeatMapController.getInstance().newHeatMetricSelected(selectedValue);
+    }
+
+    private void tabSelectedAction(Observable observable, Tab oldTab, Tab newTab) {
+        System.out.printf("%s deselected, %s selected.%n", oldTab.getText(), newTab.getText());
+        HeatMapController.getInstance().heatMapGroupingChanged(newTab.getText());
     }
     //endregion
 

@@ -1,6 +1,7 @@
 package intellij_extension.models.redesign;
 
 import intellij_extension.Constants;
+import intellij_extension.GroupingMode;
 import intellij_extension.observer.CodeBaseObservable;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.utility.RepositoryAnalyzer;
@@ -188,6 +189,10 @@ public class Codebase implements CodeBaseObservable {
         FileObject selectedFile = getFileObjectFromFilename(filename);
         System.out.println("Open file in intellij: " + selectedFile.getFilename());
         // TODO - How to open this file via Intellij
+    }
+
+    public void heatMapGroupingChanged(GroupingMode newGroupingMode) {
+
     }
     // endregion
 

@@ -10,6 +10,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+public enum GroupingMode {
+    Commits,
+    Packages
+}
+
 public class Constants {
 
     public static final Logger LOG = Logger.getInstance(Codebase.class); // TODO This should probably change to a more reasonable class?
@@ -85,6 +90,8 @@ public class Constants {
     public static final String[] DEFAULT_BRANCHES = {"development", "master", "main"};
     public static final String BRANCH_COMBOBOX_TITLE = "Evaluating Branch:";
     public static final String HEAT_METRIC_COMBOBOX_TITLE = "Heat Data:";
+    public static final String HEAT_GROUPING_TEXT = "Group by Package";
+    public static final String COMMIT_GROUPING_TEXT = "Group by Commit";
     // Heat Metric List
     public static final ObservableList<String> HEAT_METRIC_OPTIONS = FXCollections.observableArrayList(
             "Line Count",
