@@ -4,6 +4,7 @@ import com.intellij.openapi.application.PreloadingActivity;
 import com.intellij.openapi.progress.ProgressIndicator;
 import intellij_extension.Constants;
 import intellij_extension.Constants.GroupingMode;
+import intellij_extension.Constants.HeatMetricOptions;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.utility.RepositoryAnalyzer;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -76,8 +77,19 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
         codeBase.newBranchSelected(branchName);
     }
 
-    public void newHeatMetricSelected(String branchName) {
-        codeBase.newHeatMetricSelected(branchName);
+    public void newHeatMetricSelected(String heatMetricOption) {
+        HeatMetricOptions newOption;
+        if (heatMetricOption.equals(Constants.HEAT_METRIC_OPTIONS.get(0))) {
+            newOption = HeatMetricOptions.LINE_COUNT;
+        } else if (heatMetricOption.equals(Constants.HEAT_METRIC_OPTIONS.get(1))) {
+            newOption = HeatMetricOptions.NUM_OF_COMMITS;
+        } else if (heatMetricOption.equals(Constants.HEAT_METRIC_OPTIONS.get(2))) {
+            newOption = HeatMetricOptions.NUM_OF_AUTHORS;
+        } else {
+            newOption = HeatMetricOptions.OVERALL;
+        }
+
+        codeBase.newHeatMetricSelected(newOption);
     }
 
     public void commitSelected(String commitHash) {
@@ -95,9 +107,9 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
     public void heatMapGroupingChanged(String newTab) {
         GroupingMode newGroupingMode;
         if (newTab.equals(Constants.COMMIT_GROUPING_TEXT)) {
-            newGroupingMode = GroupingMode.Commits;
+            newGroupingMode = GroupingMode.COMMITS;
         } else {
-            newGroupingMode = GroupingMode.Packages;
+            newGroupingMode = GroupingMode.PACKAGES;
         }
 
         codeBase.heatMapGroupingChanged(newGroupingMode);
