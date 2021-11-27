@@ -14,6 +14,7 @@ public class Constants {
 
     public static final Logger LOG = Logger.getInstance(Codebase.class); // TODO This should probably change to a more reasonable class?
 
+    public static final GroupingMode DEFAULT_GROUPING = GroupingMode.Packages;
     public static enum GroupingMode {
         Commits,
         Packages

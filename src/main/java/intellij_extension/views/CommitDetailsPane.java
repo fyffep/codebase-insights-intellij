@@ -1,6 +1,7 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
+import intellij_extension.Constants.GroupingMode;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
@@ -17,6 +18,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
@@ -165,7 +168,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
     //region CodeBaseObservable methods
     @Override
-    public void refreshHeatMap(Codebase codeBase) {
+    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         // Nothing to do for this action
     }
 

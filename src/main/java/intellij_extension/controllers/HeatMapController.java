@@ -37,7 +37,7 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
     public void preload(@NotNull ProgressIndicator indicator) {
         System.out.println("Preloading HeatMapController..."); //logger fails here
         extractData();
-        codeBase.notifyObserversOfRefreshHeatMap();
+        codeBase.heatMapGroupingChanged(Constants.DEFAULT_GROUPING);
         System.out.println("Finished preloading HeatMapController.");
     }
 
