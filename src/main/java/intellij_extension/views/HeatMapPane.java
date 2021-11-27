@@ -1,6 +1,7 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
+import intellij_extension.Constants.GroupingMode;
 import intellij_extension.controllers.HeatMapController;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
@@ -13,19 +14,19 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
 import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class HeatMapPane implements IContainerView, CodeBaseObserver {
 
+    private final ObservableList<String> activeBranchList = FXCollections.observableArrayList();
     //region Vars
     // Basically this class' main node
     private VBox parent;
@@ -33,8 +34,6 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
     private HBox topHorizontalBanner;
     private ComboBox<String> heatMetricComboBox;
     private ComboBox<String> branchComboBox;
-    private final ObservableList<String> activeBranchList = FXCollections.observableArrayList();
-
     // Holds HeatMapPane and CommitGroupingPane
     // private HeatMapTabbedPane heatMapTabbedPane;
     // Heat Map for a single commit + the history up to the commit
@@ -94,12 +93,14 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         Tab tab = new Tab();
         tab.setText(Constants.HEAT_GROUPING_TEXT);
         HeatMapFlowPane heatMapTabContent = new HeatMapFlowPane(tabPane);
+        heatMapTabContent.setGroupingMode(Constants.GroupingMode.Packages);
         tab.setContent(heatMapTabContent.getNode());
         tabPane.getTabs().add(tab);
         // Commit tab
         tab = new Tab();
         tab.setText(Constants.COMMIT_GROUPING_TEXT);
         HeatMapFlowPane commitTabContent = new HeatMapFlowPane(tabPane);
+        commitTabContent.setGroupingMode(Constants.GroupingMode.Commits);
         tab.setContent(commitTabContent.getNode());
         tabPane.getTabs().add(tab);
 
@@ -140,7 +141,7 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
 
     //region CodeBaseObserver methods
     @Override
-    public void refreshHeatMap(Codebase codeBase) {
+    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         // Nothing to do for this action
     }
 

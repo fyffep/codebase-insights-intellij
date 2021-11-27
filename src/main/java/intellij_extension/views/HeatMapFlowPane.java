@@ -1,12 +1,12 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
+import intellij_extension.Constants.GroupingMode;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.observer.CodeBaseObserver;
-import intellij_extension.utility.GroupFileObjectUtility;
 import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.views.interfaces.IContainerView;
 import javafx.application.Platform;
@@ -18,10 +18,12 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * A view that holds rectangles to represent files for a particular commit.
@@ -35,10 +37,11 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     private ScrollPane scrollPane;
     private AnchorPane anchorPane;
     private FlowPane flowPane;
+    private GroupingMode groupingMode;
     //endregion
 
     //region Constructors
-    public HeatMapFlowPane(Control grandParent) {
+    public HeatMapFlowPane(@NotNull Control grandParent) {
         // Create ScrollPane
         scrollPane = new ScrollPane();
         // Set Properties
@@ -68,6 +71,10 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     }
     //endregion
 
+    public void setGroupingMode(GroupingMode groupingMode) {
+        this.groupingMode = groupingMode;
+    }
+
     //region IContainerView methods
     @Override
     public Node getNode() {
@@ -78,53 +85,47 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     //region CodeBaseObserver methods
 
     /**
-     * Clears the pane, then displays all files present in the latest commit.
+     * Clears the pane, then displays all files present in the target commit.
      * Each file is represented by a rectangular pane.
-     *
-     * @param codebase the model whose fileMetricMap will be read to extract
-     *                 file-to-heat data.
      */
     @Override
-    public void refreshHeatMap(Codebase codebase) {
-        System.out.println("Called refresh");
+    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
+        // If not our grouping mode, then don't do anything
+        if(!this.groupingMode.equals(groupingMode)) return;
 
-        //Calculate heat based on file size (SHOULD BE MOVED)
-        HeatCalculationUtility.assignHeatLevelsFileSize(codebase);
-
-        Map<String, ArrayList<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(codebase);
         Platform.runLater(() -> {
             flowPane.getChildren().clear();
-            for (Map.Entry<String, ArrayList<FileObject>> entry : packageToFileMap.entrySet()) {
-                String packageName = entry.getKey();
-                HeatFileContainer heatFileContainer = new HeatFileContainer(packageName);
-                heatFileContainer.maxWidthProperty().bind(flowPane.widthProperty());
-                for (FileObject fileObject : entry.getValue()) {
 
-                    HeatObject heatObject = fileObject.getHeatObjectAtCommit(codebase.getLatestCommitHash());
+            for (Map.Entry<String, TreeSet<FileObject>> entry : setOfFiles.entrySet()) {
+                // Get package name
+                String groupingKey = entry.getKey();
+                // Create a container for it
+                HeatFileContainer heatFileContainer = new HeatFileContainer(groupingKey);
+                heatFileContainer.maxWidthProperty().bind(flowPane.widthProperty());
+                setContainerToolTip(heatFileContainer, groupingKey);
+
+                // Add files to the package container
+                for (FileObject fileObject : entry.getValue()) {
+                    // Get HeatObject for targetCommit
+                    HeatObject heatObject = fileObject.getHeatObjectAtCommit(targetCommit);
                     if (heatObject == null) continue;
 
+                    // TODO Need to consider heat metric here?
                     int heatLevel = heatObject.getHeatLevel();
 
-                    //Generate color
+                    // Generate color
                     Color fileHeatColor = HeatCalculationUtility.colorOfHeat(heatLevel);
+
                     // Convert color to hex
-                    // This has a bug and doesn't properly convert colors - off by 1 or 2 error
-//                    String colorString = String.format("%02x%02x%02x", (int) (fileHeatColor.getRed() * 255), (int) (fileHeatColor.getGreen() * 255), (int) (fileHeatColor.getBlue() * 255));
                     String colorString = fileHeatColor.toString();
                     String colorFormat = String.format("-fx-background-color: #%s", colorString.substring(colorString.indexOf("x") + 1));
 
-                    // Add a pane (rectangle) to the screen
+                    // Add a pane (rectangle) package container
                     HeatFileComponent heatFileComponent = new HeatFileComponent(fileObject);
                     heatFileComponent.setStyle(colorFormat);
-                    // heatFileContainer.getChildren().add(heatFileComponent);
                     heatFileContainer.addNode(heatFileComponent);
 
-                    // Add a tooltip to the file pane
-                    String fileName = fileObject.getFilename();
-                    Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d", fileName, heatLevel));
-                    tooltip.setFont(Constants.TOOLTIP_FONT);
-                    tooltip.setShowDelay(Duration.seconds(0));
-                    Tooltip.install(heatFileComponent, tooltip);
+                    setFileToolTip(fileObject, heatLevel, heatFileComponent);
                 }
 
                 heatFileContainer.setStyle("-fx-background-color: #BBBBBB");
@@ -135,57 +136,24 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
             }
         });
 
-        /*Platform.runLater(() -> {
-            clear();
-
-            //Iterate through the files and add them to the screen
-            Iterator<FileObject> fileObjectIterator = codebase.getActiveFileObjects().iterator();
-            System.out.println("Updating the heatmap view");
-            // A list for sorting them by heat level
-            ArrayList<FileObject> sortedFileObject = new ArrayList<>();
-            while (fileObjectIterator.hasNext()) {
-                FileObject fileObject = fileObjectIterator.next();
-
-                // TODO maybe add a "current commit" field to the Codebase?
-                //  Yea.. building the model should automatically set the latest commit as the current commit.
-                // String commitHash = fileObject.getCo();
-                int heatLevel = fileObject.getHeatObjectAtCommit("df24464eb2394991112ed60f5252ccf8c59da455").computeHeatLevel(); //retrieve or calculate heat level
-
-                // Get commits associated with file
-                ArrayList<Commit> associatedCommits = (ArrayList<Commit>) codebase.getActiveCommits().stream()
-                        .filter(commit -> commit.getFileSet().contains(fileObject.getFilename()))
-                        .collect(Collectors.toList());
-                heatLevel = associatedCommits.size();
-
-                fileObject.latestCommitHeatLevel = heatLevel;
-                sortedFileObject.add(fileObject);
-            }
-            Collections.sort(sortedFileObject, (a, b) -> b.compareTo(a));
-
-
-            for (FileObject fileObject : sortedFileObject) {
-                //Generate color
-                Color fileHeatColor = HeatCalculationUtility.colorOfHeat(fileObject.latestCommitHeatLevel);
-
-                //Convert color to hex
-                String colorString = String.format("%02x%02x%02x", (int) (fileHeatColor.getRed() * 255), (int) (fileHeatColor.getGreen() * 255), (int) (fileHeatColor.getBlue() * 255));
-
-                //Add a pane (rectangle) to the screen
-                HeatFileComponent heatFileComponent = new HeatFileComponent(fileObject);
-                heatFileComponent.setStyle("-fx-background-color: #" + colorString);
-                this.addNode(heatFileComponent);
-
-                //Add a tooltip to the file pane
-                String fileName = fileObject.getFilename();
-                Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d", fileName, fileObject.latestCommitHeatLevel));
-                tooltip.setFont(Constants.TOOLTIP_FONT);
-                tooltip.setShowDelay(Duration.seconds(0));
-                Tooltip.install(heatFileComponent, tooltip);
-
-                System.out.println("Added a file pane for " + fileName + " with heat level " + fileObject.latestCommitHeatLevel); // logger only works sometimes here
-            }
-        });*/
         System.out.println("Finished adding panes to the heat map.");
+    }
+
+    private void setContainerToolTip(@NotNull HeatFileContainer container, String info) {
+        // Add a tooltip to the file pane
+        Tooltip tooltip = new Tooltip(info);
+        tooltip.setFont(Constants.TOOLTIP_FONT);
+        tooltip.setShowDelay(Duration.seconds(0.5f));
+        Tooltip.install(container, tooltip);
+    }
+
+    private void setFileToolTip(@NotNull FileObject fileObject, int heatLevel, HeatFileComponent heatFileComponent) {
+        // Add a tooltip to the file pane
+        String fileName = fileObject.getFilename();
+        Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d", fileName, heatLevel));
+        tooltip.setFont(Constants.TOOLTIP_FONT);
+        tooltip.setShowDelay(Duration.seconds(0));
+        Tooltip.install(heatFileComponent, tooltip);
     }
 
     @Override
