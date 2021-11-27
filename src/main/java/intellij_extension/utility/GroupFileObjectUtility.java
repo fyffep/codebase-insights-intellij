@@ -31,7 +31,6 @@ public class GroupFileObjectUtility {
         // TreeMap sorts by string natural order when keys are added
         // TreeSet sorts by comparator below when entries are added to set
         TreeMap<String, TreeSet<FileObject>> packageToFileMap = new TreeMap<>(String::compareTo);
-        ;
 
         // Sorting for TreeSet
         Comparator<FileObject> FILE_NAME = Comparator.comparing(FileObject::getFilename);

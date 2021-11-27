@@ -41,7 +41,7 @@ public class RepositoryAnalyzer {
     private static final boolean DEBUG_FILE = false;
     private static final boolean DEBUG_DIFF_ENTRY = false;
     private static final String DEBUG_COMMIT_HASH = "commit 0cdfe6bf92eddb57763f491b6db6edc6f56324f5 1636656382 ------p";
-    private static final String DEBUG_FILENAME = "CodebaseInsightsToolWindowFactory.java";
+    private static final String DEBUG_FILENAME = "HeatCalculationUtility.java";
     private static Git git;
 
     // Init git variable based on local repo
@@ -149,17 +149,10 @@ public class RepositoryAnalyzer {
                         commitExtract.getFileSet().add(fileName);
                         // Update latest commit for fileObject
                         fileObject.setLatestCommitInDiffEntryList(processCommit.getName());
-
-                        // Check if file moved and update path
-                        if (diffEntry.getChangeType() == DiffEntry.ChangeType.RENAME) {
-                            if (DEBUG_FILE) {
-                                System.out.println(diffEntry.getOldPath());
-                                System.out.println(diffEntry.getNewPath());
-                                System.out.println();
-                            }
-                            // TODO consider tracking paths per change/commit
-                            fileObject.setPath(diffEntry.getNewPath());
-                        }
+                        // TODO consider tracking paths per change/commit
+                        //  it's not always a rename event that changes path. HeatCalculationUtility is an example of this.
+                        // Blindly take new path
+                        fileObject.setPath(diffEntry.getNewPath());
 
                         if (DEBUG_FILE) {
                             if (fileObject.getFilename().equals(DEBUG_FILENAME)) {
