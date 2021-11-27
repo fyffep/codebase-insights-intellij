@@ -2,6 +2,8 @@ package intellij_extension.controllers;
 
 import com.intellij.openapi.application.PreloadingActivity;
 import com.intellij.openapi.progress.ProgressIndicator;
+import intellij_extension.Constants;
+import intellij_extension.GroupingMode;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.utility.RepositoryAnalyzer;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -88,6 +90,17 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
 
     public void openFile(String filename) {
         codeBase.openFile(filename);
+    }
+
+    public void heatMapGroupingChanged(String newTab) {
+        GroupingMode newGroupingMode;
+        if (newTab.equals(Constants.COMMIT_GROUPING_TEXT)) {
+            newGroupingMode = GroupingMode.Commits;
+        } else {
+            newGroupingMode = GroupingMode.Packages;
+        }
+
+        codeBase.heatMapGroupingChanged(newGroupingMode);
     }
     //endregion
 }

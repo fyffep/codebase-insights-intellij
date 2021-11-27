@@ -11,7 +11,10 @@ import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.views.interfaces.IContainerView;
 import javafx.application.Platform;
 import javafx.scene.Node;
+import javafx.scene.control.Control;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
@@ -27,17 +30,37 @@ import java.util.Map;
 public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
 
     //region Vars
-    // Basically this class' main node
-    private FlowPane parent;
+    // Basically this class' main nodes
+    // ScrollPane -> AnchorPane -> FlowPane
+    private ScrollPane scrollPane;
+    private AnchorPane anchorPane;
+    private FlowPane flowPane;
     //endregion
 
     //region Constructors
-    public HeatMapFlowPane() {
-        parent = new FlowPane();
-        // Set margin around the heat boxes.
-        parent.setVgap(Constants.HEATMAP_VERTICAL_SPACING);
-        parent.setHgap(Constants.HEATMAP_HORIZONTAL_SPACING);
-        parent.setPadding(Constants.HEATMAP_PADDING);
+    public HeatMapFlowPane(Control grandParent) {
+        // Create ScrollPane
+        scrollPane = new ScrollPane();
+        // Set Properties
+        scrollPane.prefWidthProperty().bind(grandParent.widthProperty());
+        scrollPane.maxWidthProperty().bind(grandParent.widthProperty());
+        scrollPane.maxHeightProperty().bind(grandParent.heightProperty());
+
+        // Create the AnchorPane inside the ScrollPane
+        anchorPane = new AnchorPane();
+        scrollPane.setContent(anchorPane);
+        // Set Properties
+        anchorPane.prefWidthProperty().bind(scrollPane.widthProperty());
+        anchorPane.prefHeightProperty().bind(scrollPane.heightProperty());
+
+        // Create HeatMapFlowPane inside the AnchorPane
+        flowPane = new FlowPane();
+        anchorPane.getChildren().add(flowPane);
+        // Set Properties
+        flowPane.prefWidthProperty().bind(scrollPane.widthProperty());
+        flowPane.setVgap(Constants.HEATMAP_VERTICAL_SPACING);
+        flowPane.setHgap(Constants.HEATMAP_HORIZONTAL_SPACING);
+        flowPane.setPadding(Constants.HEATMAP_PADDING);
 
         // Register self as an observer of the model
         Codebase model = Codebase.getInstance();
@@ -48,11 +71,12 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     //region IContainerView methods
     @Override
     public Node getNode() {
-        return parent;
+        return scrollPane;
     }
     //endregion
 
     //region CodeBaseObserver methods
+
     /**
      * Clears the pane, then displays all files present in the latest commit.
      * Each file is represented by a rectangular pane.
@@ -69,15 +93,15 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
 
         Map<String, ArrayList<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(codebase);
         Platform.runLater(() -> {
-            parent.getChildren().clear();
+            flowPane.getChildren().clear();
             for (Map.Entry<String, ArrayList<FileObject>> entry : packageToFileMap.entrySet()) {
                 String packageName = entry.getKey();
                 HeatFileContainer heatFileContainer = new HeatFileContainer(packageName);
-                heatFileContainer.maxWidthProperty().bind(parent.widthProperty());
+                heatFileContainer.maxWidthProperty().bind(flowPane.widthProperty());
                 for (FileObject fileObject : entry.getValue()) {
 
                     HeatObject heatObject = fileObject.getHeatObjectAtCommit(codebase.getLatestCommitHash());
-                    if(heatObject == null) continue;
+                    if (heatObject == null) continue;
 
                     int heatLevel = heatObject.getHeatLevel();
 
@@ -105,8 +129,8 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
 
                 heatFileContainer.setStyle("-fx-background-color: #BBBBBB");
                 // Only add if we actually made children for it.
-                if(heatFileContainer.getChildren().size() > 0) {
-                    parent.getChildren().add(heatFileContainer);
+                if (heatFileContainer.getChildren().size() > 0) {
+                    flowPane.getChildren().add(heatFileContainer);
                 }
             }
         });
