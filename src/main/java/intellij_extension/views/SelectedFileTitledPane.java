@@ -5,6 +5,7 @@ import intellij_extension.Constants;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
+import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.views.interfaces.IContainerView;
 import javafx.scene.Node;
@@ -25,7 +26,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
     //region Vars
     private TitledPane parent;
-    private Commit commit;
+//    private Commit commit;
 
     private final Text fileName;
     private final Text packageName;
@@ -183,12 +184,12 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         noOfCommits.setText(String.format("%s%s", Constants.SF_TEXT_NO_OF_COMMITS, totalCommits));
 
         //File Size
-        String commitHash = commit.getHash();
-        System.out.println("Commit hAsh:"+commitHash);
-        fileSize.setText(String.format("%s%s", Constants.SF_TEXT_FILE_SIZE, selectedFile.getHeatObjectAtCommit(commitHash).getFileSize()));
+        HeatObject heatobject=selectedFile.getHeatObjectAtCommit(selectedFile.getLatestCommitInTreeWalk());
+//        System.out.println("Commit hAsh:"+commitHash);
+        fileSize.setText(String.format("%s%s", Constants.SF_TEXT_FILE_SIZE,heatobject.getFileSize()));
 
         //line count
-        lineCount.setText(String.format("%s%s", Constants.SF_TEXT_LINE_COUNT, selectedFile.getHeatObjectAtCommit(commitHash).getLineCount()));
+        lineCount.setText(String.format("%s%s", Constants.SF_TEXT_LINE_COUNT, heatobject.getLineCount()));
 
         // Show the Pane
         showPane();
@@ -196,7 +197,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
     @Override
     public void commitSelected(Commit commit) {
-        this.commit=commit;
+        //this.commit=commit;
     }
     //endregion
 
