@@ -1,9 +1,14 @@
 package intellij_extension.models.redesign;
 
 import intellij_extension.Constants;
+import intellij_extension.Constants.GroupingMode;
+import intellij_extension.Constants.HeatMetricOptions;
 import intellij_extension.observer.CodeBaseObservable;
 import intellij_extension.observer.CodeBaseObserver;
+import intellij_extension.utility.GroupFileObjectUtility;
+import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.utility.RepositoryAnalyzer;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Paths;
 import java.util.*;
@@ -19,7 +24,11 @@ public class Codebase implements CodeBaseObservable {
     private LinkedHashSet<Commit> activeCommits;
     private LinkedHashSet<FileObject> activeFileObjects;
     private String projectRootPath;
-    private String latestCommitHash;
+    private String latestCommitHash; // TODO should be replaced by target Commit completely (so we can select a previous commit when the time comes)
+    private String targetCommit;
+
+    private GroupingMode currentGroupingMode = GroupingMode.PACKAGES;
+    private HeatMetricOptions currentHeatMetricOption = HeatMetricOptions.LINE_COUNT;
     // endregion
 
     // region Singleton Constructor
@@ -93,6 +102,7 @@ public class Codebase implements CodeBaseObservable {
     }
 
     public void setLatestCommitHash(String latestCommitHash) {
+        this.targetCommit = latestCommitHash;
         this.latestCommitHash = latestCommitHash;
     }
 
@@ -165,12 +175,13 @@ public class Codebase implements CodeBaseObservable {
 
         RepositoryAnalyzer.attachCodebaseData(this);
 
-        notifyObserversOfBranchChange();
+        notifyObserversOfBranchChange(getSetOfFiles(), targetCommit, currentGroupingMode);
     }
 
-    public void newHeatMetricSelected(String heatMetric) {
-        // TODO does this need to come back to the mode?
-        //  or can the view hold all heat metric info and just update when comboBox is changed (I'm against this).
+    public void newHeatMetricSelected(HeatMetricOptions newHeatMetricOption) {
+        currentHeatMetricOption = newHeatMetricOption;
+
+        notifyObserversOfRefreshHeatMap(getSetOfFiles(), targetCommit, currentGroupingMode);
     }
 
     public void commitSelected(String commitHash) {
@@ -189,19 +200,68 @@ public class Codebase implements CodeBaseObservable {
         System.out.println("Open file in intellij: " + selectedFile.getFilename());
         // TODO - How to open this file via Intellij
     }
+
+    public void heatMapGroupingChanged(@NotNull GroupingMode newGroupingMode) {
+        currentGroupingMode = newGroupingMode;
+
+        notifyObserversOfRefreshHeatMap(getSetOfFiles(), targetCommit, currentGroupingMode);
+    }
     // endregion
 
+    //region Data packaging
+
+    public TreeMap<String, TreeSet<FileObject>> getSetOfFiles() {
+        // Update views with data
+        TreeMap<String, TreeSet<FileObject>> setOfFiles;
+        switch (currentGroupingMode) {
+            case COMMITS:
+                setOfFiles = groupDataByCommits();
+                break;
+            case PACKAGES:
+            default:
+                setOfFiles = groupDataByPackages();
+                break;
+        }
+        return setOfFiles;
+    }
+
+    public TreeMap<String, TreeSet<FileObject>> groupDataByCommits() {
+        System.out.println("groupDataByCommits called");
+
+        // Calculate heat based on file size (SHOULD BE MOVED)
+        // TODO Implement current selected HeatMetric
+        //  we now have currentHeatMetricOption
+        // maybe something like this?
+//        HeatCalculationUtility.assignHeatLevels(this, currentHeatMetricOption);
+        HeatCalculationUtility.assignHeatLevelsFileSize(this);
+
+        TreeMap<String, TreeSet<FileObject>> commitsToFileMap = GroupFileObjectUtility.groupByCommit();
+
+        return commitsToFileMap;
+    }
+
+    public TreeMap<String, TreeSet<FileObject>> groupDataByPackages() {
+        System.out.println("groupDataByPackages called");
+
+        // Calculate heat based on file size (SHOULD BE MOVED)
+        // TODO Implement current selected HeatMetric
+        //  we now have currentHeatMetricOption
+        // maybe something like this?
+//        HeatCalculationUtility.assignHeatLevels(this, currentHeatMetricOption);
+        HeatCalculationUtility.assignHeatLevelsFileSize(this);
+
+        TreeMap<String, TreeSet<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(getProjectRootPath(), activeFileObjects);
+
+        return packageToFileMap;
+    }
+
+    //endregion
+
     // region Observable Methods
-    // TODO this needs to be changed.
-    // refreshHeatMap should be abandoned.
-    // It's name is not descriptive and isn't tied to any sort of interaction
-    // It passes the whole model which is absolutely insane and a bad choice by all of us.
-    // When we need to refresh the HeatMapFlowPane..
-    // ...we should only be passing a set of sets like discussed in our WhatsApp group.
     @Override
-    public void notifyObserversOfRefreshHeatMap() {
+    public void notifyObserversOfRefreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         for (CodeBaseObserver observer : observerList) {
-            observer.refreshHeatMap(this);
+            observer.refreshHeatMap(setOfFiles, targetCommit, currentGroupingMode);
         }
     }
 
@@ -213,15 +273,9 @@ public class Codebase implements CodeBaseObservable {
     }
 
     @Override
-    public void notifyObserversOfBranchChange() {
+    public void notifyObserversOfBranchChange(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         for (CodeBaseObserver observer : observerList) {
-            // TODO this needs to be changed.
-            // refreshHeatMap should be abandoned.
-            // It passes the whole model which is absolutely insane and a bad choice by all of us.
-            // When we need to refresh the HeatMapFlowPane..
-            // ...we should only be passing a set of sets like discussed in our WhatsApp group.
-            observer.refreshHeatMap(this);
-            // observer.newBranchSelected();
+            observer.newBranchSelected(setOfFiles, targetCommit, groupingMode);
         }
     }
 

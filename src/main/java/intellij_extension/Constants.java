@@ -14,6 +14,29 @@ public class Constants {
 
     public static final Logger LOG = Logger.getInstance(Codebase.class); // TODO This should probably change to a more reasonable class?
 
+    // Default Branches
+    public static final String[] DEFAULT_BRANCHES = {"development", "master", "main"};
+
+    public static final GroupingMode DEFAULT_GROUPING = GroupingMode.PACKAGES;
+    public static enum GroupingMode {
+        COMMITS,
+        PACKAGES
+    }
+
+    // Heat Metric List
+    public static final ObservableList<String> HEAT_METRIC_OPTIONS = FXCollections.observableArrayList(
+            "Line Count",
+            "Number of Commits",
+            "Number of Authors",
+            "Overall Heat"
+    );
+    public static enum HeatMetricOptions {
+        OVERALL,
+        LINE_COUNT,
+        NUM_OF_COMMITS,
+        NUM_OF_AUTHORS
+    }
+
     // Heat
     public static final int HEAT_MIN = 1;
     public static final int HEAT_MAX = 10;
@@ -82,15 +105,10 @@ public class Constants {
     public static final String SF_TEXT_PACKAGE_NAME = "Package Name: ";
     public static final String SF_TEXT_AUTHORS = "Authors: ";
     public static final String SF_TEXT_SEPERATOR = ":";
-    public static final String[] DEFAULT_BRANCHES = {"development", "master", "main"};
     public static final String BRANCH_COMBOBOX_TITLE = "Evaluating Branch:";
     public static final String HEAT_METRIC_COMBOBOX_TITLE = "Heat Data:";
-    // Heat Metric List
-    public static final ObservableList<String> HEAT_METRIC_OPTIONS = FXCollections.observableArrayList(
-            "Line Count",
-            "Number of Commits",
-            "Number of Authors"
-    );
+    public static final String HEAT_GROUPING_TEXT = "Group by Package";
+    public static final String COMMIT_GROUPING_TEXT = "Group by Commit";
     //endregion
 
     //Prevent instantiation

@@ -1,51 +1,48 @@
 package intellij_extension.utility;
 
-import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.FileObject;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
-public class GroupFileObjectUtility
-{
+public class GroupFileObjectUtility {
+
     private GroupFileObjectUtility() {
         //This is a utility class
     }
 
 
+    public static TreeMap<String, TreeSet<FileObject>> groupByCommit() {
+        return new TreeMap<>();
+    }
+
     /**
-     * Returns a HashMap of package names to the list of files contained in each respective
+     * Returns a TreeMap(for sorting capabilities) of package names to the list of files contained in each respective
      * package. Each package name includes only the folders inside the user's project.
      * <br/>
      * Example: If the project root path is "C:\Users\Dummy\my-project" and a FileObject has a path
      * "C:\Users\Dummy\my-project\package1\package2\my-file.java", then the package name for my-file.java
      * will be "\package1\package2\"
      */
-    public static Map<String, ArrayList<FileObject>> groupByPackage(Codebase codebase)
-    {
-        final String projectRootPath = codebase.getProjectRootPath();
-        LinkedHashMap<String, ArrayList<FileObject>> packageToFileMap = new LinkedHashMap<>(); //currently no real reason to have this kind of Map
-        for (FileObject fileObject : codebase.getActiveFileObjects())
-        {
-            //Obtain the package name by removing the FileObject's absolute path part and file name from its path
+    public static TreeMap<String, TreeSet<FileObject>> groupByPackage(String projectRootPath, HashSet<FileObject> activeFiles) {
+        // <Package, <Set of Files in package>>
+        // TreeMap sorts by string natural order when keys are added
+        // TreeSet sorts by comparator below when entries are added to set
+        TreeMap<String, TreeSet<FileObject>> packageToFileMap = new TreeMap<>(String::compareTo);
+
+        // Sorting for TreeSet
+        Comparator<FileObject> FILE_NAME = Comparator.comparing(FileObject::getFilename);
+
+        for (FileObject fileObject : activeFiles) {
+            // Obtain the package name by removing the FileObject's absolute path part and file name from its path
             String packageName = fileObject.getPath().toString().replace(projectRootPath, "")
                     .replace(fileObject.getFilename(), "");
-            //Add the FileObject under the package name
-            packageToFileMap.computeIfAbsent(packageName, k -> new ArrayList<>()).add(fileObject);
-        }
 
-        //Sort the files within each package alphabetically
-        Comparator<FileObject> FILE_NAME = Comparator.comparing(FileObject::getFilename);
-        for (ArrayList<FileObject> fileObjectArrayList : packageToFileMap.values())
-        {
-            fileObjectArrayList.sort(FILE_NAME);
+            // Add the FileObject under the package name
+            packageToFileMap.computeIfAbsent(packageName, k -> new TreeSet<>(FILE_NAME)).add(fileObject);
         }
-
-        /*//Sort the LinkedHashMap by package path alphabetically
-        //Ehh, we're better off using a Package class for this.
-        LinkedHashMap<String, ArrayList<FileObject>> outputMap = new LinkedHashMap<>();
-        packageToFileMap.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
-                .forEach(entry -> outputMap.put(entry.getKey(), entry.getValue()));*/
 
         return packageToFileMap;
     }
