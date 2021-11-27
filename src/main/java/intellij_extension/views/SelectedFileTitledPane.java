@@ -2,6 +2,7 @@ package intellij_extension.views;
 
 
 import intellij_extension.Constants;
+import intellij_extension.Constants.GroupingMode;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
@@ -16,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * The following Class is responsible for displaying the details of  file selected in the heat map
@@ -92,7 +95,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
     //region CodeBaseObserver methods
     @Override
-    public void refreshHeatMap(Codebase codeBase) {
+    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         // Nothing to do for this action
     }
 
@@ -102,7 +105,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     }
 
     @Override
-    public void newBranchSelected() {
+    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         fileName.setText(Constants.SF_TEXT_FILENAME);
         packageName.setText(Constants.SF_TEXT_PACKAGE_NAME);
         authors.setText(Constants.SF_TEXT_AUTHORS);

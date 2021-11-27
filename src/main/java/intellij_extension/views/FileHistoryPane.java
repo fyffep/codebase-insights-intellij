@@ -1,6 +1,7 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
+import intellij_extension.Constants.GroupingMode;
 import intellij_extension.controllers.HeatMapController;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
@@ -9,9 +10,7 @@ import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.views.interfaces.IContainerView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.scene.Node;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -22,6 +21,8 @@ import javafx.scene.text.Text;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class FileHistoryPane implements IContainerView, CodeBaseObserver {
 
@@ -141,7 +142,7 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
 
     //region CodeBaseObservable methods
     @Override
-    public void refreshHeatMap(Codebase codeBase) {
+    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         // Nothing to do for this action
     }
 
@@ -151,7 +152,7 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
     }
 
     @Override
-    public void newBranchSelected() {
+    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         activeCommitLines.clear();
     }
 
