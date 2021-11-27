@@ -65,7 +65,8 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         System.out.println("Called refresh");
 
         //Calculate heat based on file size (SHOULD BE MOVED)
-        HeatCalculationUtility.assignHeatLevelsFileSize(codebase);
+        //HeatCalculationUtility.assignHeatLevelsFileSize(codebase);
+        HeatCalculationUtility.assignHeatLevelsNumberOfCommits(codebase);
 
         Map<String, ArrayList<FileObject>> packageToFileMap = GroupFileObjectUtility.groupByPackage(codebase);
         Platform.runLater(() -> {
@@ -84,8 +85,6 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                     //Generate color
                     Color fileHeatColor = HeatCalculationUtility.colorOfHeat(heatLevel);
                     // Convert color to hex
-                    // This has a bug and doesn't properly convert colors - off by 1 or 2 error
-//                    String colorString = String.format("%02x%02x%02x", (int) (fileHeatColor.getRed() * 255), (int) (fileHeatColor.getGreen() * 255), (int) (fileHeatColor.getBlue() * 255));
                     String colorString = fileHeatColor.toString();
                     String colorFormat = String.format("-fx-background-color: #%s", colorString.substring(colorString.indexOf("x") + 1));
 
@@ -97,7 +96,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
 
                     // Add a tooltip to the file pane
                     String fileName = fileObject.getFilename();
-                    Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d", fileName, heatLevel));
+                    Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d\n\nPackage: %s", fileName, heatLevel, packageName));
                     tooltip.setFont(Constants.TOOLTIP_FONT);
                     tooltip.setShowDelay(Duration.seconds(0));
                     Tooltip.install(heatFileComponent, tooltip);
