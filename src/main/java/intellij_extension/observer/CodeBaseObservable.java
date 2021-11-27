@@ -16,7 +16,7 @@ public interface CodeBaseObservable {
     void notifyObserversOfBranchList();
 
     // branchSelected
-    void notifyObserversOfBranchChange();
+    void notifyObserversOfBranchChange(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode);
 
     // fileSelected
     void notifyObserversOfRefreshFileCommitHistory(FileObject selectedFile, ArrayList<Commit> filesCommits);

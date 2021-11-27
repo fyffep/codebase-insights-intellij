@@ -16,7 +16,7 @@ public interface CodeBaseObserver {
     void branchListRequested(String activeBranch, Iterator<String> branchList);
 
     // notifyObserversOfBranchChange
-    void newBranchSelected();
+    void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode);
 
     // notifyObserversOfRefreshFileCommitHistory
     void fileSelected(FileObject selectedFile, Iterator<Commit> filesCommits);

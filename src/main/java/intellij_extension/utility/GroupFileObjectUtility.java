@@ -2,7 +2,10 @@ package intellij_extension.utility;
 
 import intellij_extension.models.redesign.FileObject;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class GroupFileObjectUtility {
 
@@ -10,6 +13,10 @@ public class GroupFileObjectUtility {
         //This is a utility class
     }
 
+
+    public static TreeMap<String, TreeSet<FileObject>> groupByCommit() {
+        return new TreeMap<>();
+    }
 
     /**
      * Returns a TreeMap(for sorting capabilities) of package names to the list of files contained in each respective
@@ -23,7 +30,8 @@ public class GroupFileObjectUtility {
         // <Package, <Set of Files in package>>
         // TreeMap sorts by string natural order when keys are added
         // TreeSet sorts by comparator below when entries are added to set
-        TreeMap<String, TreeSet<FileObject>> packageToFileMap = new TreeMap<>(String::compareTo);;
+        TreeMap<String, TreeSet<FileObject>> packageToFileMap = new TreeMap<>(String::compareTo);
+        ;
 
         // Sorting for TreeSet
         Comparator<FileObject> FILE_NAME = Comparator.comparing(FileObject::getFilename);
@@ -32,6 +40,7 @@ public class GroupFileObjectUtility {
             // Obtain the package name by removing the FileObject's absolute path part and file name from its path
             String packageName = fileObject.getPath().toString().replace(projectRootPath, "")
                     .replace(fileObject.getFilename(), "");
+
             // Add the FileObject under the package name
             packageToFileMap.computeIfAbsent(packageName, k -> new TreeSet<>(FILE_NAME)).add(fileObject);
         }
