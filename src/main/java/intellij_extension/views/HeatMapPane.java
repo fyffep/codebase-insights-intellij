@@ -44,12 +44,14 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
     //region Constructors
     public HeatMapPane() {
         parent = new VBox();
+        parent.setMinWidth(Constants.ZERO_WIDTH);
 
         // Create the top horizontal banner
         topHorizontalBanner = new HBox();
         parent.getChildren().add(topHorizontalBanner);
         // Add constraints to width/height
         topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT);
+        topHorizontalBanner.setMinWidth(Constants.ZERO_WIDTH);
         topHorizontalBanner.prefWidthProperty().bind(parent.widthProperty());
         // Child layout properties
         topHorizontalBanner.setAlignment(Constants.BANNER_ALIGNMENT);

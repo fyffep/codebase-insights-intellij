@@ -54,6 +54,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         anchorPane = new AnchorPane();
         scrollPane.setContent(anchorPane);
         // Set Properties
+        anchorPane.setMinWidth(Constants.ZERO_WIDTH);
         anchorPane.prefWidthProperty().bind(scrollPane.widthProperty());
         anchorPane.prefHeightProperty().bind(scrollPane.heightProperty());
 
@@ -61,6 +62,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         flowPane = new FlowPane();
         anchorPane.getChildren().add(flowPane);
         // Set Properties
+        flowPane.setMinWidth(Constants.ZERO_WIDTH);
         flowPane.prefWidthProperty().bind(scrollPane.widthProperty());
         flowPane.setVgap(Constants.HEATMAP_VERTICAL_SPACING);
         flowPane.setHgap(Constants.HEATMAP_HORIZONTAL_SPACING);

@@ -37,6 +37,7 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
 
     public FileHistoryPane() {
         parent = new VBox();
+        parent.setMinWidth(Constants.ZERO_WIDTH);
 
         // Create the top horizontal banner
         topHorizontalBanner = new HBox();
@@ -90,7 +91,7 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
         commitList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         // Set up constraints on width/height
-//        commitList.setMinHeight(Constants.FCH_COMMIT_LIST_MIN_HEIGHT);
+        commitList.setMinWidth(Constants.ZERO_WIDTH);
         commitList.prefWidthProperty().bind(parent.widthProperty());
         commitList.prefHeightProperty().bind(parent.heightProperty());
 
