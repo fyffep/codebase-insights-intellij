@@ -27,18 +27,15 @@ import java.util.TreeSet;
  */
 public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver {
 
-    //region Vars
-    private TitledPane parent;
-//    private Commit commit;
-
     private final Text fileName;
+//    private Commit commit;
     private final Text packageName;
     private final Text authors;
     private final Text noOfCommits;
     private final Text fileSize;
     private final Text lineCount;
-
-
+    //region Vars
+    private TitledPane parent;
     private int totalCommits;
 
     //endregion
@@ -46,6 +43,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     //region Constructor
     public SelectedFileTitledPane() {
         parent = new TitledPane();
+        parent.setMinWidth(Constants.ZERO_WIDTH);
 
         setTitledPaneProperties();
 
@@ -71,7 +69,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         authors.setText(Constants.SF_TEXT_AUTHORS);
         vbox.getChildren().add(authors);
 
-        noOfCommits=new Text();
+        noOfCommits = new Text();
         setFileDetailsTextProperties(noOfCommits);
         noOfCommits.setText(Constants.SF_TEXT_NO_OF_COMMITS);
         vbox.getChildren().add(noOfCommits);
@@ -149,14 +147,14 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
         // Package
         if (selectedFile.getPath().getParent() != null) {
-            packageName.setText(String.format("%s%s",Constants.SF_TEXT_PACKAGE_NAME, selectedFile.getPath().getParent().toString()));
+            packageName.setText(String.format("%s%s", Constants.SF_TEXT_PACKAGE_NAME, selectedFile.getPath().getParent().toString()));
         } else {
             packageName.setText(String.format("%s%s", Constants.SF_TEXT_PACKAGE_NAME, "Unknown"));
         }
 
         // Gather all authors from list of commits
         ArrayList<String> uniqueAuthors = new ArrayList<>();
-        totalCommits=0;
+        totalCommits = 0;
         while (filesCommits.hasNext()) {
             totalCommits++;
             Commit commit = filesCommits.next();
@@ -187,9 +185,9 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         noOfCommits.setText(String.format("%s%s", Constants.SF_TEXT_NO_OF_COMMITS, totalCommits));
 
         //File Size
-        HeatObject heatobject=selectedFile.getHeatObjectAtCommit(selectedFile.getLatestCommitInTreeWalk());
+        HeatObject heatobject = selectedFile.getHeatObjectAtCommit(selectedFile.getLatestCommitInTreeWalk());
 //        System.out.println("Commit hAsh:"+commitHash);
-        fileSize.setText(String.format("%s%s", Constants.SF_TEXT_FILE_SIZE,heatobject.getFileSize()));
+        fileSize.setText(String.format("%s%s", Constants.SF_TEXT_FILE_SIZE, heatobject.getFileSize()));
 
         //line count
         lineCount.setText(String.format("%s%s", Constants.SF_TEXT_LINE_COUNT, heatobject.getLineCount()));

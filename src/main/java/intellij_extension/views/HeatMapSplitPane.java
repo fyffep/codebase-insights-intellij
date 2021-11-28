@@ -3,9 +3,8 @@ package intellij_extension.views;
 import intellij_extension.views.interfaces.IContainerView;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
-import javafx.scene.layout.AnchorPane;
 
 public class HeatMapSplitPane implements IContainerView {
 
@@ -24,10 +23,11 @@ public class HeatMapSplitPane implements IContainerView {
     private HeatMapSplitPane() {
     }
 
-    public HeatMapSplitPane(MainScene mainScene) {
+    public HeatMapSplitPane(Scene scene) {
         parent = new SplitPane();
         parent.setOrientation(Orientation.VERTICAL);
-        parent.prefHeightProperty().bind(mainScene.heightProperty());
+        parent.setMinWidth(0);
+        parent.prefHeightProperty().bind(scene.heightProperty());
 
         // Top Half: heatMapPane (holds banner and tabbed view)
         heatMapPane = new HeatMapPane();
