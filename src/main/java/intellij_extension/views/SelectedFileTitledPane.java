@@ -63,7 +63,6 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
 
     //region Vars
-    private TitledPane parent;
     private int totalCommits;
 
     //endregion
@@ -238,10 +237,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
         //File Size
         fileSize.setText(String.format("%s%s", Constants.SF_TEXT_FILE_SIZE, heatobject.getFileSize()));
-        //File Size
-        HeatObject heatobject = selectedFile.getHeatObjectAtCommit(selectedFile.getLatestCommitInTreeWalk());
-//        System.out.println("Commit hAsh:"+commitHash);
-        fileSize.setText(String.format("%s%s", Constants.SF_TEXT_FILE_SIZE, heatobject.getFileSize()));
+
 
         //Line count
         lineCount.setText(String.format("%s%s", Constants.SF_TEXT_LINE_COUNT, heatobject.getLineCount()));
