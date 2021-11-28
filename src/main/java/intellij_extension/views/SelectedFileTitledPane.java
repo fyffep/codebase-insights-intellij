@@ -1,20 +1,41 @@
 package intellij_extension.views;
 
 
+import com.intellij.openapi.application.Application;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.OpenFileDescriptor;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.xml.actions.xmlbeans.FileUtils;
 import intellij_extension.Constants;
+import intellij_extension.controllers.HeatMapController;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.views.interfaces.IContainerView;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.TitledPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import org.jetbrains.annotations.NotNull;
 
+
+import java.awt.*;
+import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -26,6 +47,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
     //region Vars
     private TitledPane parent;
+    private FileObject selectedFile;
 
     private final Text fileName;
     private final Text packageName;
@@ -33,6 +55,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     private final Text noOfCommits;
     private final Text fileSize;
     private final Text lineCount;
+    private final Button openFile;
 
 
     private int totalCommits;
@@ -42,7 +65,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     //region Constructor
     public SelectedFileTitledPane() {
         parent = new TitledPane();
-
+        this.selectedFile = null;
         setTitledPaneProperties();
 
         // Create vbox that lays out text
@@ -50,10 +73,20 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         parent.setContent(vbox);
 
         // Filename
+        HBox hbox = new HBox();
+        vbox.getChildren().add(hbox);
+        hbox.setAlignment(Constants.BANNER_ALIGNMENT);
+        hbox.setSpacing(15);
+
         fileName = new Text();
         setFileDetailsTextProperties(fileName); // set the font
         fileName.setText(Constants.SF_TEXT_FILENAME);
-        vbox.getChildren().add(fileName);
+        hbox.getChildren().add(fileName);
+
+        //open File Button
+        openFile = new Button("Open File");
+        openFile.setOnAction(this::openSelectedFileInEditor);
+        hbox.getChildren().add(openFile);
 
         // Package Name Node
         packageName = new Text();
@@ -67,7 +100,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         authors.setText(Constants.SF_TEXT_AUTHORS);
         vbox.getChildren().add(authors);
 
-        noOfCommits=new Text();
+        noOfCommits = new Text();
         setFileDetailsTextProperties(noOfCommits);
         noOfCommits.setText(Constants.SF_TEXT_NO_OF_COMMITS);
         vbox.getChildren().add(noOfCommits);
@@ -104,6 +137,14 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         text.wrappingWidthProperty().bind(parent.widthProperty().multiply(0.9f));
     }
     //endregion
+
+    public void setSelectedFile(FileObject selectedFile) {
+        this.selectedFile = selectedFile;
+    }
+
+    public FileObject getSelectedFile() {
+        return this.selectedFile;
+    }
 
     //region UI Action
     public void showPane() {
@@ -142,17 +183,18 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     public void fileSelected(@NotNull FileObject selectedFile, Iterator<Commit> filesCommits) {
         // Filename
         fileName.setText(String.format("%s%s", Constants.SF_TEXT_FILENAME, selectedFile.getFilename()));
+        setSelectedFile(selectedFile);
 
         // Package
         if (selectedFile.getPath().getParent() != null) {
-            packageName.setText(String.format("%s%s",Constants.SF_TEXT_PACKAGE_NAME, selectedFile.getPath().getParent().toString()));
+            packageName.setText(String.format("%s%s", Constants.SF_TEXT_PACKAGE_NAME, selectedFile.getPath().getParent().toString()));
         } else {
             packageName.setText(String.format("%s%s", Constants.SF_TEXT_PACKAGE_NAME, "Unknown"));
         }
 
         // Gather all authors from list of commits
         ArrayList<String> uniqueAuthors = new ArrayList<>();
-        totalCommits=0;
+        totalCommits = 0;
         while (filesCommits.hasNext()) {
             totalCommits++;
             Commit commit = filesCommits.next();
@@ -184,12 +226,12 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         //No of Commits
         noOfCommits.setText(String.format("%s%s", Constants.SF_TEXT_NO_OF_COMMITS, totalCommits));
 
-        HeatObject heatobject=selectedFile.getHeatObjectAtCommit(selectedFile.getLatestCommitInTreeWalk());
+        HeatObject heatobject = selectedFile.getHeatObjectAtCommit(selectedFile.getLatestCommitInTreeWalk());
 
         //File Size
-        fileSize.setText(String.format("%s%s", Constants.SF_TEXT_FILE_SIZE,heatobject.getFileSize()));
+        fileSize.setText(String.format("%s%s", Constants.SF_TEXT_FILE_SIZE, heatobject.getFileSize()));
 
-        //line count
+        //Line count
         lineCount.setText(String.format("%s%s", Constants.SF_TEXT_LINE_COUNT, heatobject.getLineCount()));
 
         // Show the Pane
@@ -200,12 +242,56 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     public void commitSelected(Commit commit) {
         //this.commit=commit;
     }
-    //endregion
 
-    //region IContainerView methods
     @Override
     public Node getNode() {
         return parent;
     }
     //endregion
+
+
+    // open a selected file in the editor
+    public static void openFileInEditor(FileObject file) {
+        try {
+            ProjectManager pm = ProjectManager.getInstance();
+            // TODO if we open more than one project in our plugin ,this will always consider the first opened project.Need to optimize
+            Project project = pm.getOpenProjects()[0];
+
+            //To get the absolute path of the project root within the system
+            ProjectRootManager prm = ProjectRootManager.getInstance(project);
+            VirtualFile[] projectRoot = prm.getContentRoots();
+
+            String projectRootPath = projectRoot[0].getPath();
+            projectRootPath = projectRootPath.replace('/', '\\');
+
+            // relative path of the selected file
+            String selectedFileRelativePath = file.getPath().toString();
+
+            //full absolute path
+            String fileAbsolutePath = projectRootPath + "\\" + selectedFileRelativePath;
+            System.out.println("vFiles" + fileAbsolutePath);
+
+            VirtualFile vFile = LocalFileSystem.getInstance().findFileByIoFile(new File(fileAbsolutePath));
+            //open file
+            if(vFile==null)
+            {
+                System.out.println("No File Found in specified path");
+            }
+            FileEditorManager.getInstance(project).openFile(vFile, true);
+
+        } catch (Exception e) {
+
+            System.out.println(e);
+        }
+    }
+
+    // action listener to the "open file" button
+    private void openSelectedFileInEditor(ActionEvent event) {
+        // openFile has to be called from Event Dispatcher Thread (EDT)
+        EventQueue.invokeLater(() -> {
+            openFileInEditor(getSelectedFile());
+        });
+    }
+
+
 }
