@@ -53,7 +53,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     private FileObject selectedFile;
 
     private final Text fileName;
-//    private Commit commit;
+    //    private Commit commit;
     private final Text packageName;
     private final Text authors;
     private final Text noOfCommits;
@@ -283,8 +283,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
             VirtualFile vFile = LocalFileSystem.getInstance().findFileByIoFile(new File(fileAbsolutePath));
             //open file
-            if(vFile==null)
-            {
+            if (vFile == null) {
                 System.out.println("No File Found in specified path");
             }
             FileEditorManager.getInstance(project).openFile(vFile, true);
