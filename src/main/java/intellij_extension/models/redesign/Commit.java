@@ -40,7 +40,7 @@ public class Commit {
         this.fullMessage = revCommit.getFullMessage();
         this.shortMessage = revCommit.getShortMessage();
         this.date = authorIdent.getWhen().toString();
-        this.hash = revCommit.getId().toString();
+        this.hash = revCommit.getName();
 
         this.fileSet = new HashSet<>();
         this.commitDiffs = new ArrayList<>();

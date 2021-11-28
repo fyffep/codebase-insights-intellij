@@ -5,9 +5,9 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import intellij_extension.views.HeatMapSplitPane;
 import intellij_extension.views.InfoSplitPane;
-import intellij_extension.views.MainScene;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
+import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,7 +35,8 @@ public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory {
         Platform.setImplicitExit(false);
         Platform.runLater(() -> {
             SplitPane root = new SplitPane();
-            MainScene mainScene = new MainScene(root, componentWidth, componentHeight);
+            Scene mainScene = new Scene(root, componentWidth, componentHeight);
+            root.setMinWidth(Constants.ZERO_WIDTH);
             root.prefWidthProperty().bind(mainScene.widthProperty());
             root.prefHeightProperty().bind(mainScene.heightProperty());
 

@@ -1,6 +1,7 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
+import intellij_extension.Constants.GroupingMode;
 import intellij_extension.controllers.HeatMapController;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
@@ -9,9 +10,7 @@ import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.views.interfaces.IContainerView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.scene.Node;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -22,22 +21,23 @@ import javafx.scene.text.Text;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class FileHistoryPane implements IContainerView, CodeBaseObserver {
-
-    private VBox parent;
-
-    private HBox topHorizontalBanner;
-    private Text headerText;
-    private TableView<CommitInfoRow> commitList;
 
     // This is all the lines we created so far - we should never remove from this list
     private final ArrayList<CommitInfoRow> commitLines = new ArrayList<>();
     // These are active lines in the TableView
     private final ObservableList<CommitInfoRow> activeCommitLines = FXCollections.observableArrayList();
+    private VBox parent;
+    private HBox topHorizontalBanner;
+    private Text headerText;
+    private TableView<CommitInfoRow> commitList;
 
     public FileHistoryPane() {
         parent = new VBox();
+        parent.setMinWidth(Constants.ZERO_WIDTH);
 
         // Create the top horizontal banner
         topHorizontalBanner = new HBox();
@@ -65,8 +65,8 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
     private void setBannerProperties() {
         // Add constraints to width/height
         topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT);
-        topHorizontalBanner.prefHeightProperty().bind(parent.heightProperty().multiply(Constants.BANNER_SIZE_MULTIPLIER));
-        topHorizontalBanner.maxHeightProperty().bind(parent.heightProperty().multiply(Constants.BANNER_SIZE_MULTIPLIER));
+//        topHorizontalBanner.prefHeightProperty().bind(parent.heightProperty().multiply(Constants.BANNER_SIZE_MULTIPLIER));
+//        topHorizontalBanner.maxHeightProperty().bind(parent.heightProperty().multiply(Constants.BANNER_SIZE_MULTIPLIER));
         topHorizontalBanner.prefWidthProperty().bind(parent.widthProperty());
 
         // Child layout properties
@@ -87,10 +87,11 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
         commitList.setEditable(false);
 
         // This forces columns to resize to their content
-        commitList.setColumnResizePolicy((param) -> true);
+//        commitList.setColumnResizePolicy((param) -> true);
+        commitList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         // Set up constraints on width/height
-        commitList.setMinHeight(Constants.FCH_COMMIT_LIST_MIN_HEIGHT);
+        commitList.setMinWidth(Constants.ZERO_WIDTH);
         commitList.prefWidthProperty().bind(parent.widthProperty());
         commitList.prefHeightProperty().bind(parent.heightProperty());
 
@@ -111,21 +112,30 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
     private void setCommitListColumns() {
         // Number Column
         TableColumn<CommitInfoRow, String> rowColumn = new TableColumn<>("#");
+        rowColumn.setPrefWidth(50);
+//        rowColumn.setMaxWidth(50);
 
         // Description Column
         TableColumn<CommitInfoRow, String> descriptionColumn = new TableColumn<>("Description");
         descriptionColumn.setPrefWidth(Constants.FCH_DESCRIPTION_COLUMN_MAX_WIDTH);
+//        descriptionColumn.setMaxWidth(Constants.FCH_DESCRIPTION_COLUMN_MAX_WIDTH);
         descriptionColumn.setSortable(false);
 
         // Author Column
         TableColumn<CommitInfoRow, String> authorColumn = new TableColumn<>("Author");
+        authorColumn.setPrefWidth(125);
+//        authorColumn.setMaxWidth(125);
 
         // Date Column
         TableColumn<CommitInfoRow, String> dateColumn = new TableColumn<>("Date");
+        dateColumn.setPrefWidth(150);
+//        dateColumn.setMaxWidth(100);
         dateColumn.setSortable(false);
 
         // Hash Column
         TableColumn<CommitInfoRow, String> hashColumn = new TableColumn<>("Hash");
+        hashColumn.setPrefWidth(75);
+//        hashColumn.setMaxWidth(75);
         hashColumn.setSortable(false);
 
         //Associate data with columns
@@ -141,7 +151,7 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
 
     //region CodeBaseObservable methods
     @Override
-    public void refreshHeatMap(Codebase codeBase) {
+    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         // Nothing to do for this action
     }
 
@@ -151,7 +161,7 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
     }
 
     @Override
-    public void newBranchSelected() {
+    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         activeCommitLines.clear();
     }
 
@@ -177,7 +187,9 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
                 row.update(commit);
             } else {
                 // Create a new row b/c all the old rows are used up
+//                row = new CommitInfoRow(String.valueOf(rowIndex + 1), commit.getShortMessage(), commit.getAuthor(), commit.getDate(), commit.getHash().substring(0, 7));
                 row = new CommitInfoRow(String.valueOf(rowIndex + 1), commit.getShortMessage(), commit.getAuthor(), commit.getDate(), commit.getHash());
+
                 commitLines.add(row);
             }
 

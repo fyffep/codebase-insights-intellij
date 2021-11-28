@@ -10,7 +10,7 @@ public class InfoSplitPane implements IContainerView {
 
     private SplitPane parent;
 
-    // Top half is Commit History for a single branch
+    // Top half is Commit H istory for a single branch
     private FileHistoryPane fileHistoryPane;
 
     // Bottom half is Commit Details for a single commit in the selected branch
@@ -19,8 +19,8 @@ public class InfoSplitPane implements IContainerView {
     public InfoSplitPane() {
         parent = new SplitPane();
         parent.setOrientation(Orientation.VERTICAL);
-        // Ensure heat map can take over full tool  window
-        parent.setMinWidth(Constants.INFO_SPLIT_PANE_MIN_WIDTH);
+        // Ensure heat map can take over full tool window
+        parent.setMinWidth(Constants.ZERO_WIDTH);
 
         // Top half
         fileHistoryPane = new FileHistoryPane();

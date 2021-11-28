@@ -1,6 +1,7 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
+import intellij_extension.Constants.GroupingMode;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
@@ -17,6 +18,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
@@ -40,6 +43,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
     public CommitDetailsPane() {
         parent = new VBox();
+        parent.setMinWidth(Constants.ZERO_WIDTH);
 
         // Create the top horizontal banner
         topHorizontalBanner = new VBox();
@@ -121,6 +125,8 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
     //region Properties setting
     private void setBannerProperties() {
         // Set up constraints on width/height
+        topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT);
+        topHorizontalBanner.setMinWidth(Constants.ZERO_WIDTH);
         topHorizontalBanner.prefWidthProperty().bind(parent.widthProperty());
 
         // Child layout properties
@@ -139,13 +145,13 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
     private void setFileListContainerProperties(@NotNull ScrollPane fileListContainer) {
         // Set up constraints on width/height
-        fileListContainer.minHeightProperty().bind(parent.heightProperty().multiply(Constants.FILE_LIST_SIZE_MULTIPLIER));
+//        fileListContainer.minHeightProperty().bind(parent.heightProperty().multiply(Constants.FILE_LIST_SIZE_MULTIPLIER));
         fileListContainer.prefWidthProperty().bind(parent.widthProperty());
     }
 
     private void setFileListProperties() {
         // Set up constraints on width/height
-        fileList.setMinHeight(Constants.FILE_LIST_MIN_HEIGHT);
+//        fileList.setMinHeight(Constants.FILE_LIST_MIN_HEIGHT);
         fileList.prefWidthProperty().bind(parent.widthProperty());
 
         // Child layout properties
@@ -165,7 +171,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
     //region CodeBaseObservable methods
     @Override
-    public void refreshHeatMap(Codebase codeBase) {
+    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         // Nothing to do for this action
     }
 
@@ -175,7 +181,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
     }
 
     @Override
-    public void newBranchSelected() {
+    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         // Clear
         descriptionText.setText(Constants.CD_DESCRIPTION);
         authorText.setText(Constants.CD_AUTHOR);

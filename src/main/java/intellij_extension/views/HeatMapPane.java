@@ -1,37 +1,39 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
+import intellij_extension.Constants.GroupingMode;
 import intellij_extension.controllers.HeatMapController;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.views.interfaces.IContainerView;
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
 import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class HeatMapPane implements IContainerView, CodeBaseObserver {
 
     //region Vars
+    private final ObservableList<String> activeBranchList = FXCollections.observableArrayList();
     // Basically this class' main node
     private VBox parent;
     // Banner that holds heat metric and branch comboBoxes
     private HBox topHorizontalBanner;
     private ComboBox<String> heatMetricComboBox;
     private ComboBox<String> branchComboBox;
-    private final ObservableList<String> activeBranchList = FXCollections.observableArrayList();
-
     // Holds HeatMapPane and CommitGroupingPane
     // private HeatMapTabbedPane heatMapTabbedPane;
     // Heat Map for a single commit + the history up to the commit
@@ -42,12 +44,14 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
     //region Constructors
     public HeatMapPane() {
         parent = new VBox();
+        parent.setMinWidth(Constants.ZERO_WIDTH);
 
         // Create the top horizontal banner
         topHorizontalBanner = new HBox();
         parent.getChildren().add(topHorizontalBanner);
         // Add constraints to width/height
         topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT);
+        topHorizontalBanner.setMinWidth(Constants.ZERO_WIDTH);
         topHorizontalBanner.prefWidthProperty().bind(parent.widthProperty());
         // Child layout properties
         topHorizontalBanner.setAlignment(Constants.BANNER_ALIGNMENT);
@@ -67,6 +71,8 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         heatMetricComboBox.getSelectionModel().select(0);
         // Set up the select action
         heatMetricComboBox.setOnAction(this::heatMetricOptionSelectedAction);
+        //Set default option (TEMPORARY to avoid confusion while Overall heat is not yet implemented)
+        heatMetricComboBox.setValue("Number of Commits");
 
         // Label for branch ComboBox
         Text branchTitle = new Text();
@@ -81,29 +87,34 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         // Set up the select action
         branchComboBox.setOnAction(this::branchSelectedAction);
 
-        // HeatMapFlowPane inside an AnchorPane inside a ScrollPane
-        // TODO this will eventually become a TabbedView
-        ScrollPane scrollPane = new ScrollPane();
-        parent.getChildren().add(scrollPane);
-        scrollPane.prefWidthProperty().bind(parent.widthProperty());
-        scrollPane.maxWidthProperty().bind(parent.widthProperty());
+        // Tabbed view
+        TabPane tabPane = new TabPane();
+        parent.getChildren().add(tabPane);
+        tabPane.prefHeightProperty().bind(parent.heightProperty());
+        // Set  up tabs
+        // Package tab
+        Tab tab = new Tab();
+        tab.setText(Constants.HEAT_GROUPING_TEXT);
+        HeatMapFlowPane heatMapTabContent = new HeatMapFlowPane(tabPane);
+        heatMapTabContent.setGroupingMode(Constants.GroupingMode.PACKAGES);
+        tab.setContent(heatMapTabContent.getNode());
+        tabPane.getTabs().add(tab);
+        // Commit tab
+        tab = new Tab();
+        tab.setText(Constants.COMMIT_GROUPING_TEXT);
+        HeatMapFlowPane commitTabContent = new HeatMapFlowPane(tabPane);
+        commitTabContent.setGroupingMode(Constants.GroupingMode.COMMITS);
+        tab.setContent(commitTabContent.getNode());
+        tabPane.getTabs().add(tab);
 
-        // Create ScrollPane and the AnchorPane inside it
-        AnchorPane anchorPane = new AnchorPane();
-        scrollPane.setContent(anchorPane);
-        anchorPane.prefWidthProperty().bind(scrollPane.widthProperty());
-        anchorPane.prefHeightProperty().bind(scrollPane.heightProperty());
+        tabPane.getSelectionModel().selectedItemProperty().addListener(this::tabSelectedAction);
 
-        // Create HeatMapFlowPane
-        heatMapFlowPane = new HeatMapFlowPane();
-        anchorPane.getChildren().add(heatMapFlowPane.getNode());
-        FlowPane flowPane = (FlowPane) heatMapFlowPane.getNode();
-        flowPane.prefWidthProperty().bind(scrollPane.widthProperty());
 
         Codebase model = Codebase.getInstance();
         model.registerObserver(this);
         HeatMapController.getInstance().branchListRequested();
     }
+
     //endregion
 
     //region UI actions
@@ -120,6 +131,11 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
 
         HeatMapController.getInstance().newHeatMetricSelected(selectedValue);
     }
+
+    private void tabSelectedAction(Observable observable, Tab oldTab, Tab newTab) {
+        System.out.printf("%s deselected, %s selected.%n", oldTab.getText(), newTab.getText());
+        HeatMapController.getInstance().heatMapGroupingChanged(newTab.getText());
+    }
     //endregion
 
     //region IContainerView methods
@@ -131,7 +147,7 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
 
     //region CodeBaseObserver methods
     @Override
-    public void refreshHeatMap(Codebase codeBase) {
+    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         // Nothing to do for this action
     }
 
@@ -148,7 +164,7 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
     }
 
     @Override
-    public void newBranchSelected() {
+    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         // Nothing to do for this action
     }
 

@@ -21,6 +21,8 @@ public class HeatFileContainer extends GridPane
     public HeatFileContainer(String title) {
         super();
         this.title = title;
+        setMinWidth(Constants.ZERO_WIDTH);
+
         addOrUpdateTooltip();
 
         //Set margins
