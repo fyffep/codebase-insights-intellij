@@ -36,6 +36,7 @@ public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory {
         Platform.runLater(() -> {
             SplitPane root = new SplitPane();
             Scene mainScene = new Scene(root, componentWidth, componentHeight);
+            root.setMinWidth(Constants.ZERO_WIDTH);
             root.prefWidthProperty().bind(mainScene.widthProperty());
             root.prefHeightProperty().bind(mainScene.heightProperty());
 

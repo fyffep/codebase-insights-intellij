@@ -1,5 +1,6 @@
 package intellij_extension.views;
 
+import intellij_extension.Constants;
 import intellij_extension.views.interfaces.IContainerView;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
@@ -26,7 +27,7 @@ public class HeatMapSplitPane implements IContainerView {
     public HeatMapSplitPane(Scene scene) {
         parent = new SplitPane();
         parent.setOrientation(Orientation.VERTICAL);
-        parent.setMinWidth(0);
+        parent.setMinWidth(Constants.ZERO_WIDTH);
         parent.prefHeightProperty().bind(scene.heightProperty());
 
         // Top Half: heatMapPane (holds banner and tabbed view)

@@ -43,6 +43,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
     public CommitDetailsPane() {
         parent = new VBox();
+        parent.setMinWidth(Constants.ZERO_WIDTH);
 
         // Create the top horizontal banner
         topHorizontalBanner = new VBox();
@@ -125,6 +126,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
     private void setBannerProperties() {
         // Set up constraints on width/height
         topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT);
+        topHorizontalBanner.setMinWidth(Constants.ZERO_WIDTH);
         topHorizontalBanner.prefWidthProperty().bind(parent.widthProperty());
 
         // Child layout properties
