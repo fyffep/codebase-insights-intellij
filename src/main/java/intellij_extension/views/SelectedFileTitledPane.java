@@ -13,6 +13,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.xml.actions.xmlbeans.FileUtils;
 import intellij_extension.Constants;
+import intellij_extension.Constants.GroupingMode;
 import intellij_extension.controllers.HeatMapController;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
@@ -38,6 +39,8 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * The following Class is responsible for displaying the details of  file selected in the heat map
@@ -50,6 +53,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     private FileObject selectedFile;
 
     private final Text fileName;
+//    private Commit commit;
     private final Text packageName;
     private final Text authors;
     private final Text noOfCommits;
@@ -58,6 +62,8 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     private final Button openFile;
 
 
+    //region Vars
+    private TitledPane parent;
     private int totalCommits;
 
     //endregion
@@ -66,6 +72,8 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     public SelectedFileTitledPane() {
         parent = new TitledPane();
         this.selectedFile = null;
+        parent.setMinWidth(Constants.ZERO_WIDTH);
+
         setTitledPaneProperties();
 
         // Create vbox that lays out text
@@ -158,7 +166,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
     //region CodeBaseObserver methods
     @Override
-    public void refreshHeatMap(Codebase codeBase) {
+    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         // Nothing to do for this action
     }
 
@@ -168,7 +176,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     }
 
     @Override
-    public void newBranchSelected() {
+    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         fileName.setText(Constants.SF_TEXT_FILENAME);
         packageName.setText(Constants.SF_TEXT_PACKAGE_NAME);
         authors.setText(Constants.SF_TEXT_AUTHORS);
@@ -230,6 +238,10 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
         //File Size
         fileSize.setText(String.format("%s%s", Constants.SF_TEXT_FILE_SIZE, heatobject.getFileSize()));
+        //File Size
+        HeatObject heatobject = selectedFile.getHeatObjectAtCommit(selectedFile.getLatestCommitInTreeWalk());
+//        System.out.println("Commit hAsh:"+commitHash);
+        fileSize.setText(String.format("%s%s", Constants.SF_TEXT_FILE_SIZE, heatobject.getFileSize()));
 
         //Line count
         lineCount.setText(String.format("%s%s", Constants.SF_TEXT_LINE_COUNT, heatobject.getLineCount()));
@@ -242,7 +254,9 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     public void commitSelected(Commit commit) {
         //this.commit=commit;
     }
+    //endregion
 
+    //region IContainerView methods
     @Override
     public Node getNode() {
         return parent;

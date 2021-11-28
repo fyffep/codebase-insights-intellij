@@ -14,6 +14,30 @@ public class Constants {
 
     public static final Logger LOG = Logger.getInstance(Codebase.class); // TODO This should probably change to a more reasonable class?
 
+    // Default Branches
+    public static final String[] DEFAULT_BRANCHES = {"development", "master", "main"};
+
+    public static final GroupingMode DEFAULT_GROUPING = GroupingMode.PACKAGES;
+    public static enum GroupingMode {
+        COMMITS,
+        PACKAGES
+    }
+
+    // Heat Metric List
+    //Note that this affects HeatMapController::newHeatMetricSelected()
+    public static final ObservableList<String> HEAT_METRIC_OPTIONS = FXCollections.observableArrayList(
+            "Overall Heat",
+            "File Size",
+            "Number of Commits",
+            "Number of Authors"
+    );
+    public static enum HeatMetricOptions {
+        OVERALL,
+        FILE_SIZE,
+        NUM_OF_COMMITS,
+        NUM_OF_AUTHORS
+    }
+
     // Heat
     public static final int HEAT_MIN = 1;
     public static final int HEAT_MAX = 10;
@@ -30,7 +54,7 @@ public class Constants {
     public static final Color HEAT_MIN_COLOR = Color.BLUE;
     public static final Color HEAT_MAX_COLOR = Color.RED;
     // General Banner Constants
-    public static final int INFO_SPLIT_PANE_MIN_WIDTH = 0;
+    public static final int ZERO_WIDTH = 0;
     public static final Pos BANNER_ALIGNMENT = Pos.CENTER_LEFT;
     public static final int BANNER_SPACING = 15;
     public static final Insets BANNER_INSETS = new Insets(0, 0, 0, 10);
@@ -48,7 +72,7 @@ public class Constants {
     // File Commit History Commit List
     public static final int FCH_COMMIT_LIST_MIN_HEIGHT = 0;
     // File Commit History Commit List Columns
-    public static final int FCH_DESCRIPTION_COLUMN_MAX_WIDTH = 200;
+    public static final int FCH_DESCRIPTION_COLUMN_MAX_WIDTH = 300;
     // Commit Details Banner
     public static final Font TOOLTIP_FONT = new Font(16);
     // Commit History Commit List
@@ -85,15 +109,10 @@ public class Constants {
     public static final String SF_TEXT_NO_OF_COMMITS = "No of Commits: ";
     public static final String SF_TEXT_LINE_COUNT = "Line Count: ";
     public static final String SF_TEXT_SEPERATOR = ":";
-    public static final String[] DEFAULT_BRANCHES = {"development", "master", "main"};
     public static final String BRANCH_COMBOBOX_TITLE = "Evaluating Branch:";
     public static final String HEAT_METRIC_COMBOBOX_TITLE = "Heat Data:";
-    // Heat Metric List
-    public static final ObservableList<String> HEAT_METRIC_OPTIONS = FXCollections.observableArrayList(
-            "Line Count",
-            "Number of Commits",
-            "Number of Authors"
-    );
+    public static final String HEAT_GROUPING_TEXT = "Group by Package";
+    public static final String COMMIT_GROUPING_TEXT = "Group by Commit";
     //endregion
 
     //Prevent instantiation
