@@ -124,6 +124,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
     //region Properties setting
     private void setBannerProperties() {
         // Set up constraints on width/height
+        topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT);
         topHorizontalBanner.prefWidthProperty().bind(parent.widthProperty());
 
         // Child layout properties
@@ -142,13 +143,13 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
     private void setFileListContainerProperties(@NotNull ScrollPane fileListContainer) {
         // Set up constraints on width/height
-        fileListContainer.minHeightProperty().bind(parent.heightProperty().multiply(Constants.FILE_LIST_SIZE_MULTIPLIER));
+//        fileListContainer.minHeightProperty().bind(parent.heightProperty().multiply(Constants.FILE_LIST_SIZE_MULTIPLIER));
         fileListContainer.prefWidthProperty().bind(parent.widthProperty());
     }
 
     private void setFileListProperties() {
         // Set up constraints on width/height
-        fileList.setMinHeight(Constants.FILE_LIST_MIN_HEIGHT);
+//        fileList.setMinHeight(Constants.FILE_LIST_MIN_HEIGHT);
         fileList.prefWidthProperty().bind(parent.widthProperty());
 
         // Child layout properties

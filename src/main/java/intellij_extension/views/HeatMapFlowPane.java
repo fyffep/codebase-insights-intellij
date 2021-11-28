@@ -45,9 +45,10 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         // Create ScrollPane
         scrollPane = new ScrollPane();
         // Set Properties
-        scrollPane.prefWidthProperty().bind(grandParent.widthProperty());
-        scrollPane.maxWidthProperty().bind(grandParent.widthProperty());
-        scrollPane.maxHeightProperty().bind(grandParent.heightProperty());
+        scrollPane.setMinWidth(Constants.ZERO_WIDTH);
+//        scrollPane.prefWidthProperty().bind(grandParent.widthProperty());
+//        scrollPane.maxWidthProperty().bind(grandParent.widthProperty());
+//        scrollPane.maxHeightProperty().bind(grandParent.heightProperty());
 
         // Create the AnchorPane inside the ScrollPane
         anchorPane = new AnchorPane();
@@ -87,14 +88,15 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     /**
      * Clears the pane, then displays all files present in the target commit.
      * Each file is represented by a rectangular pane.
+     *
      * @param setOfFiles a sorted grouping of files in a Codebase. Each HeatObject
-     * inside the FileObject must already have its heatLevel according to the current
-     * heat metric(s).
+     *                   inside the FileObject must already have its heatLevel according to the current
+     *                   heat metric(s).
      */
     @Override
     public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
         // If not our grouping mode, then don't do anything
-        if(!this.groupingMode.equals(groupingMode)) return;
+        if (!this.groupingMode.equals(groupingMode)) return;
 
         Platform.runLater(() -> {
             flowPane.getChildren().clear();
@@ -104,7 +106,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                 String groupingKey = entry.getKey();
                 // Create a container for it
                 HeatFileContainer heatFileContainer = new HeatFileContainer(groupingKey);
-                heatFileContainer.maxWidthProperty().bind(flowPane.widthProperty());
+//                heatFileContainer.maxWidthProperty().bind(flowPane.widthProperty());
                 //setContainerToolTip(heatFileContainer, groupingKey);
 
                 // Add files to the package container

@@ -54,7 +54,7 @@ public class Constants {
     public static final Color HEAT_MIN_COLOR = Color.BLUE;
     public static final Color HEAT_MAX_COLOR = Color.RED;
     // General Banner Constants
-    public static final int INFO_SPLIT_PANE_MIN_WIDTH = 0;
+    public static final int ZERO_WIDTH = 0;
     public static final Pos BANNER_ALIGNMENT = Pos.CENTER_LEFT;
     public static final int BANNER_SPACING = 15;
     public static final Insets BANNER_INSETS = new Insets(0, 0, 0, 10);
@@ -72,7 +72,7 @@ public class Constants {
     // File Commit History Commit List
     public static final int FCH_COMMIT_LIST_MIN_HEIGHT = 0;
     // File Commit History Commit List Columns
-    public static final int FCH_DESCRIPTION_COLUMN_MAX_WIDTH = 200;
+    public static final int FCH_DESCRIPTION_COLUMN_MAX_WIDTH = 300;
     // Commit Details Banner
     public static final Font TOOLTIP_FONT = new Font(16);
     // Commit History Commit List
