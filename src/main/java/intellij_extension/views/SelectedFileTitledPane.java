@@ -1,29 +1,22 @@
 package intellij_extension.views;
 
 
-import com.intellij.openapi.application.Application;
-import com.intellij.openapi.application.ApplicationManager;
+
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileManager;
-import com.intellij.xml.actions.xmlbeans.FileUtils;
 import intellij_extension.Constants;
 import intellij_extension.Constants.GroupingMode;
-import intellij_extension.controllers.HeatMapController;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.views.interfaces.IContainerView;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.TitledPane;
@@ -36,7 +29,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.io.File;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -53,7 +45,6 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     private FileObject selectedFile;
 
     private final Text fileName;
-    //    private Commit commit;
     private final Text packageName;
     private final Text authors;
     private final Text noOfCommits;
