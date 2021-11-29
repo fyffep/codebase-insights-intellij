@@ -2,6 +2,7 @@ package intellij_extension.views;
 
 import intellij_extension.Constants;
 import intellij_extension.Constants.GroupingMode;
+import intellij_extension.Constants.HeatMetricOptions;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
@@ -101,7 +102,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
      *                   heat metric(s).
      */
     @Override
-    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
+    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode, HeatMetricOptions heatMetricOption) {
         // If not our grouping mode, then don't do anything
         if (!this.groupingMode.equals(groupingMode)) return;
 
@@ -136,7 +137,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                     heatFileComponent.setStyle(colorFormat);
                     heatFileContainer.addNode(heatFileComponent);
 
-                    setFileToolTip(fileObject, heatLevel, groupingKey, heatFileComponent);
+                    setFileToolTip(fileObject, heatLevel, groupingKey, fileObject.getHeatMetricString(heatObject, heatMetricOption), heatFileComponent);
                 }
 
                 heatFileContainer.setStyle("-fx-background-color: #BBBBBB");
@@ -159,10 +160,10 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         Tooltip.install(container, tooltip);
     }*/
 
-    private void setFileToolTip(@NotNull FileObject fileObject, int heatLevel, String groupName, HeatFileComponent heatFileComponent) {
+    private void setFileToolTip(@NotNull FileObject fileObject, int heatLevel, String groupName, String heatMetricString, HeatFileComponent heatFileComponent) {
         // Add a tooltip to the file pane
         String fileName = fileObject.getFilename();
-        Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d\n\nGroup: %s", fileName, heatLevel, groupName));
+        Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d\n%s\n\nGroup: %s", fileName, heatLevel, heatMetricString, groupName));
         tooltip.setFont(Constants.TOOLTIP_FONT);
         tooltip.setShowDelay(Duration.seconds(0));
         Tooltip.install(heatFileComponent, tooltip);
@@ -174,8 +175,8 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     }
 
     @Override
-    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
-        refreshHeatMap(setOfFiles, targetCommit, groupingMode);
+    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode, HeatMetricOptions heatMetricOption) {
+        refreshHeatMap(setOfFiles, targetCommit, groupingMode, heatMetricOption);
     }
 
     @Override

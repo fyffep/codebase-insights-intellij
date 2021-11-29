@@ -175,13 +175,13 @@ public class Codebase implements CodeBaseObservable {
 
         RepositoryAnalyzer.attachCodebaseData(this);
 
-        notifyObserversOfBranchChange(getSetOfFiles(), targetCommit, currentGroupingMode);
+        notifyObserversOfBranchChange(getSetOfFiles(), targetCommit, currentGroupingMode, currentHeatMetricOption);
     }
 
     public void newHeatMetricSelected(HeatMetricOptions newHeatMetricOption) {
         currentHeatMetricOption = newHeatMetricOption;
 
-        notifyObserversOfRefreshHeatMap(getSetOfFiles(), targetCommit, currentGroupingMode);
+        notifyObserversOfRefreshHeatMap(getSetOfFiles(), targetCommit, currentGroupingMode, currentHeatMetricOption);
     }
 
     public void commitSelected(String commitHash) {
@@ -204,7 +204,7 @@ public class Codebase implements CodeBaseObservable {
     public void heatMapGroupingChanged(@NotNull GroupingMode newGroupingMode) {
         currentGroupingMode = newGroupingMode;
 
-        notifyObserversOfRefreshHeatMap(getSetOfFiles(), targetCommit, currentGroupingMode);
+        notifyObserversOfRefreshHeatMap(getSetOfFiles(), targetCommit, currentGroupingMode, currentHeatMetricOption);
     }
     // endregion
 
@@ -249,9 +249,9 @@ public class Codebase implements CodeBaseObservable {
 
     // region Observable Methods
     @Override
-    public void notifyObserversOfRefreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
+    public void notifyObserversOfRefreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode currentGroupingMode, HeatMetricOptions currentHeatMetricOption) {
         for (CodeBaseObserver observer : observerList) {
-            observer.refreshHeatMap(setOfFiles, targetCommit, currentGroupingMode);
+            observer.refreshHeatMap(setOfFiles, targetCommit, currentGroupingMode, currentHeatMetricOption);
         }
     }
 
@@ -263,9 +263,9 @@ public class Codebase implements CodeBaseObservable {
     }
 
     @Override
-    public void notifyObserversOfBranchChange(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
+    public void notifyObserversOfBranchChange(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode currentGroupingMode, HeatMetricOptions currentHeatMetricOption) {
         for (CodeBaseObserver observer : observerList) {
-            observer.newBranchSelected(setOfFiles, targetCommit, groupingMode);
+            observer.newBranchSelected(setOfFiles, targetCommit, currentGroupingMode, currentHeatMetricOption);
         }
     }
 

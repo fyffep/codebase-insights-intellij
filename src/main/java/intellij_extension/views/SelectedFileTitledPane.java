@@ -1,7 +1,5 @@
 package intellij_extension.views;
 
-
-
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
@@ -26,7 +24,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import org.jetbrains.annotations.NotNull;
 
-
 import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
@@ -40,10 +37,6 @@ import java.util.TreeSet;
  */
 public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver {
 
-    //region Vars
-    private TitledPane parent;
-    private FileObject selectedFile;
-
     private final Text fileName;
     private final Text packageName;
     private final Text authors;
@@ -51,8 +44,9 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     private final Text fileSize;
     private final Text lineCount;
     private final Button openFile;
-
-
+    //region Vars
+    private TitledPane parent;
+    private FileObject selectedFile;
     //region Vars
     private int totalCommits;
 
@@ -121,31 +115,6 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     }
     //endregion
 
-    //region Properties setting
-    private void setTitledPaneProperties() {
-        parent.setText(Constants.SF_TITLE_TEXT);
-        parent.setPrefHeight(10);
-        parent.setExpanded(false);
-        parent.setCollapsible(true);
-        parent.setAnimated(true);
-    }
-
-    public void setFileDetailsTextProperties(Text text) {
-        text.setFont(Font.font(Constants.SF_TEXT_FONT, Constants.SF_TEXT_FONT_WEIGHT, Constants.SF_TEXT_SIZE));
-        text.wrappingWidthProperty().bind(parent.widthProperty().multiply(0.9f));
-    }
-    //endregion
-
-    //region Getters/Setters
-    public void setSelectedFile(FileObject selectedFile) {
-        this.selectedFile = selectedFile;
-    }
-
-    public FileObject getSelectedFile() {
-        return this.selectedFile;
-    }
-    //endregion
-
     //region UI Action
     // open a selected file in the editor
     public static void openFileInEditor(FileObject file) {
@@ -182,6 +151,31 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         }
     }
 
+    //region Properties setting
+    private void setTitledPaneProperties() {
+        parent.setText(Constants.SF_TITLE_TEXT);
+        parent.setPrefHeight(10);
+        parent.setExpanded(false);
+        parent.setCollapsible(true);
+        parent.setAnimated(true);
+    }
+    //endregion
+
+    public void setFileDetailsTextProperties(Text text) {
+        text.setFont(Font.font(Constants.SF_TEXT_FONT, Constants.SF_TEXT_FONT_WEIGHT, Constants.SF_TEXT_SIZE));
+        text.wrappingWidthProperty().bind(parent.widthProperty().multiply(0.9f));
+    }
+
+    public FileObject getSelectedFile() {
+        return this.selectedFile;
+    }
+    //endregion
+
+    //region Getters/Setters
+    public void setSelectedFile(FileObject selectedFile) {
+        this.selectedFile = selectedFile;
+    }
+
     // action listener to the "open file" button
     private void openSelectedFileInEditor(ActionEvent event) {
         // openFile has to be called from Event Dispatcher Thread (EDT)
@@ -201,7 +195,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
     //region CodeBaseObserver methods
     @Override
-    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
+    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode, Constants.HeatMetricOptions heatMetricOption) {
         // Nothing to do for this action
     }
 
@@ -211,7 +205,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     }
 
     @Override
-    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
+    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode, Constants.HeatMetricOptions heatMetricOption) {
         clearPane();
     }
 
