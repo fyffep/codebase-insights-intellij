@@ -2,6 +2,7 @@ package intellij_extension.views;
 
 import intellij_extension.Constants;
 import intellij_extension.Constants.GroupingMode;
+import intellij_extension.Constants.HeatMetricOptions;
 import intellij_extension.controllers.HeatMapController;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
@@ -154,7 +155,7 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
 
     //region CodeBaseObservable methods
     @Override
-    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
+    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode, HeatMetricOptions heatMetricOption) {
         // Nothing to do for this action
     }
 
@@ -164,7 +165,7 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
     }
 
     @Override
-    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
+    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode, HeatMetricOptions heatMetricOption) {
         clearPane();
     }
 

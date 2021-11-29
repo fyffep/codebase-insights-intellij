@@ -1,5 +1,7 @@
 package intellij_extension.models.redesign;
 
+import intellij_extension.Constants;
+import intellij_extension.Constants.HeatMetricOptions;
 import intellij_extension.utility.RepositoryAnalyzer;
 
 import java.nio.file.Path;
@@ -128,6 +130,28 @@ public class FileObject {
 
     public int getOverallHeat() {
         return (int) (Math.random() % 10); //TODO calculate overall heat here (this is a placeholder)
+    }
+
+    public String getHeatMetricString(HeatObject heatObject, HeatMetricOptions heatMetricOption) {
+        String text = "";
+        switch (heatMetricOption) {
+            case FILE_SIZE:
+                text = String.format("%s%d", Constants.TT_FILE_SIZE, heatObject.getFileSize());
+                break;
+            case NUM_OF_AUTHORS:
+                text = String.format("%s%d", Constants.TT_NUMBER_OF_AUTHORS, heatObject.getNumberOfAuthors());
+                break;
+            case NUM_OF_COMMITS:
+                text = String.format("%s%d", Constants.TT_NUMBER_OF_COMMITS, heatObject.getNumberOfCommits());
+                break;
+            case OVERALL:
+                // TODO this might not be correct - revisit when overall is implemented
+                text = String.format("%s%d", Constants.TT_OVERALL, heatObject.getHeatLevel());
+                break;
+            default:
+                throw new UnsupportedOperationException("Heat Metric Option is invalid or not implemented for this method.");
+        }
+        return text;
     }
 
     @Override

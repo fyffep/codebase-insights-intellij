@@ -2,6 +2,7 @@ package intellij_extension.views;
 
 import intellij_extension.Constants;
 import intellij_extension.Constants.GroupingMode;
+import intellij_extension.Constants.HeatMetricOptions;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
@@ -173,7 +174,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
     //region CodeBaseObservable methods
     @Override
-    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
+    public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode, HeatMetricOptions heatMetricOption) {
         // Nothing to do for this action
     }
 
@@ -183,7 +184,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
     }
 
     @Override
-    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
+    public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode, HeatMetricOptions heatMetricOption) {
         clearPane();
     }
 
@@ -203,16 +204,6 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
         if (clearPane) {
             clearPane();
         }
-
-
-//        if(!selectedFile.getCommitHashToHeatObjectMap().containsKey(currentCommit)) {
-//            clearPane();
-//            System.out.println("poop1 " + selectedFile.getCommitHashToHeatObjectMap().containsKey(currentCommit));
-//        } else {
-//            System.out.println("poop2 " + selectedFile.getCommitHashToHeatObjectMap().containsKey(currentCommit));
-//            System.out.println(selectedFile.getCommitHashToHeatObjectMap().get(currentCommit));
-//            System.out.println(selectedFile.getCommitHashToHeatObjectMap().size());
-//        }
     }
 
     @Override
