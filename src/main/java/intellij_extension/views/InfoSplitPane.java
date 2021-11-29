@@ -35,4 +35,9 @@ public class InfoSplitPane implements IContainerView {
     public Node getNode() {
         return parent;
     }
+
+    @Override
+    public void clearPane() {
+
+    }
 }

@@ -83,6 +83,11 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     public Node getNode() {
         return scrollPane;
     }
+
+    @Override
+    public void clearPane() {
+
+    }
     //endregion
 
     //region CodeBaseObserver methods

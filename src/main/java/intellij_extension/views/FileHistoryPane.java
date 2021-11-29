@@ -18,6 +18,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -34,6 +35,7 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
     private HBox topHorizontalBanner;
     private Text headerText;
     private TableView<CommitInfoRow> commitList;
+    private String selectedCommit = "";
 
     public FileHistoryPane() {
         parent = new VBox();
@@ -101,6 +103,7 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
             row.setOnMouseClicked(event -> {
                 if (!row.isEmpty()) {
                     CommitInfoRow rowData = row.getItem();
+                    selectedCommit = rowData.getCommitHash().getValue();
                     HeatMapController.getInstance().commitSelected(rowData.getCommitHash().getValue());
                 }
             });
@@ -162,11 +165,11 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
 
     @Override
     public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
-        activeCommitLines.clear();
+        clearPane();
     }
 
     @Override
-    public void fileSelected(FileObject selectedFile, Iterator<Commit> filesCommits) {
+    public void fileSelected(@NotNull FileObject selectedFile, @NotNull Iterator<Commit> filesCommits) {
         // Update header text to reflect selected filename
         headerText.setText(selectedFile.getFilename() + Constants.FCH_HEADER_SUFFIX_TEXT);
 
@@ -174,10 +177,15 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
         activeCommitLines.clear();
 
         int rowIndex = 0;
+        int selectedIndex = -1;
         while (filesCommits.hasNext()) {
 
             // Grab commit and make a null row
             Commit commit = filesCommits.next();
+            // If this was previously select it, track the index so we can select it at the end
+            if (selectedCommit.equals(commit.getHash())) {
+                selectedIndex = rowIndex;
+            }
             CommitInfoRow row;
 
             // Populate row based on if it exists or not
@@ -197,6 +205,14 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
             activeCommitLines.add(row);
             rowIndex++;
         }
+
+        if(selectedIndex == -1) {
+            // Set this to empty b/c no commit is selected at this point
+            selectedCommit = "";
+        } else {
+            // Select the previously selected commit in the new list
+            commitList.getSelectionModel().select(selectedIndex);
+        }
     }
 
     @Override
@@ -209,6 +225,13 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
     @Override
     public Node getNode() {
         return parent;
+    }
+
+    @Override
+    public void clearPane() {
+        activeCommitLines.clear();
+        headerText.setText(Constants.FCH_DEFAULT_HEADER_TEXT);
+        selectedCommit = "";
     }
     //endregion
 }

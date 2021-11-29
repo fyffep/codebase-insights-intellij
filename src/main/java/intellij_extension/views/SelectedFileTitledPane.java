@@ -136,6 +136,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     }
     //endregion
 
+    //region Getters/Setters
     public void setSelectedFile(FileObject selectedFile) {
         this.selectedFile = selectedFile;
     }
@@ -143,8 +144,52 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     public FileObject getSelectedFile() {
         return this.selectedFile;
     }
+    //endregion
 
     //region UI Action
+    // open a selected file in the editor
+    public static void openFileInEditor(FileObject file) {
+        try {
+            ProjectManager pm = ProjectManager.getInstance();
+            // TODO if we open more than one project in our plugin ,this will always consider the first opened project.Need to optimize
+            Project project = pm.getOpenProjects()[0];
+
+            //To get the absolute path of the project root within the system
+            ProjectRootManager prm = ProjectRootManager.getInstance(project);
+            VirtualFile[] projectRoot = prm.getContentRoots();
+
+            String projectRootPath = projectRoot[0].getPath();
+            projectRootPath = projectRootPath.replace('/', '\\');
+
+            // relative path of the selected file
+            String selectedFileRelativePath = file.getPath().toString();
+
+            //full absolute path
+            String fileAbsolutePath = projectRootPath + "\\" + selectedFileRelativePath;
+            System.out.println("vFiles" + fileAbsolutePath);
+
+            VirtualFile vFile = LocalFileSystem.getInstance().findFileByIoFile(new File(fileAbsolutePath));
+            //open file
+            if (vFile == null) {
+                System.out.println("No File Found in specified path");
+            }
+
+            FileEditorManager.getInstance(project).openFile(vFile, true);
+
+        } catch (Exception e) {
+
+            System.out.println(e);
+        }
+    }
+
+    // action listener to the "open file" button
+    private void openSelectedFileInEditor(ActionEvent event) {
+        // openFile has to be called from Event Dispatcher Thread (EDT)
+        EventQueue.invokeLater(() -> {
+            openFileInEditor(getSelectedFile());
+        });
+    }
+
     public void showPane() {
         parent.setExpanded(true);
     }
@@ -167,14 +212,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
     @Override
     public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
-        fileName.setText(Constants.SF_TEXT_FILENAME);
-        packageName.setText(Constants.SF_TEXT_PACKAGE_NAME);
-        authors.setText(Constants.SF_TEXT_AUTHORS);
-        noOfCommits.setText(Constants.SF_TEXT_NO_OF_COMMITS);
-        fileSize.setText(Constants.SF_TEXT_FILE_SIZE);
-        lineCount.setText(Constants.SF_TEXT_LINE_COUNT);
-
-        hidePane();
+        clearPane();
     }
 
     @Override
@@ -239,7 +277,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
     @Override
     public void commitSelected(Commit commit) {
-        //this.commit=commit;
+        // Nothing to do for this action
     }
     //endregion
 
@@ -248,50 +286,17 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     public Node getNode() {
         return parent;
     }
+
+    @Override
+    public void clearPane() {
+        fileName.setText(Constants.SF_TEXT_FILENAME);
+        packageName.setText(Constants.SF_TEXT_PACKAGE_NAME);
+        authors.setText(Constants.SF_TEXT_AUTHORS);
+        noOfCommits.setText(Constants.SF_TEXT_NO_OF_COMMITS);
+        fileSize.setText(Constants.SF_TEXT_FILE_SIZE);
+        lineCount.setText(Constants.SF_TEXT_LINE_COUNT);
+
+        hidePane();
+    }
     //endregion
-
-
-    // open a selected file in the editor
-    public static void openFileInEditor(FileObject file) {
-        try {
-            ProjectManager pm = ProjectManager.getInstance();
-            // TODO if we open more than one project in our plugin ,this will always consider the first opened project.Need to optimize
-            Project project = pm.getOpenProjects()[0];
-
-            //To get the absolute path of the project root within the system
-            ProjectRootManager prm = ProjectRootManager.getInstance(project);
-            VirtualFile[] projectRoot = prm.getContentRoots();
-
-            String projectRootPath = projectRoot[0].getPath();
-            projectRootPath = projectRootPath.replace('/', '\\');
-
-            // relative path of the selected file
-            String selectedFileRelativePath = file.getPath().toString();
-
-            //full absolute path
-            String fileAbsolutePath = projectRootPath + "\\" + selectedFileRelativePath;
-            System.out.println("vFiles" + fileAbsolutePath);
-
-            VirtualFile vFile = LocalFileSystem.getInstance().findFileByIoFile(new File(fileAbsolutePath));
-            //open file
-            if (vFile == null) {
-                System.out.println("No File Found in specified path");
-            }
-            FileEditorManager.getInstance(project).openFile(vFile, true);
-
-        } catch (Exception e) {
-
-            System.out.println(e);
-        }
-    }
-
-    // action listener to the "open file" button
-    private void openSelectedFileInEditor(ActionEvent event) {
-        // openFile has to be called from Event Dispatcher Thread (EDT)
-        EventQueue.invokeLater(() -> {
-            openFileInEditor(getSelectedFile());
-        });
-    }
-
-
 }
