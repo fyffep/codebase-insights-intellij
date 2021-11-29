@@ -45,5 +45,10 @@ public class HeatMapSplitPane implements IContainerView {
     public Node getNode() {
         return parent;
     }
+
+    @Override
+    public void clearPane() {
+
+    }
     //endregion
 }

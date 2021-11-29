@@ -19,6 +19,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -120,20 +121,20 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
     //region UI actions
     private void branchSelectedAction(ActionEvent event) {
         String selectedValue = branchComboBox.getValue();
-        System.out.printf("The %s branch was selected. Update HeatMap, CommitHistory, and CommitDetails, Hide SelectedFileTerminal Window.%n", selectedValue);
+//        System.out.printf("The %s branch was selected. Update HeatMap, CommitHistory, and CommitDetails, Hide SelectedFileTerminal Window.%n", selectedValue);
 
         HeatMapController.getInstance().newBranchSelected(selectedValue);
     }
 
     private void heatMetricOptionSelectedAction(ActionEvent event) {
         String selectedValue = heatMetricComboBox.getValue();
-        System.out.printf("The %s option was selected. Update HeatMap with info based on it.%n", selectedValue);
+//        System.out.printf("The %s option was selected. Update HeatMap with info based on it.%n", selectedValue);
 
         HeatMapController.getInstance().newHeatMetricSelected(selectedValue);
     }
 
     private void tabSelectedAction(Observable observable, Tab oldTab, Tab newTab) {
-        System.out.printf("%s deselected, %s selected.%n", oldTab.getText(), newTab.getText());
+//        System.out.printf("%s deselected, %s selected.%n", oldTab.getText(), newTab.getText());
         HeatMapController.getInstance().heatMapGroupingChanged(newTab.getText());
     }
     //endregion
@@ -142,6 +143,11 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
     @Override
     public Node getNode() {
         return parent;
+    }
+
+    @Override
+    public void clearPane() {
+
     }
     //endregion
 
@@ -152,7 +158,7 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
     }
 
     @Override
-    public void branchListRequested(String activeBranch, Iterator<String> branchList) {
+    public void branchListRequested(String activeBranch, @NotNull Iterator<String> branchList) {
         activeBranchList.clear();
 
         while (branchList.hasNext()) {

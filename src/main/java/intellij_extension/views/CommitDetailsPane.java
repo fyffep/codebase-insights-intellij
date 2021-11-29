@@ -24,6 +24,7 @@ import java.util.TreeSet;
 public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
     private final VBox topHorizontalBanner;
+    private final ScrollPane fileListContainer;
     private final VBox fileList;
     private final Text descriptionText;
     private final Text authorText;
@@ -59,8 +60,9 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
         hashText = createCommitDetailsText(Constants.CD_HASH, topHorizontalBanner);
 
         // Create the Commit Detail's file list container (i.e. scroll view)
-        ScrollPane fileListContainer = new ScrollPane();
+        fileListContainer = new ScrollPane();
         setFileListContainerProperties(fileListContainer);
+        fileListContainer.setVisible(false);
         parent.getChildren().add(fileListContainer);
 
         fileList = new VBox();
@@ -182,19 +184,35 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
     @Override
     public void newBranchSelected(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode) {
-        // Clear
-        descriptionText.setText(Constants.CD_DESCRIPTION);
-        authorText.setText(Constants.CD_AUTHOR);
-        dateText.setText(Constants.CD_DATE);
-        hashText.setText(Constants.CD_HASH);
-
-        // Clear
-        fileList.getChildren().clear();
+        clearPane();
     }
 
     @Override
-    public void fileSelected(FileObject selectedFile, Iterator<Commit> filesCommits) {
-        // Nothing to do for this action
+    public void fileSelected(@NotNull FileObject selectedFile, Iterator<Commit> filesCommits) {
+        boolean clearPane = true;
+        String currentCommit = hashText.getText().replace(Constants.CD_HASH, "");
+        while (filesCommits.hasNext()) {
+
+            // Grab commit and make a null row
+            Commit commit = filesCommits.next();
+            if (commit.getHash().equals(currentCommit)) {
+                clearPane = false;
+            }
+        }
+
+        if (clearPane) {
+            clearPane();
+        }
+
+
+//        if(!selectedFile.getCommitHashToHeatObjectMap().containsKey(currentCommit)) {
+//            clearPane();
+//            System.out.println("poop1 " + selectedFile.getCommitHashToHeatObjectMap().containsKey(currentCommit));
+//        } else {
+//            System.out.println("poop2 " + selectedFile.getCommitHashToHeatObjectMap().containsKey(currentCommit));
+//            System.out.println(selectedFile.getCommitHashToHeatObjectMap().get(currentCommit));
+//            System.out.println(selectedFile.getCommitHashToHeatObjectMap().size());
+//        }
     }
 
     @Override
@@ -207,6 +225,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
         // Clear and start fresh
         fileList.getChildren().clear();
+
 
         StringBuilder addBuilder = new StringBuilder();
         StringBuilder copyBuilder = new StringBuilder();
@@ -265,6 +284,9 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
             deleteBody.setText(deleteBuilder.toString());
             fileList.getChildren().add(deleteBody);
         }
+
+        // Show scroll pane
+        fileListContainer.setVisible(true);
     }
     //endregion
 
@@ -272,6 +294,21 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
     @Override
     public Node getNode() {
         return parent;
+    }
+
+    @Override
+    public void clearPane() {
+        // Clear
+        descriptionText.setText(Constants.CD_DESCRIPTION);
+        authorText.setText(Constants.CD_AUTHOR);
+        dateText.setText(Constants.CD_DATE);
+        hashText.setText(Constants.CD_HASH);
+
+        // Clear
+        fileList.getChildren().clear();
+
+        // Hide scroll pane
+        fileListContainer.setVisible(false);
     }
     //endregion
 }
