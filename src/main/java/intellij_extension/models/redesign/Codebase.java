@@ -232,7 +232,7 @@ public class Codebase implements CodeBaseObservable {
         HeatCalculationUtility.assignHeatLevels(this, currentHeatMetricOption);
 
         //Group by commit
-        return GroupFileObjectUtility.groupByCommit();
+        return GroupFileObjectUtility.groupByCommit(this);
     }
 
     public TreeMap<String, TreeSet<FileObject>> groupDataByPackages() {
