@@ -140,11 +140,12 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
             VirtualFile vFile = LocalFileSystem.getInstance().findFileByIoFile(new File(fileAbsolutePath));
             //open file
             if (vFile == null) {
-                System.out.println("No File Found in specified path");
+                System.err.println("No File Found in specified path");
+                //TODO could we display a pop-up error message here?
             }
-
-            FileEditorManager.getInstance(project).openFile(vFile, true);
-
+            else {
+                FileEditorManager.getInstance(project).openFile(vFile, true);
+            }
         } catch (Exception e) {
 
             System.out.println(e);

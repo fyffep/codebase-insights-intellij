@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.*;
+import java.util.stream.Stream;
 
 
 public class FileSizeCalculator {
@@ -16,16 +17,23 @@ public class FileSizeCalculator {
 
 
     /**
+     * Unused
      * Gets the line count of a file at the given filePath
      */
-    public static long getLineCount(String filePath) {
-        try {
+    /*public static long getLineCount(String filePath) {
+        Stream stream = null;
+        try
+        {
             // This technique would return the lines of the file in the latest version of the repository
-            return Files.lines(Paths.get(filePath)).count();
-        } catch (IOException e) {
+            stream = Files.lines(Paths.get(filePath));
+            return stream.count();
+        }
+        catch (IOException e) {
+            System.err.println("There was an error reading file "+filePath);
+            stream.close();
             return 0;
         }
-    }
+    }*/
 
     /**
      * @param in an InputStream with a File open. This method does not close the InputStream when it is done.
