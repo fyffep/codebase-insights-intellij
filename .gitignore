@@ -112,3 +112,4 @@ Temporary Items
 
 #Log files
 /logs/
+.idea/runConfigurations.xml
