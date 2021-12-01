@@ -10,6 +10,7 @@ import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.utility.RepositoryAnalyzer;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,22 +40,18 @@ public class Codebase implements CodeBaseObservable {
         activeFileObjects = new LinkedHashSet<>();
     }
 
-    public static Codebase getInstance() {
+    public static synchronized Codebase getInstance() {
+        //SonarQube recommends to avoid double-checking a lock and instead placing synchronized in the method signature
+        //because double-checking is not reliable.
         if (instance == null) {
-            //synchronized block to remove overhead
-            synchronized (Codebase.class) {
-                // if instance is null, initialize
-                if (instance == null) {
-                    instance = new Codebase();
-                    System.out.println("Model (Codebase) has been created"); //logger doesn't work here
-                }
-            }
+            instance = new Codebase();
+            System.out.println("Model (Codebase) has been created"); //logger doesn't work here
         }
         return instance;
     }
     // endregion
 
-    public void selectDefaultBranch() {
+    public void selectDefaultBranch() throws IOException {
         String branch = "";
         for (String defaultBranch : Constants.DEFAULT_BRANCHES) {
             if (branchNameList.contains(defaultBranch.toLowerCase())) {
@@ -66,7 +63,16 @@ public class Codebase implements CodeBaseObservable {
         // Means no default branches are in branchNameList
         if (branch.isEmpty()) {
             // So, just grab the first branch
-            branch = branchNameList.stream().findFirst().get();
+            //branch = branchNameList.stream().findFirst().get();
+            Optional<String> optional = branchNameList.stream().findFirst();
+            if (optional.isPresent())
+                branch = optional.get();
+            else
+            {
+                //Potentially, we could instead default to "No branches found" to keep the plugin window empty.
+                //For now, we'll throw an exception.
+                throw new IOException("Could not find any branches in the Git repository to be analyzed"); //FIXME determine how to handle the situation where the local repository cannot be found
+            }
         }
 
         activeBranch = branch;

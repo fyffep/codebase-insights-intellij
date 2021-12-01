@@ -128,9 +128,6 @@ public class FileObject {
         this.latestCommitInTreeWalk = commitHash;
     }
 
-    public int getOverallHeat() {
-        return (int) (Math.random() % 10); //TODO calculate overall heat here (this is a placeholder)
-    }
 
     public String getHeatMetricString(HeatObject heatObject, HeatMetricOptions heatMetricOption) {
         String text = "";
@@ -161,6 +158,11 @@ public class FileObject {
             return this.getFilename().equals(fileObject.getFilename());
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 
     public int compareTo(FileObject other) {
