@@ -33,7 +33,7 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
     // Basically this class' main node
     private VBox parent;
     // Banner that holds heat metric and branch comboBoxes
-    private HBox topHorizontalBanner;
+    private HBox comboBoxContainer;
     private ComboBox<String> heatMetricComboBox;
     private ComboBox<String> branchComboBox;
     // Holds HeatMapPane and CommitGroupingPane
@@ -49,25 +49,28 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         parent.setMinWidth(Constants.ZERO_WIDTH);
 
         // Create the top horizontal banner
-        topHorizontalBanner = new HBox();
-        parent.getChildren().add(topHorizontalBanner);
+//        comboBoxContainer = new VBox();
+
+        // Create the top horizontal banner
+        comboBoxContainer = new HBox();
+        parent.getChildren().add(comboBoxContainer);
         // Add constraints to width/height
-        topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT);
-        topHorizontalBanner.setMinWidth(Constants.ZERO_WIDTH);
-        topHorizontalBanner.prefWidthProperty().bind(parent.widthProperty());
+        comboBoxContainer.setMinHeight(Constants.BANNER_MIN_HEIGHT);
+        comboBoxContainer.setMinWidth(Constants.ZERO_WIDTH);
+        comboBoxContainer.prefWidthProperty().bind(parent.widthProperty());
         // Child layout properties
-        topHorizontalBanner.setAlignment(Constants.BANNER_ALIGNMENT);
-        topHorizontalBanner.setSpacing(Constants.BANNER_SPACING);
-        topHorizontalBanner.setPadding(Constants.BANNER_INSETS);
+        comboBoxContainer.setAlignment(Constants.BANNER_ALIGNMENT);
+        comboBoxContainer.setSpacing(Constants.BANNER_SPACING);
+        comboBoxContainer.setPadding(Constants.BANNER_INSETS);
 
         // Label for heatMetric ComboBox
         Text heatMetricTitle = new Text();
-        topHorizontalBanner.getChildren().add(heatMetricTitle);
+        comboBoxContainer.getChildren().add(heatMetricTitle);
         heatMetricTitle.setText(Constants.HEAT_METRIC_COMBOBOX_TITLE);
 
         // Create heatMetric comboBox
         heatMetricComboBox = new ComboBox<>();
-        topHorizontalBanner.getChildren().add(heatMetricComboBox);
+        comboBoxContainer.getChildren().add(heatMetricComboBox);
         // Set up observable list
         heatMetricComboBox.setItems(Constants.HEAT_METRIC_OPTIONS);
         heatMetricComboBox.getSelectionModel().select(0);
@@ -78,12 +81,12 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
 
         // Label for branch ComboBox
         Text branchTitle = new Text();
-        topHorizontalBanner.getChildren().add(branchTitle);
+        comboBoxContainer.getChildren().add(branchTitle);
         branchTitle.setText(Constants.BRANCH_COMBOBOX_TITLE);
 
         // Create branch comboBox
         branchComboBox = new ComboBox<>();
-        topHorizontalBanner.getChildren().add(branchComboBox);
+        comboBoxContainer.getChildren().add(branchComboBox);
         // Set up observable list
         branchComboBox.setItems(activeBranchList);
         // Set up the select action
@@ -110,7 +113,6 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         tabPane.getTabs().add(tab);
 
         tabPane.getSelectionModel().selectedItemProperty().addListener(this::tabSelectedAction);
-
 
         Codebase model = Codebase.getInstance();
         model.registerObserver(this);
