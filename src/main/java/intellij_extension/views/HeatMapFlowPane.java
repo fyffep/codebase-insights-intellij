@@ -42,14 +42,11 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     //endregion
 
     //region Constructors
-    public HeatMapFlowPane(@NotNull Control grandParent) {
+    public HeatMapFlowPane() {
         // Create ScrollPane
         scrollPane = new ScrollPane();
         // Set Properties
         scrollPane.setMinWidth(Constants.ZERO_WIDTH);
-//        scrollPane.prefWidthProperty().bind(grandParent.widthProperty());
-//        scrollPane.maxWidthProperty().bind(grandParent.widthProperty());
-//        scrollPane.maxHeightProperty().bind(grandParent.heightProperty());
 
         // Create the AnchorPane inside the ScrollPane
         anchorPane = new AnchorPane();
@@ -87,7 +84,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
 
     @Override
     public void clearPane() {
-
+        flowPane.getChildren().clear();
     }
     //endregion
 

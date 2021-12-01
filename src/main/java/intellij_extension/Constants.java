@@ -18,7 +18,7 @@ public class Constants {
     public static final String[] DEFAULT_BRANCHES = {"development", "master", "main"};
 
     public static final GroupingMode DEFAULT_GROUPING = GroupingMode.PACKAGES;
-    public static enum GroupingMode {
+    public enum GroupingMode {
         COMMITS,
         PACKAGES
     }
@@ -31,7 +31,7 @@ public class Constants {
             "Number of Commits",
             "Number of Authors"
     );
-    public static enum HeatMetricOptions {
+    public enum HeatMetricOptions {
         OVERALL,
         FILE_SIZE,
         NUM_OF_COMMITS,

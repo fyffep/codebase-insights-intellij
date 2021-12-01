@@ -25,7 +25,7 @@ public class Codebase implements CodeBaseObservable {
     private LinkedHashSet<Commit> activeCommits;
     private LinkedHashSet<FileObject> activeFileObjects;
     private String projectRootPath;
-    private String latestCommitHash; // TODO should be replaced by target Commit completely (so we can select a previous commit when the time comes)
+    private String latestCommitHash;
     private String targetCommit;
 
     private GroupingMode currentGroupingMode = GroupingMode.PACKAGES;
@@ -63,7 +63,6 @@ public class Codebase implements CodeBaseObservable {
         // Means no default branches are in branchNameList
         if (branch.isEmpty()) {
             // So, just grab the first branch
-            //branch = branchNameList.stream().findFirst().get();
             Optional<String> optional = branchNameList.stream().findFirst();
             if (optional.isPresent())
                 branch = optional.get();
@@ -129,10 +128,8 @@ public class Codebase implements CodeBaseObservable {
     // If not building model data we want a null return
     // This ensures we know something went wrong. Which means we are looking for a filename that doesn't exist in our model's data
     public FileObject getFileObjectFromFilename(String filename) {
-        FileObject selectedFile = activeFileObjects.stream()
+        return activeFileObjects.stream()
                 .filter(file -> file.getFilename().equals(filename)).findAny().orElse(null);
-
-        return selectedFile;
     }
 
     public Commit getCommitFromCommitHash(String commitHash) {
@@ -201,11 +198,6 @@ public class Codebase implements CodeBaseObservable {
         // TODO - Implement UI and backend logic.
     }
 
-    public void openFile(String filename) {
-        FileObject selectedFile = getFileObjectFromFilename(filename);
-        System.out.println("Open file in intellij: " + selectedFile.getFilename());
-        // TODO - How to open this file via Intellij
-    }
 
     public void heatMapGroupingChanged(@NotNull GroupingMode newGroupingMode) {
         currentGroupingMode = newGroupingMode;
