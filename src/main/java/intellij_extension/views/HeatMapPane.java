@@ -97,14 +97,14 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         // Package tab
         Tab tab = new Tab();
         tab.setText(Constants.HEAT_GROUPING_TEXT);
-        HeatMapFlowPane heatMapTabContent = new HeatMapFlowPane(tabPane);
+        HeatMapFlowPane heatMapTabContent = new HeatMapFlowPane();
         heatMapTabContent.setGroupingMode(Constants.GroupingMode.PACKAGES);
         tab.setContent(heatMapTabContent.getNode());
         tabPane.getTabs().add(tab);
         // Commit tab
         tab = new Tab();
         tab.setText(Constants.COMMIT_GROUPING_TEXT);
-        HeatMapFlowPane commitTabContent = new HeatMapFlowPane(tabPane);
+        HeatMapFlowPane commitTabContent = new HeatMapFlowPane();
         commitTabContent.setGroupingMode(Constants.GroupingMode.COMMITS);
         tab.setContent(commitTabContent.getNode());
         tabPane.getTabs().add(tab);

@@ -5,7 +5,6 @@ import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.models.redesign.HeatObject;
 import javafx.scene.paint.Color;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -32,31 +31,6 @@ public class HeatCalculationUtility
         return heatColor;
     }
 
-
-    /**
-     * Returns the level of heat caused by the HeatObject's file size.
-     *
-     * @param heatObject this should have its lineCount already assigned
-     */
-    public static int calculateHeatForFileSize(@NotNull HeatObject heatObject) {
-        int heatLevel;
-
-        long lineCount = heatObject.getLineCount();
-        if (lineCount < 100) {
-            heatLevel = Constants.HEAT_MIN;
-        }
-        //Give 1 point of heat for every hundred lines
-        else if (lineCount > 100 && lineCount < 1000) {
-            heatLevel = (int) Math.round(lineCount / 100.0);
-        } else {
-            heatLevel = Constants.HEAT_MAX;
-        }
-
-        if (heatLevel > Constants.HEAT_MAX)
-            heatLevel = Constants.HEAT_MAX;
-
-        return heatLevel;
-    }
 
 
     public static void assignHeatLevelsFileSize(Codebase codebase)
