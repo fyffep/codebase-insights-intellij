@@ -48,13 +48,10 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
 
         // Create the top horizontal banner
         topHorizontalBanner = new VBox();
-//        topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT * 2); // We need double the height b/c two rows of controls in this banner
         topHorizontalBanner.setMinWidth(Constants.ZERO_WIDTH);
         topHorizontalBanner.prefWidthProperty().bind(parent.widthProperty());
         // Child layout properties
         topHorizontalBanner.setAlignment(Constants.BANNER_ALIGNMENT);
-//        topHorizontalBanner.setSpacing(Constants.BANNER_SPACING);
-//        topHorizontalBanner.setPadding(Constants.BANNER_INSETS);
         parent.getChildren().add(topHorizontalBanner);
 
         // Create the HBox for the combo boxes
@@ -99,7 +96,6 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         branchComboBox.setOnAction(this::branchSelectedAction);
 
         // Top-Vs-All commit controls
-
         // Create the HBox for the radio buttons +
         HBox commitFilterContainer = new HBox();
         topHorizontalBanner.getChildren().add(commitFilterContainer);
@@ -116,17 +112,29 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         ToggleGroup commitFilteringGroup = new ToggleGroup();
 
         // Radio buttons
-        RadioButton allCommitsButton = new RadioButton("All Commits");
+        RadioButton allCommitsButton = new RadioButton("All Files");
         allCommitsButton.setToggleGroup(commitFilteringGroup);
         allCommitsButton.setSelected(false);
         commitFilterContainer.getChildren().add(allCommitsButton);
 
-        RadioButton topCommitsButton = new RadioButton("Top 10 Commits");
+        RadioButton topCommitsButton = new RadioButton("Top 10 Hottest Files");
         topCommitsButton.setToggleGroup(commitFilteringGroup);
         topCommitsButton.setSelected(true);
         commitFilterContainer.getChildren().add(topCommitsButton);
 
-
+        // Slider to control # of top commits
+        Slider topCommitsSlider = new Slider();
+        topCommitsSlider.setMin(1);
+        topCommitsSlider.setMax(10);
+        topCommitsSlider.setValue(10/2);
+        topCommitsSlider.setShowTickLabels(true);
+//        topCommitsSlider.setShowTickMarks(true);
+        topCommitsSlider.setSnapToTicks(true);
+        topCommitsSlider.setSnapToPixel(true);
+        topCommitsSlider.setMajorTickUnit(1);
+        topCommitsSlider.setMinorTickCount(0);
+        topCommitsSlider.setBlockIncrement(1);
+        commitFilterContainer.getChildren().add(topCommitsSlider);
 
         // Tabbed view
         TabPane tabPane = new TabPane();
