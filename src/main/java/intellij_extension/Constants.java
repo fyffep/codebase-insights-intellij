@@ -18,6 +18,7 @@ public class Constants {
     public static final String[] DEFAULT_BRANCHES = {"development", "master", "main"};
 
     public static final GroupingMode DEFAULT_GROUPING = GroupingMode.PACKAGES;
+
     public enum GroupingMode {
         COMMITS,
         PACKAGES
@@ -111,8 +112,9 @@ public class Constants {
     public static final String SF_TEXT_SEPERATOR = ":";
     public static final String BRANCH_COMBOBOX_TITLE = "Evaluating Branch:";
     public static final String HEAT_METRIC_COMBOBOX_TITLE = "Heat Data:";
+    public static final String DASHBOARD_TEXT = "Dashboard";
     public static final String HEAT_GROUPING_TEXT = "Group by Package";
-    public static final String COMMIT_GROUPING_TEXT = "Group by Commit";
+    public static final String COMMIT_GROUPING_TEXT = "Group by Commit Contiguity";
     public static final String SEPARATOR = "~";
     // Tool Tips
     public static final String TT_FILE_SIZE = "File size: ";

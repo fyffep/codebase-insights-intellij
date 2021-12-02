@@ -16,6 +16,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -141,14 +142,25 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         parent.getChildren().add(tabPane);
         tabPane.setMinHeight(Constants.ZERO_WIDTH);
         tabPane.prefHeightProperty().bind(parent.heightProperty());
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+
         // Set  up tabs
-        // Package tab
+        // Dashboard tab
         Tab tab = new Tab();
+        tab.setText(Constants.DASHBOARD_TEXT);
+        Pane dashboardPane = new Pane();
+//        tab.setContent(dashboardPane.getNode());
+        tab.setContent(dashboardPane);
+        tabPane.getTabs().add(tab);
+
+        // Package tab
+        tab = new Tab();
         tab.setText(Constants.HEAT_GROUPING_TEXT);
         HeatMapFlowPane heatMapTabContent = new HeatMapFlowPane();
         heatMapTabContent.setGroupingMode(Constants.GroupingMode.PACKAGES);
         tab.setContent(heatMapTabContent.getNode());
         tabPane.getTabs().add(tab);
+
         // Commit tab
         tab = new Tab();
         tab.setText(Constants.COMMIT_GROUPING_TEXT);
