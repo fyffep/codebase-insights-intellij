@@ -47,7 +47,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     private final Text noOfCommits;
     private final Text fileSize;
     private final Text lineCount;
-    private final Button openFile;
+    private final Hyperlink openFile;
     //region Vars
     private TitledPane parent;
     private FileObject selectedFile;
