@@ -43,6 +43,12 @@ dependencies {
         exclude group: 'org.slf4j'
     }
 
+    // https://mvnrepository.com/artifact/org.mockito/mockito-all
+    testImplementation group: 'org.mockito', name: 'mockito-all', version: '1.8.4'
+
+    // https://mvnrepository.com/artifact/org.mockito/mockito-all
+    testImplementation 'org.mockito:mockito-all:1.8.4'
+
     //JGit
     implementation 'org.eclipse.jgit:org.eclipse.jgit:5.13.0.202109080827-r'
     implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:5.13.0.202109080827-r'

@@ -113,6 +113,7 @@ public class Constants {
     public static final String HEAT_METRIC_COMBOBOX_TITLE = "Heat Data:";
     public static final String HEAT_GROUPING_TEXT = "Group by Package";
     public static final String COMMIT_GROUPING_TEXT = "Group by Commit";
+    public static final String SEPARATOR = "~";
     // Tool Tips
     public static final String TT_FILE_SIZE = "File size: ";
     public static final String TT_NUMBER_OF_COMMITS = "Number of Commits: ";
