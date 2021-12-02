@@ -30,16 +30,14 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
     //region Vars
     private final ObservableList<String> activeBranchList = FXCollections.observableArrayList();
     // Basically this class' main node
-    private VBox parent;
-    // Banner that holds heat metric and branch comboBoxes
-    private VBox topHorizontalBanner;
+    private final VBox parent;
+    // Banner that holds heat metric, branch comboBoxes, and filtering controls
+    private final VBox topHorizontalBanner;
     private ComboBox<String> heatMetricComboBox;
     private ComboBox<String> branchComboBox;
-    // Holds HeatMapPane and CommitGroupingPane
-    // private HeatMapTabbedPane heatMapTabbedPane;
-    // Heat Map for a single commit + the history up to the commit
-    // TODO move out when HeatMapTabbedPane is ready
-    private HeatMapFlowPane heatMapFlowPane;
+
+    private Slider topFilesSlider;
+
     //endregion
 
     //region Constructors
@@ -55,6 +53,18 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         topHorizontalBanner.setAlignment(Constants.BANNER_ALIGNMENT);
         parent.getChildren().add(topHorizontalBanner);
 
+        createComboBoxes();
+
+        createTopAllControls();
+
+        createTabs();
+
+        Codebase model = Codebase.getInstance();
+        model.registerObserver(this);
+        HeatMapController.getInstance().branchListRequested();
+    }
+
+    private void createComboBoxes() {
         // Create the HBox for the combo boxes
         HBox comboBoxContainer = new HBox();
         topHorizontalBanner.getChildren().add(comboBoxContainer);
@@ -95,48 +105,53 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         branchComboBox.setItems(activeBranchList);
         // Set up the select action
         branchComboBox.setOnAction(this::branchSelectedAction);
+    }
 
-        // Top-Vs-All commit controls
-        // Create the HBox for the radio buttons +
-        HBox commitFilterContainer = new HBox();
-        topHorizontalBanner.getChildren().add(commitFilterContainer);
+    private void createTopAllControls() {
+        // Top-Vs-All Files controls
+        // Create the HBox for the radio buttons + slider
+        HBox filesFilterContainer = new HBox();
+        topHorizontalBanner.getChildren().add(filesFilterContainer);
         // Add constraints to width/height
-        commitFilterContainer.setMinWidth(Constants.ZERO_WIDTH);
-        commitFilterContainer.prefWidthProperty().bind(parent.widthProperty());
-        commitFilterContainer.setMinHeight(Constants.BANNER_MIN_HEIGHT);
+        filesFilterContainer.setMinWidth(Constants.ZERO_WIDTH);
+        filesFilterContainer.prefWidthProperty().bind(parent.widthProperty());
+        filesFilterContainer.setMinHeight(Constants.BANNER_MIN_HEIGHT);
         // Child layout properties
-        commitFilterContainer.setAlignment(Constants.BANNER_ALIGNMENT);
-        commitFilterContainer.setSpacing(Constants.BANNER_SPACING);
-        commitFilterContainer.setPadding(Constants.BANNER_INSETS);
+        filesFilterContainer.setAlignment(Constants.BANNER_ALIGNMENT);
+        filesFilterContainer.setSpacing(Constants.BANNER_SPACING);
+        filesFilterContainer.setPadding(Constants.BANNER_INSETS);
 
         // Radio button group
-        ToggleGroup commitFilteringGroup = new ToggleGroup();
+        ToggleGroup fileFilteringGroup = new ToggleGroup();
 
         // Radio buttons
-        RadioButton allCommitsButton = new RadioButton("All Files");
-        allCommitsButton.setToggleGroup(commitFilteringGroup);
-        allCommitsButton.setSelected(false);
-        commitFilterContainer.getChildren().add(allCommitsButton);
+        RadioButton allFilesButton = new RadioButton("All Files");
+        allFilesButton.setToggleGroup(fileFilteringGroup);
+        allFilesButton.setSelected(false);
+        allFilesButton.selectedProperty().addListener(this::allRadioButtonClicked);
+        filesFilterContainer.getChildren().add(allFilesButton);
 
-        RadioButton topCommitsButton = new RadioButton("Top 10 Hottest Files");
-        topCommitsButton.setToggleGroup(commitFilteringGroup);
-        topCommitsButton.setSelected(true);
-        commitFilterContainer.getChildren().add(topCommitsButton);
+        RadioButton topFilesButton = new RadioButton("Top 10 Hottest Files");
+        topFilesButton.setToggleGroup(fileFilteringGroup);
+        topFilesButton.setSelected(true);
+        allFilesButton.selectedProperty().addListener(this::topRadioButtonClicked);
+        filesFilterContainer.getChildren().add(topFilesButton);
 
         // Slider to control # of top commits
-        Slider topCommitsSlider = new Slider();
-        topCommitsSlider.setMin(1);
-        topCommitsSlider.setMax(10);
-        topCommitsSlider.setValue(10/2);
-        topCommitsSlider.setShowTickLabels(true);
-//        topCommitsSlider.setShowTickMarks(true);
-        topCommitsSlider.setSnapToTicks(true);
-        topCommitsSlider.setSnapToPixel(true);
-        topCommitsSlider.setMajorTickUnit(1);
-        topCommitsSlider.setMinorTickCount(0);
-        topCommitsSlider.setBlockIncrement(1);
-        commitFilterContainer.getChildren().add(topCommitsSlider);
+        topFilesSlider = new Slider();
+        topFilesSlider.setMin(1);
+        topFilesSlider.setMax(20);
+        topFilesSlider.setValue(20);
+        topFilesSlider.setShowTickLabels(true);
+        topFilesSlider.setSnapToTicks(true);
+        topFilesSlider.setSnapToPixel(true);
+        topFilesSlider.setMajorTickUnit(2);
+        topFilesSlider.setMinorTickCount(0);
+        topFilesSlider.setBlockIncrement(2);
+        filesFilterContainer.getChildren().add(topFilesSlider);
+    }
 
+    private void createTabs() {
         // Tabbed view
         TabPane tabPane = new TabPane();
         parent.getChildren().add(tabPane);
@@ -157,7 +172,7 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         tab = new Tab();
         tab.setText(Constants.HEAT_GROUPING_TEXT);
         HeatMapFlowPane heatMapTabContent = new HeatMapFlowPane();
-        heatMapTabContent.setGroupingMode(Constants.GroupingMode.PACKAGES);
+        heatMapTabContent.setGroupingMode(GroupingMode.PACKAGES);
         tab.setContent(heatMapTabContent.getNode());
         tabPane.getTabs().add(tab);
 
@@ -165,37 +180,60 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         tab = new Tab();
         tab.setText(Constants.COMMIT_GROUPING_TEXT);
         HeatMapFlowPane commitTabContent = new HeatMapFlowPane();
-        commitTabContent.setGroupingMode(Constants.GroupingMode.COMMITS);
+        commitTabContent.setGroupingMode(GroupingMode.COMMITS);
         tab.setContent(commitTabContent.getNode());
         tabPane.getTabs().add(tab);
 
         tabPane.getSelectionModel().selectedItemProperty().addListener(this::tabSelectedAction);
-
-        Codebase model = Codebase.getInstance();
-        model.registerObserver(this);
-        HeatMapController.getInstance().branchListRequested();
+        updateUIControlsBasedOnTab(Constants.DASHBOARD_TEXT);
     }
-
     //endregion
 
     //region UI actions
     private void branchSelectedAction(ActionEvent event) {
         String selectedValue = branchComboBox.getValue();
-//        System.out.printf("The %s branch was selected. Update HeatMap, CommitHistory, and CommitDetails, Hide SelectedFileTerminal Window.%n", selectedValue);
 
         HeatMapController.getInstance().newBranchSelected(selectedValue);
     }
 
     private void heatMetricOptionSelectedAction(ActionEvent event) {
         String selectedValue = heatMetricComboBox.getValue();
-//        System.out.printf("The %s option was selected. Update HeatMap with info based on it.%n", selectedValue);
 
         HeatMapController.getInstance().newHeatMetricSelected(selectedValue);
     }
 
     private void tabSelectedAction(Observable observable, Tab oldTab, Tab newTab) {
-//        System.out.printf("%s deselected, %s selected.%n", oldTab.getText(), newTab.getText());
+        updateUIControlsBasedOnTab(newTab.getText());
+
         HeatMapController.getInstance().heatMapGroupingChanged(newTab.getText());
+    }
+
+    private void updateUIControlsBasedOnTab(String tab) {
+        switch (tab) {
+            case Constants.COMMIT_GROUPING_TEXT:
+            case Constants.HEAT_GROUPING_TEXT:
+                if(!topHorizontalBanner.isVisible()) {
+                    parent.getChildren().add(0, topHorizontalBanner); // Make first child so its at the top
+                }
+                topHorizontalBanner.setVisible(true);
+                break;
+            case Constants.DASHBOARD_TEXT:
+                parent.getChildren().remove(topHorizontalBanner);
+                topHorizontalBanner.setVisible(false);
+                break;
+            default:
+                // Unknown state/tab just leaving it as-is...
+                break;
+        }
+        parent.layout();
+    }
+
+    private void allRadioButtonClicked(Observable observable, boolean oldValue, boolean newValue) {
+        topFilesSlider.setVisible(oldValue);
+    }
+
+    private void topRadioButtonClicked(Observable observable, boolean oldValue, boolean newValue) {
+        topFilesSlider.setVisible(oldValue);
     }
     //endregion
 
