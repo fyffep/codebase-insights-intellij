@@ -10,6 +10,7 @@ import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.utility.RepositoryAnalyzer;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,16 +18,17 @@ import java.util.stream.Collectors;
 public class Codebase implements CodeBaseObservable {
 
     // region Vars
-    private static Codebase instance; //singleton
+    private static Codebase instance; // Singleton
+    private static TreeMap<String, TreeSet<FileObject>> packageBasedMapGroup;
+    private static TreeMap<String, TreeSet<FileObject>> commitBasedMapGroup;
     private final List<CodeBaseObserver> observerList = new LinkedList<>();
     private final LinkedHashSet<String> branchNameList;
     private String activeBranch;
     private LinkedHashSet<Commit> activeCommits;
     private LinkedHashSet<FileObject> activeFileObjects;
     private String projectRootPath;
-    private String latestCommitHash; // TODO should be replaced by target Commit completely (so we can select a previous commit when the time comes)
+    private String latestCommitHash;
     private String targetCommit;
-
     private GroupingMode currentGroupingMode = GroupingMode.PACKAGES;
     private HeatMetricOptions currentHeatMetricOption = HeatMetricOptions.FILE_SIZE;
     // endregion
@@ -37,24 +39,22 @@ public class Codebase implements CodeBaseObservable {
         branchNameList = new LinkedHashSet<>();
         activeCommits = new LinkedHashSet<>();
         activeFileObjects = new LinkedHashSet<>();
+        packageBasedMapGroup = new TreeMap<>();
+        commitBasedMapGroup = new TreeMap<>();
     }
 
-    public static Codebase getInstance() {
+    public static synchronized Codebase getInstance() {
+        // SonarQube recommends avoid double-checking a lock and instead placing synchronized in the method signature
+        // because double-checking is not reliable.
         if (instance == null) {
-            //synchronized block to remove overhead
-            synchronized (Codebase.class) {
-                // if instance is null, initialize
-                if (instance == null) {
-                    instance = new Codebase();
-                    System.out.println("Model (Codebase) has been created"); //logger doesn't work here
-                }
-            }
+            instance = new Codebase();
+            System.out.println("Model (Codebase) has been created"); //logger doesn't work here
         }
         return instance;
     }
     // endregion
 
-    public void selectDefaultBranch() {
+    public void selectDefaultBranch() throws IOException {
         String branch = "";
         for (String defaultBranch : Constants.DEFAULT_BRANCHES) {
             if (branchNameList.contains(defaultBranch.toLowerCase())) {
@@ -66,7 +66,14 @@ public class Codebase implements CodeBaseObservable {
         // Means no default branches are in branchNameList
         if (branch.isEmpty()) {
             // So, just grab the first branch
-            branch = branchNameList.stream().findFirst().get();
+            Optional<String> optional = branchNameList.stream().findFirst();
+            if (optional.isPresent())
+                branch = optional.get();
+            else {
+                //Potentially, we could instead default to "No branches found" to keep the plugin window empty.
+                //For now, we'll throw an exception.
+                throw new IOException("Could not find any branches in the Git repository to be analyzed"); //FIXME determine how to handle the situation where the local repository cannot be found
+            }
         }
 
         activeBranch = branch;
@@ -123,10 +130,8 @@ public class Codebase implements CodeBaseObservable {
     // If not building model data we want a null return
     // This ensures we know something went wrong. Which means we are looking for a filename that doesn't exist in our model's data
     public FileObject getFileObjectFromFilename(String filename) {
-        FileObject selectedFile = activeFileObjects.stream()
+        return activeFileObjects.stream()
                 .filter(file -> file.getFilename().equals(filename)).findAny().orElse(null);
-
-        return selectedFile;
     }
 
     public Commit getCommitFromCommitHash(String commitHash) {
@@ -171,6 +176,10 @@ public class Codebase implements CodeBaseObservable {
         activeCommits = new LinkedHashSet<>();
         activeFileObjects.clear();
         activeFileObjects = new LinkedHashSet<>();
+        packageBasedMapGroup = new TreeMap<>();
+        packageBasedMapGroup.clear();
+        commitBasedMapGroup = new TreeMap<>();
+        commitBasedMapGroup.clear();
         latestCommitHash = "";
 
         RepositoryAnalyzer.attachCodebaseData(this);
@@ -195,11 +204,6 @@ public class Codebase implements CodeBaseObservable {
         // TODO - Implement UI and backend logic.
     }
 
-    public void openFile(String filename) {
-        FileObject selectedFile = getFileObjectFromFilename(filename);
-        System.out.println("Open file in intellij: " + selectedFile.getFilename());
-        // TODO - How to open this file via Intellij
-    }
 
     public void heatMapGroupingChanged(@NotNull GroupingMode newGroupingMode) {
         currentGroupingMode = newGroupingMode;
@@ -212,17 +216,15 @@ public class Codebase implements CodeBaseObservable {
 
     public TreeMap<String, TreeSet<FileObject>> getSetOfFiles() {
         // Update views with data
-        TreeMap<String, TreeSet<FileObject>> setOfFiles;
         switch (currentGroupingMode) {
             case COMMITS:
-                setOfFiles = groupDataByCommits();
-                break;
+                if (commitBasedMapGroup.isEmpty()) commitBasedMapGroup = groupDataByCommits();
+                return commitBasedMapGroup;
             case PACKAGES:
             default:
-                setOfFiles = groupDataByPackages();
-                break;
+                if (packageBasedMapGroup.isEmpty()) packageBasedMapGroup = groupDataByPackages();
+                return packageBasedMapGroup;
         }
-        return setOfFiles;
     }
 
     public TreeMap<String, TreeSet<FileObject>> groupDataByCommits() {

@@ -15,8 +15,8 @@ import javax.swing.*;
 import java.awt.*;
 
 public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory {
-    public static final Boolean projectSynchronizer = false; //used for accessing `project` on other threads
-    public static Project project;
+    public static final Object projectSynchronizer = new Object(); //used for accessing `project` on other threads
+    private static Project project;
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
@@ -53,5 +53,9 @@ public class CodebaseInsightsToolWindowFactory implements ToolWindowFactory {
         });
 
         component.getParent().add(fxPanel);
+    }
+
+    public static Project getProject() {
+        return project;
     }
 }

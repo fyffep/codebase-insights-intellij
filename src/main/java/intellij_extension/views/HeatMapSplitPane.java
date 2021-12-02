@@ -48,7 +48,7 @@ public class HeatMapSplitPane implements IContainerView {
 
     @Override
     public void clearPane() {
-
+        throw new UnsupportedOperationException("A " + this.getClass() + " is not intended to be cleared.");
     }
     //endregion
 }

@@ -48,7 +48,7 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
             //Calculate file sizes for every commit
             // TODO, is this a static class or not?
             RepositoryAnalyzer repositoryAnalyzer = new RepositoryAnalyzer();
-            RepositoryAnalyzer.attachBranchNameList(codeBase); // FIXME bad place to obtain the list of branches for a Codebase?
+            RepositoryAnalyzer.attachBranchNameList(codeBase);
             codeBase.selectDefaultBranch();
             RepositoryAnalyzer.attachCodebaseData(codeBase);
 
@@ -98,10 +98,6 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
 
     public void changeHeatMapToCommit(String commitHash) {
         codeBase.changeHeatMapToCommit(commitHash);
-    }
-
-    public void openFile(String filename) {
-        codeBase.openFile(filename);
     }
 
     public void heatMapGroupingChanged(String newTab) {

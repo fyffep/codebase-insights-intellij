@@ -164,7 +164,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
     }
 
     private void setChangeTextProperties(Text fileText) {
-        // Any formatting for text goes here.
+        // TODO Any formatting for text goes here.
     }
 
     private void setChangeHeaderTextProperties(@NotNull Text headerText) {
