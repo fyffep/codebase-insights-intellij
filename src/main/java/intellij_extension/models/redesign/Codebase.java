@@ -18,7 +18,9 @@ import java.util.stream.Collectors;
 public class Codebase implements CodeBaseObservable {
 
     // region Vars
-    private static Codebase instance; //singleton
+    private static Codebase instance; // Singleton
+    private static TreeMap<String, TreeSet<FileObject>> packageBasedMapGroup;
+    private static TreeMap<String, TreeSet<FileObject>> commitBasedMapGroup;
     private final List<CodeBaseObserver> observerList = new LinkedList<>();
     private final LinkedHashSet<String> branchNameList;
     private String activeBranch;
@@ -27,10 +29,6 @@ public class Codebase implements CodeBaseObservable {
     private String projectRootPath;
     private String latestCommitHash;
     private String targetCommit;
-
-    private static TreeMap<String, TreeSet<FileObject>> packageBasedMapGroup;
-    private static TreeMap<String, TreeSet<FileObject>> commitBasedMapGroup;
-
     private GroupingMode currentGroupingMode = GroupingMode.PACKAGES;
     private HeatMetricOptions currentHeatMetricOption = HeatMetricOptions.FILE_SIZE;
     // endregion
@@ -46,8 +44,8 @@ public class Codebase implements CodeBaseObservable {
     }
 
     public static synchronized Codebase getInstance() {
-        //SonarQube recommends avoid double-checking a lock and instead placing synchronized in the method signature
-        //because double-checking is not reliable.
+        // SonarQube recommends avoid double-checking a lock and instead placing synchronized in the method signature
+        // because double-checking is not reliable.
         if (instance == null) {
             instance = new Codebase();
             System.out.println("Model (Codebase) has been created"); //logger doesn't work here
@@ -71,8 +69,7 @@ public class Codebase implements CodeBaseObservable {
             Optional<String> optional = branchNameList.stream().findFirst();
             if (optional.isPresent())
                 branch = optional.get();
-            else
-            {
+            else {
                 //Potentially, we could instead default to "No branches found" to keep the plugin window empty.
                 //For now, we'll throw an exception.
                 throw new IOException("Could not find any branches in the Git repository to be analyzed"); //FIXME determine how to handle the situation where the local repository cannot be found
