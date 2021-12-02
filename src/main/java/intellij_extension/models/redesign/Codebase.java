@@ -46,7 +46,7 @@ public class Codebase implements CodeBaseObservable {
     }
 
     public static synchronized Codebase getInstance() {
-        //SonarQube recommends to avoid double-checking a lock and instead placing synchronized in the method signature
+        //SonarQube recommends avoid double-checking a lock and instead placing synchronized in the method signature
         //because double-checking is not reliable.
         if (instance == null) {
             instance = new Codebase();
@@ -179,6 +179,10 @@ public class Codebase implements CodeBaseObservable {
         activeCommits = new LinkedHashSet<>();
         activeFileObjects.clear();
         activeFileObjects = new LinkedHashSet<>();
+        packageBasedMapGroup = new TreeMap<>();
+        packageBasedMapGroup.clear();
+        commitBasedMapGroup = new TreeMap<>();
+        commitBasedMapGroup.clear();
         latestCommitHash = "";
 
         RepositoryAnalyzer.attachCodebaseData(this);
