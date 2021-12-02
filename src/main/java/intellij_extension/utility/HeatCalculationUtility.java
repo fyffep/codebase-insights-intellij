@@ -354,7 +354,7 @@ public class HeatCalculationUtility
         assignHeatLevelsNumberOfCommits(codebase);
         sumHeatLevels(codebase, fileToCommitToHeatSumMap, WEIGHT_NUM_COMMITS_NUM_OF_COMMITS);
 
-        assignHeatLevelsNumberOfAuthors(codebase);
+        OLD_assignHeatLevelsNumberOfAuthors(codebase);
         sumHeatLevels(codebase, fileToCommitToHeatSumMap, WEIGHT_NUM_OF_AUTHORS);
 
         //Add more metrics here if more are needed in the future...
@@ -424,7 +424,7 @@ public class HeatCalculationUtility
                 assignHeatLevelsNumberOfCommits(codebase);
                 break;
             case NUM_OF_AUTHORS:
-                assignHeatLevelsNumberOfAuthors(codebase);
+                OLD_assignHeatLevelsNumberOfAuthors(codebase);
                 break;
             default:
                 throw new UnsupportedOperationException("Invalid heat metric selected in HeatCalculationUtility.assignHeatLevels(...)");
