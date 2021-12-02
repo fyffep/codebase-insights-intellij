@@ -1,7 +1,9 @@
 package intellij_extension.utility;
 
+import com.intellij.vcs.log.Hash;
 import intellij_extension.Constants;
 import intellij_extension.models.redesign.Codebase;
+import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.models.redesign.HeatObject;
 import javafx.scene.paint.Color;
@@ -168,7 +170,7 @@ public class HeatCalculationUtility
     }
 
 
-    public static void assignHeatLevelsNumberOfAuthors(Codebase codebase)
+    public static void OLD_assignHeatLevelsNumberOfAuthors(Codebase codebase)
     {
         System.out.println("Calculating heat based on number of authors...");
         /*/final int NEW_AUTHOR_HEAT_CONSEQUENCE = 2; //how much the heat increases when another author joins
@@ -259,6 +261,80 @@ public class HeatCalculationUtility
         }
         System.out.println("Finished calculating heat based on number of authors.");
     }
+
+
+
+    public static void assignHeatLevelsNumberOfAuthors(Codebase codebase)
+    {
+        System.out.println("Calculating heat based on number of authors...");
+        final int REQUIRED_NUM_COMMITS_WITH_AUTHOR_ABSENCE = 10; //how many consecutive commits another author must make to a file before a particular author can be considered absent
+        final int NEW_AUTHOR_HEAT_CONSEQUENCE = 2; //how much the heat increases when another author joins
+        final int AUTHOR_ABSENCE_HEAT_CONSEQUENCE = -1; //how much the heat decreases when an author is absent for long enough
+
+        //Assign heat level to every HeatObject based on number of authors
+        Set<FileObject> fileObjectSet = codebase.getActiveFileObjects();
+        for (FileObject fileObject : fileObjectSet)
+        {
+            HashMap<String, Integer> activeAuthors = new HashMap<>(); //the emails of which authors have been committing to the file recently
+            //...and how many commits they have pushed recently
+
+            //The oldest commits are at the front of the LinkedHashMap
+            LinkedHashMap<String, HeatObject> commitHashToHeatObjectMap = fileObject.getCommitHashToHeatObjectMap();
+            HeatObject lastHeatObject = null;
+
+            for (Map.Entry<String, HeatObject> commitToHeatObjectEntry : commitHashToHeatObjectMap.entrySet())
+            {
+                HeatObject newerHeatObject = commitToHeatObjectEntry.getValue();
+                int heatLevel = Constants.HEAT_MIN;
+                if (lastHeatObject != null) {
+                    heatLevel = lastHeatObject.getHeatLevel();
+                }
+
+                //Get the author of the commit
+                String commitHash = commitToHeatObjectEntry.getKey();
+                String authorEmail = codebase.getCommitFromCommitHash(commitHash).getAuthorEmail();
+
+                //Returning author
+                if (activeAuthors.containsKey(authorEmail))
+                {
+                    //Add the following: 1 to mark this current commit
+                    //..and 1 to reverse the subtraction step below that affects all authors, including this one.
+                    int newNumberOfCommits = activeAuthors.get(authorEmail) + 1 + 1;
+                    activeAuthors.put(authorEmail, newNumberOfCommits);
+                }
+                //New author -> incur a hefty penalty
+                else
+                {
+                    //Add the following: REQUIRED_NUM_COMMITS_WITH_AUTHOR_ABSENCE to mark this current commit
+                    //..and 1 to reverse the subtraction step below that affects all authors, including this one.
+                    int newNumberOfCommits = activeAuthors.get(authorEmail) + REQUIRED_NUM_COMMITS_WITH_AUTHOR_ABSENCE + 1;
+                    activeAuthors.put(authorEmail, newNumberOfCommits);
+                }
+
+                for (Map.Entry<String, Integer> authorEntry : activeAuthors.entrySet())
+                {
+                    //Decrement the number of recent commits for every author to indicate that they have not modified the file in this commit
+                    int decrementedNumberOfCommits = authorEntry.getValue() - 1;
+                    //If the value is now 0, remove the author and reduce the heat
+                    if (decrementedNumberOfCommits <= 0) {
+                        activeAuthors.remove(authorEntry.getKey());
+                        heatLevel += AUTHOR_ABSENCE_HEAT_CONSEQUENCE;
+                    }
+                    else {
+                        activeAuthors.put(authorEntry.getKey(), decrementedNumberOfCommits);
+                    }
+                }
+
+                //Store the new heat level
+                newerHeatObject.setHeatLevel(heatLevel);
+                lastHeatObject = newerHeatObject;
+            }
+        }
+        System.out.println("Finished calculating heat based on number of authors.");
+    }
+
+
+
 
     public static void assignHeatLevelsOverall(Codebase codebase)
     {
