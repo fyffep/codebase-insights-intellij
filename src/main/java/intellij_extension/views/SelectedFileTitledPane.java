@@ -1,6 +1,5 @@
 package intellij_extension.views;
 
-import com.intellij.execution.testframework.HyperLink;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
@@ -73,6 +72,8 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         HBox hbox = new HBox(0);
 
         // Filename
+
+
         fileName = new Text();
         fileName.setFont(setFileDetailsProperties());
         fileName.setText(Constants.SF_TEXT_FILENAME);
@@ -148,12 +149,11 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
             VirtualFile vFile = LocalFileSystem.getInstance().findFileByIoFile(new File(fileAbsolutePath));
             //open file
             if (vFile == null) {
-                System.err.println("No File Found in specified path");
-                //TODO could we display a pop-up error message here?
+                System.out.println("No File Found in specified path");
             }
-            else {
-                FileEditorManager.getInstance(project).openFile(vFile, true);
-            }
+
+            FileEditorManager.getInstance(project).openFile(vFile, true);
+
         } catch (Exception e) {
 
             System.out.println(e);
@@ -187,7 +187,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         this.selectedFile = selectedFile;
     }
 
-    // action listener to the "open file" Hyperlink
+    // action listener to the "open file" button
     private void openSelectedFileInEditor(ActionEvent event) {
         // openFile has to be called from Event Dispatcher Thread (EDT)
         EventQueue.invokeLater(() -> {

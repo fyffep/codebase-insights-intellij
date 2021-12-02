@@ -18,7 +18,9 @@ import java.util.stream.Collectors;
 public class Codebase implements CodeBaseObservable {
 
     // region Vars
-    private static Codebase instance; //singleton
+    private static Codebase instance; // Singleton
+    private static TreeMap<String, TreeSet<FileObject>> packageBasedMapGroup;
+    private static TreeMap<String, TreeSet<FileObject>> commitBasedMapGroup;
     private final List<CodeBaseObserver> observerList = new LinkedList<>();
     private final LinkedHashSet<String> branchNameList;
     private String activeBranch;
@@ -27,7 +29,6 @@ public class Codebase implements CodeBaseObservable {
     private String projectRootPath;
     private String latestCommitHash;
     private String targetCommit;
-
     private GroupingMode currentGroupingMode = GroupingMode.PACKAGES;
     private HeatMetricOptions currentHeatMetricOption = HeatMetricOptions.FILE_SIZE;
     // endregion
@@ -38,11 +39,13 @@ public class Codebase implements CodeBaseObservable {
         branchNameList = new LinkedHashSet<>();
         activeCommits = new LinkedHashSet<>();
         activeFileObjects = new LinkedHashSet<>();
+        packageBasedMapGroup = new TreeMap<>();
+        commitBasedMapGroup = new TreeMap<>();
     }
 
     public static synchronized Codebase getInstance() {
-        //SonarQube recommends to avoid double-checking a lock and instead placing synchronized in the method signature
-        //because double-checking is not reliable.
+        // SonarQube recommends avoid double-checking a lock and instead placing synchronized in the method signature
+        // because double-checking is not reliable.
         if (instance == null) {
             instance = new Codebase();
             System.out.println("Model (Codebase) has been created"); //logger doesn't work here
@@ -66,8 +69,7 @@ public class Codebase implements CodeBaseObservable {
             Optional<String> optional = branchNameList.stream().findFirst();
             if (optional.isPresent())
                 branch = optional.get();
-            else
-            {
+            else {
                 //Potentially, we could instead default to "No branches found" to keep the plugin window empty.
                 //For now, we'll throw an exception.
                 throw new IOException("Could not find any branches in the Git repository to be analyzed"); //FIXME determine how to handle the situation where the local repository cannot be found
@@ -174,6 +176,10 @@ public class Codebase implements CodeBaseObservable {
         activeCommits = new LinkedHashSet<>();
         activeFileObjects.clear();
         activeFileObjects = new LinkedHashSet<>();
+        packageBasedMapGroup = new TreeMap<>();
+        packageBasedMapGroup.clear();
+        commitBasedMapGroup = new TreeMap<>();
+        commitBasedMapGroup.clear();
         latestCommitHash = "";
 
         RepositoryAnalyzer.attachCodebaseData(this);
@@ -210,17 +216,15 @@ public class Codebase implements CodeBaseObservable {
 
     public TreeMap<String, TreeSet<FileObject>> getSetOfFiles() {
         // Update views with data
-        TreeMap<String, TreeSet<FileObject>> setOfFiles;
         switch (currentGroupingMode) {
             case COMMITS:
-                setOfFiles = groupDataByCommits();
-                break;
+                if (commitBasedMapGroup.isEmpty()) commitBasedMapGroup = groupDataByCommits();
+                return commitBasedMapGroup;
             case PACKAGES:
             default:
-                setOfFiles = groupDataByPackages();
-                break;
+                if (packageBasedMapGroup.isEmpty()) packageBasedMapGroup = groupDataByPackages();
+                return packageBasedMapGroup;
         }
-        return setOfFiles;
     }
 
     public TreeMap<String, TreeSet<FileObject>> groupDataByCommits() {
