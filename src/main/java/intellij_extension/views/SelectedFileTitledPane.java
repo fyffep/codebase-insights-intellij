@@ -116,41 +116,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     //endregion
 
     //region UI Action
-    // open a selected file in the editor
-    public static void openFileInEditor(FileObject file) {
-        try {
-            ProjectManager pm = ProjectManager.getInstance();
-            // TODO if we open more than one project in our plugin ,this will always consider the first opened project.Need to optimize
-            Project project = pm.getOpenProjects()[0];
 
-            //To get the absolute path of the project root within the system
-            ProjectRootManager prm = ProjectRootManager.getInstance(project);
-            VirtualFile[] projectRoot = prm.getContentRoots();
-
-            String projectRootPath = projectRoot[0].getPath();
-            projectRootPath = projectRootPath.replace('/', '\\');
-
-            // relative path of the selected file
-            String selectedFileRelativePath = file.getPath().toString();
-
-            //full absolute path
-            String fileAbsolutePath = projectRootPath + "\\" + selectedFileRelativePath;
-            System.out.println("vFiles" + fileAbsolutePath);
-
-            VirtualFile vFile = LocalFileSystem.getInstance().findFileByIoFile(new File(fileAbsolutePath));
-            //open file
-            if (vFile == null) {
-                System.err.println("No File Found in specified path");
-                //TODO could we display a pop-up error message here?
-            }
-            else {
-                FileEditorManager.getInstance(project).openFile(vFile, true);
-            }
-        } catch (Exception e) {
-
-            System.out.println(e);
-        }
-    }
 
     //region Properties setting
     private void setTitledPaneProperties() {
@@ -177,13 +143,6 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         this.selectedFile = selectedFile;
     }
 
-    // action listener to the "open file" button
-    private void openSelectedFileInEditor(ActionEvent event) {
-        // openFile has to be called from Event Dispatcher Thread (EDT)
-        EventQueue.invokeLater(() -> {
-            openFileInEditor(getSelectedFile());
-        });
-    }
 
     public void showPane() {
         parent.setExpanded(true);
@@ -294,4 +253,50 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         hidePane();
     }
     //endregion
+
+    // open a selected file in the editor
+    public static void openFileInEditor(FileObject file) {
+        try {
+            ProjectManager pm = ProjectManager.getInstance();
+            // TODO if we open more than one project in our plugin ,this will always consider the first opened project.Need to optimize
+            Project project = pm.getOpenProjects()[0];
+
+            //To get the absolute path of the project root within the system
+            ProjectRootManager prm = ProjectRootManager.getInstance(project);
+            VirtualFile[] projectRoot = prm.getContentRoots();
+
+            String projectRootPath = projectRoot[0].getPath();
+//            projectRootPath = projectRootPath.replace('/', '\\');
+
+            // relative path of the selected file
+            String selectedFileRelativePath = file.getPath().toString();
+            selectedFileRelativePath = selectedFileRelativePath.replace("\\", "/");
+
+            //full absolute path
+            String fileAbsolutePath = projectRootPath + "/" + selectedFileRelativePath;
+            System.out.println("File Path in the System : " + fileAbsolutePath);
+
+            File fileToOpen = new File(fileAbsolutePath);
+            VirtualFile vFile = LocalFileSystem.getInstance().findFileByIoFile(fileToOpen);
+            //open file
+            if (vFile == null) {
+                System.err.println("Error in the file path computed");
+                //TODO could we display a pop-up error message here?
+            } else {
+                FileEditorManager.getInstance(project).openFile(vFile, true);
+            }
+        } catch (Exception e) {
+
+            System.out.println(e);
+        }
+    }
+
+    // action listener to the "open file" button
+    private void openSelectedFileInEditor(ActionEvent event) {
+        // openFile has to be called from Event Dispatcher Thread (EDT)
+        EventQueue.invokeLater(() -> {
+            openFileInEditor(getSelectedFile());
+        });
+    }
+
 }
