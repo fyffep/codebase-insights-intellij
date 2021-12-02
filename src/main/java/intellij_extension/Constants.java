@@ -63,9 +63,14 @@ public class Constants {
     public static final int HEADER_TEXT_SIZE = 24;
     public static final FontWeight HEADER_TEXT_FONT_WEIGHT = FontWeight.BOLD;
     // Text Font properties in Selected File Pane
+    public static final String SF_TYPE_TEXT = "text";
+    public static final String SF_TYPE_HYPERLINK = "hyperlink";
     public static final String SF_TEXT_FONT = "Veranda";
     public static final int SF_TEXT_SIZE = 14;
     public static final FontWeight SF_TEXT_FONT_WEIGHT = FontWeight.BOLD;
+    public static final String SF_HYPERLINK_FONT = "Veranda";
+    public static final int SF_HYPERLINK_SIZE = 10;
+    public static final FontWeight SF_HYPERLINK_FONT_WEIGHT = FontWeight.EXTRA_LIGHT;
     public static final String SF_FILE_NAME_SPECIFIER = "%-20s";
     public static final String SF_PACKAGE_NAME_SPECIFIER = "%-15s";
     public static final String SF_FILE_AUTHOR_SPECIFIER = "%-22s";
