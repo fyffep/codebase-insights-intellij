@@ -48,15 +48,18 @@ public class JGitHelper
     {
         //Pull the 'project' from CodebaseInsightsToolWindowFactory, and wait until it exists if necessary
         synchronized (CodebaseInsightsToolWindowFactory.projectSynchronizer) {
-            if (CodebaseInsightsToolWindowFactory.project == null) {
+            if (CodebaseInsightsToolWindowFactory.getProject() == null) {
                 try {
                     //Wait until the 'project' is not-null
                     CodebaseInsightsToolWindowFactory.projectSynchronizer.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+
+                    //Restore interrupted state... (recommended by SonarQube)
+                    Thread.currentThread().interrupt();
                 }
             }
         }
-        return CodebaseInsightsToolWindowFactory.project.getBasePath();
+        return CodebaseInsightsToolWindowFactory.getProject().getBasePath();
     }
 }

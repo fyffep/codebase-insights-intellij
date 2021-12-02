@@ -5,11 +5,8 @@ import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.models.redesign.HeatObject;
 import javafx.scene.paint.Color;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class HeatCalculationUtility
 {
@@ -34,31 +31,6 @@ public class HeatCalculationUtility
         return heatColor;
     }
 
-
-    /**
-     * Returns the level of heat caused by the HeatObject's file size.
-     *
-     * @param heatObject this should have its lineCount already assigned
-     */
-    public static int calculateHeatForFileSize(@NotNull HeatObject heatObject) {
-        int heatLevel;
-
-        long lineCount = heatObject.getLineCount();
-        if (lineCount < 100) {
-            heatLevel = Constants.HEAT_MIN;
-        }
-        //Give 1 point of heat for every hundred lines
-        else if (lineCount > 100 && lineCount < 1000) {
-            heatLevel = (int) Math.round(lineCount / 100.0);
-        } else {
-            heatLevel = Constants.HEAT_MAX;
-        }
-
-        if (heatLevel > Constants.HEAT_MAX)
-            heatLevel = Constants.HEAT_MAX;
-
-        return heatLevel;
-    }
 
 
     public static void assignHeatLevelsFileSize(Codebase codebase)
@@ -124,7 +96,7 @@ public class HeatCalculationUtility
                     newerHeatObject.setHeatLevel(Constants.HEAT_MIN); //No in/decreases in file size yet
                 }
 //if (fileObject.getFilename().equals("HeatMapPane.java"))
-    //System.out.println("Heat: "+newerHeatObject.getHeatLevel()+"\n");
+                //System.out.println("Heat: "+newerHeatObject.getHeatLevel()+"\n");
 
                 lastHeatObject = newerHeatObject;
             }
@@ -187,7 +159,7 @@ public class HeatCalculationUtility
                     newerHeatObject.setHeatLevel(Constants.HEAT_MIN); //No commits to the file yet
                 }
 //if (fileObject.getFilename().equals("HeatMapPane.java"))
-    //System.out.println("Heat: "+newerHeatObject.getHeatLevel()+"\n");
+                //System.out.println("Heat: "+newerHeatObject.getHeatLevel()+"\n");
 
                 lastHeatObject = newerHeatObject;
             }
@@ -196,12 +168,178 @@ public class HeatCalculationUtility
     }
 
 
+    public static void assignHeatLevelsNumberOfAuthors(Codebase codebase)
+    {
+        System.out.println("Calculating heat based on number of authors...");
+        /*/final int NEW_AUTHOR_HEAT_CONSEQUENCE = 2; //how much the heat increases when another author joins
+        //final int GREATER_THAN_AVERAGE_HEAT_CONSEQUENCE = 1; //how much heat increases for every 0.5 authors more than the average
+        final float REQUIRED_DIFFERENCE_FROM_AVERAGE = 0.5f;
+        final int DEFAULT_HEAT = 5;*/
+
+        //Determine the average, total, and maximum number of authors.
+        //Note that these are localized per commit
+        HashMap<String, Integer> totalAuthorsMap = new HashMap<>(); //maps commit hash to total number of authors (includes duplicate authors)
+
+        Set<FileObject> fileObjectSet = codebase.getActiveFileObjects();
+        for (FileObject fileObject : fileObjectSet)
+        {
+            //The oldest commits are at the front of the LinkedHashMap
+            LinkedHashMap<String, HeatObject> commitHashToHeatObjectMap = fileObject.getCommitHashToHeatObjectMap();
+            for (Map.Entry<String, HeatObject> commitToHeatObjectEntry : commitHashToHeatObjectMap.entrySet())
+            {
+                //Add the number of authors from the file to the total number of authors on that commit
+                HeatObject heatObject = commitToHeatObjectEntry.getValue();
+                int authorCount = heatObject.getNumberOfAuthors();
+                assert authorCount > 0;
+                totalAuthorsMap.merge(commitToHeatObjectEntry.getKey(), authorCount, Integer::sum);
+            }
+
+            /*/Select latest commit only
+            String latestCommitHash = codebase.getLatestCommitHash();
+            HeatObject heatObject = commitHashToHeatObjectMap.get(latestCommitHash);
+
+            int authorCount = heatObject.getNumberOfAuthors();
+            assert authorCount > 0;
+            totalAuthors += authorCount;
+
+            if (authorCount > maxAuthors)
+                maxAuthors = authorCount;*/
+        }
+
+        //final int fileCount = fileObjectSet.size();
+        /*final HashMap<String, Float> averageAuthorsMap = new HashMap<>(); //maps commit hash to avg. number of authors across all files in that commit
+        for (Map.Entry<String, Integer> commitToAuthorCountEntry : totalAuthorsMap.entrySet())
+        {
+            String commitHash = commitToAuthorCountEntry.getKey();
+            final int fileCount = codebase.getCommitFromCommitHash(commitHash).getFileSet().size();
+            final float averageAuthors = ((float) commitToAuthorCountEntry.getValue()) / fileCount;
+            assert  fileCount > 0;
+            averageAuthorsMap.put(commitHash, averageAuthors);
+            System.out.println("Avg for commit "+commitHash+" is: "+averageAuthors);
+        }*/
+
+        //Merge all author names into one collection to determine total number of authors
+        Set<String> allAuthorSet = new LinkedHashSet<>();
+        for (FileObject fileObject : fileObjectSet)
+        {
+            allAuthorSet.addAll(fileObject.getUniqueAuthors());
+        }
+        final double totalAuthorCount = allAuthorSet.size();
+
+
+        //Assign heat level to every HeatObject based on number of authors
+        for (FileObject fileObject : fileObjectSet)
+        {
+            //The oldest commits are at the front of the LinkedHashMap
+            LinkedHashMap<String, HeatObject> commitHashToHeatObjectMap = fileObject.getCommitHashToHeatObjectMap();
+
+            //HeatObject lastHeatObject = null;
+
+            for (Map.Entry<String, HeatObject> commitToHeatObjectEntry : commitHashToHeatObjectMap.entrySet())
+            {
+                HeatObject newerHeatObject = commitToHeatObjectEntry.getValue();
+                /*if (lastHeatObject != null)
+                {
+                    //For every 0.5 authors (REQUIRED_DIFFERENCE_FROM_AVERAGE), incur 1 heat
+                    /*float averageAtCommit = averageAuthorsMap.get(commitToHeatObjectEntry.getKey());
+                    int heatConsequence = (int) Math.ceil(
+                            (newerHeatObject.getNumberOfAuthors() - averageAtCommit) / REQUIRED_DIFFERENCE_FROM_AVERAGE);
+                    newerHeatObject.setHeatLevel(Constants.HEAT_MIN + heatConsequence);*
+                }
+                else
+                {
+                    newerHeatObject.setHeatLevel(Constants.HEAT_MIN); //Only 1 author so far
+                }*/
+
+                int heatLevel = (int) Math.round((newerHeatObject.getNumberOfAuthors() / totalAuthorCount) * Constants.HEAT_MAX);
+                newerHeatObject.setHeatLevel(heatLevel);
+
+                //lastHeatObject = newerHeatObject;
+            }
+        }
+        System.out.println("Finished calculating heat based on number of authors.");
+    }
+
+    public static void assignHeatLevelsOverall(Codebase codebase)
+    {
+        final float WEIGHT_FILE_SIZE = 0.2f;
+        final float WEIGHT_NUM_COMMITS_NUM_OF_COMMITS = 0.4f;
+        final float WEIGHT_NUM_OF_AUTHORS = 0.4f;
+        /**
+         * Create a map that records the sum of all heat levels from every metric.
+         * After every call to an assignHeatLevels method, we must call sumHeatLevels(...) to record
+         * the latest heat levels in this map.
+         */
+        HashMap<FileObject, HashMap<String, Float>> fileToCommitToHeatSumMap = new HashMap<>();
+
+        assignHeatLevelsFileSize(codebase);
+        sumHeatLevels(codebase, fileToCommitToHeatSumMap, WEIGHT_FILE_SIZE);
+
+        assignHeatLevelsNumberOfCommits(codebase);
+        sumHeatLevels(codebase, fileToCommitToHeatSumMap, WEIGHT_NUM_COMMITS_NUM_OF_COMMITS);
+
+        assignHeatLevelsNumberOfAuthors(codebase);
+        sumHeatLevels(codebase, fileToCommitToHeatSumMap, WEIGHT_NUM_OF_AUTHORS);
+
+        //Add more metrics here if more are needed in the future...
+
+        //Compute and store overall heat
+        Set<FileObject> fileObjectSet = codebase.getActiveFileObjects();
+        for (FileObject fileObject : fileObjectSet)
+        {
+            HashMap<String, Float> commitToHeatSumMap = fileToCommitToHeatSumMap.get(fileObject);
+
+            LinkedHashMap<String, HeatObject> commitHashToHeatObjectMap = fileObject.getCommitHashToHeatObjectMap();
+            for (Map.Entry<String, HeatObject> commitToHeatObjectEntry : commitHashToHeatObjectMap.entrySet())
+            {
+                //Retrieve heat sum
+                String commitHash = commitToHeatObjectEntry.getKey();
+                int heatSum = Math.round(commitToHeatSumMap.get(commitHash));
+
+                //Store result in the HeatObject
+                commitToHeatObjectEntry.getValue().setHeatLevel(heatSum);
+            }
+        }
+    }
+
+    /**
+     * Helper method for assignHeatLevelsOverall that adds the heat levels from every HeatObject to the float
+     * part of the given fileToCommitToHeatSumMap. That way, the HeatObjects can have their heatLevels recalculated
+     * by other assignHeat methods.
+     */
+    private static void sumHeatLevels(Codebase codebase, HashMap<FileObject, HashMap<String, Float>> fileToCommitToHeatSumMap, float weight)
+    {
+        Set<FileObject> fileObjectSet = codebase.getActiveFileObjects();
+        for (FileObject fileObject : fileObjectSet)
+        {
+            //Get or create map of commit hash to heat sum
+            HashMap<String, Float> commitToHeatSumMap = fileToCommitToHeatSumMap.computeIfAbsent(fileObject, k -> new HashMap<>());
+
+            /*HashMap<String, Float> commitToHeatSumMap = fileToCommitToHeatSumMap.get(fileObject);
+            if (commitToHeatSumMap == null)
+            {
+                commitToHeatSumMap = new HashMap<>();
+                fileToCommitToHeatSumMap.put(fileObject, commitToHeatSumMap);
+            }*/
+
+            LinkedHashMap<String, HeatObject> commitHashToHeatObjectMap = fileObject.getCommitHashToHeatObjectMap();
+            for (Map.Entry<String, HeatObject> commitToHeatObjectEntry : commitHashToHeatObjectMap.entrySet())
+            {
+                int heatLevel = commitToHeatObjectEntry.getValue().getHeatLevel();
+                float weightedHeat = heatLevel * weight;
+                String commitHash = commitToHeatObjectEntry.getKey();
+                commitToHeatSumMap.merge(commitHash, weightedHeat, Float::sum);
+            }
+        }
+    }
+
+
     public static void assignHeatLevels(Codebase codebase, Constants.HeatMetricOptions heatMetricOption)
     {
         switch (heatMetricOption)
         {
             case OVERALL:
-                System.err.println("NOT YET SUPPORTED: Overall heat calculation");
+                assignHeatLevelsOverall(codebase);
                 break;
             case FILE_SIZE:
                 assignHeatLevelsFileSize(codebase);
@@ -210,10 +348,10 @@ public class HeatCalculationUtility
                 assignHeatLevelsNumberOfCommits(codebase);
                 break;
             case NUM_OF_AUTHORS:
-                System.err.println("NOT YET SUPPORTED: Number of authors heat");
+                assignHeatLevelsNumberOfAuthors(codebase);
                 break;
             default:
-                System.err.println("Invalid heat metric selected in HeatCalculationUtility.assignHeatLevels(...)");
+                throw new UnsupportedOperationException("Invalid heat metric selected in HeatCalculationUtility.assignHeatLevels(...)");
         }
     }
 }

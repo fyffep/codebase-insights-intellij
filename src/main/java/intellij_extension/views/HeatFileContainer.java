@@ -1,7 +1,6 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
-import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 
@@ -9,9 +8,6 @@ import java.util.ArrayList;
 
 public class HeatFileContainer extends GridPane
 {
-    private final String title;
-    private Tooltip tooltip;
-
     private final ArrayList<Pane> children = new ArrayList<>();
 
     /**
@@ -20,10 +16,7 @@ public class HeatFileContainer extends GridPane
      */
     public HeatFileContainer(String title) {
         super();
-        this.title = title;
         setMinWidth(Constants.ZERO_WIDTH);
-
-        addOrUpdateTooltip();
 
         //Set margins
         this.setVgap(Constants.HEATMAP_VERTICAL_SPACING);
@@ -38,7 +31,6 @@ public class HeatFileContainer extends GridPane
     {
         children.add(node);
         reorganize();
-        addOrUpdateTooltip();
     }
 
     private void reorganize()
@@ -46,15 +38,6 @@ public class HeatFileContainer extends GridPane
         //Determine size of grid
         int numColumns = (children.size() / 2) + 1;
         int numRows = (children.size() / 2) - 1;
-
-        //Some calculation logic to prevent grid from being too wide -- can be deleted
-        /*final int WIDTH_LIMIT = this.maxWidthProperty().intValue();
-        int sumOfChildrenWidth = 0;
-        for (int i = 0; i < numColumns && i < children.size(); i++)
-            sumOfChildrenWidth += children.get(i).getPrefWidth();
-        System.out.println("sumOfChildrenWidth= "+sumOfChildrenWidth+"  WIDTH_LIMIT="+WIDTH_LIMIT);
-        if (sumOfChildrenWidth > WIDTH_LIMIT)
-            numColumns = (int)(WIDTH_LIMIT / children.get(0).getWidth());*/
 
         //Validate the row & column counts
         final int MAX_COLUMNS = 6;
@@ -82,17 +65,5 @@ public class HeatFileContainer extends GridPane
                 this.add(element, c, r);
             }
         }
-    }
-
-    private void addOrUpdateTooltip()
-    {
-        //These package name tool tips were blocking the file tool tips, so they're removed for now
-        /*//Add a tooltip
-        if (tooltip != null)
-            Tooltip.uninstall(this, tooltip);
-        tooltip = new Tooltip(String.format("%s\nFiles: %d", title, children.size()));
-        tooltip.setFont(Constants.TOOLTIP_FONT);
-        tooltip.setShowDelay(Duration.seconds(0));
-        Tooltip.install(this, tooltip);*/
     }
 }

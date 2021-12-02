@@ -29,8 +29,6 @@ public class FileObject {
     private String latestCommitInTreeWalk; // last time this file appeared in the TreeWalk
     private String latestCommitInDiffEntryList; // last time this file appeared in the DiffEntry
     // FIXME implement me properly along with latest commit
-    //  This is just an easy hacky way to sort FileObjects in a list.
-    public int latestCommitHeatLevel;
     // endregion
 
     // region Constructors
@@ -93,9 +91,6 @@ public class FileObject {
         this.latestCommitInDiffEntryList = latestCommitInDiffEntryList;
     }
 
-    public int getLatestCommitHeatLevel() {
-        return latestCommitHeatLevel;
-    }
 
     // Find/return existing or create new HeatObject for commitHash
     public HeatObject createOrGetHeatObjectAtCommit(String commitHash) {
@@ -128,9 +123,6 @@ public class FileObject {
         this.latestCommitInTreeWalk = commitHash;
     }
 
-    public int getOverallHeat() {
-        return (int) (Math.random() % 10); //TODO calculate overall heat here (this is a placeholder)
-    }
 
     public String getHeatMetricString(HeatObject heatObject, HeatMetricOptions heatMetricOption) {
         String text = "";
@@ -163,11 +155,8 @@ public class FileObject {
         return false;
     }
 
-    public int compareTo(FileObject other) {
-        if (this.latestCommitHeatLevel > other.latestCommitHeatLevel) {
-            return 1;
-        } else {
-            return -1;
-        }
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }
