@@ -16,6 +16,7 @@ import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.views.interfaces.IContainerView;
 import javafx.event.ActionEvent;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
@@ -25,6 +26,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -72,15 +74,15 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
         // Filename
         fileName = new Text();
-        fileName.setFont(setFileDetailsProperties(Constants.SF_TYPE_TEXT));
+        fileName.setFont(setFileDetailsProperties());
         fileName.setText(Constants.SF_TEXT_FILENAME);
+//        fileName.setTextAlignment(TextAlignment.CENTER);
 
         //Open File HyperLink
-        openFile = new Hyperlink("Open");
-        openFile.setFont(setFileDetailsProperties(Constants.SF_TYPE_HYPERLINK));
+        openFile = new Hyperlink();
+        openFile.setFont(setFileDetailsProperties());
         openFile.setOnAction(this::openSelectedFileInEditor);
-        openFile.setLayoutX(fileName.getLayoutX());
-        openFile.setLayoutY(fileName.getLayoutY());
+        openFile.setAlignment(Pos.TOP_CENTER);
 
         hbox.getChildren().addAll(fileName,openFile);
         vbox.getChildren().add(hbox);
@@ -88,30 +90,30 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
         // Package Name Node
         packageName = new Text();
-        packageName.setFont(setFileDetailsProperties(Constants.SF_TYPE_TEXT));
+        packageName.setFont(setFileDetailsProperties());
         packageName.setText(Constants.SF_TEXT_PACKAGE_NAME);
         vbox.getChildren().add(packageName);
 
         // Author Node
         authors = new Text();
-        authors.setFont(setFileDetailsProperties(Constants.SF_TYPE_TEXT));
+        authors.setFont(setFileDetailsProperties());
         authors.setText(Constants.SF_TEXT_AUTHORS);
         vbox.getChildren().add(authors);
 
         noOfCommits = new Text();
-        noOfCommits.setFont(setFileDetailsProperties(Constants.SF_TYPE_TEXT));
+        noOfCommits.setFont(setFileDetailsProperties());
         noOfCommits.setText(Constants.SF_TEXT_NO_OF_COMMITS);
         vbox.getChildren().add(noOfCommits);
 
         // File Size  Node:
         fileSize = new Text();
-        fileSize.setFont(setFileDetailsProperties(Constants.SF_TYPE_TEXT));
+        fileSize.setFont(setFileDetailsProperties());
         fileSize.setText(Constants.SF_TEXT_FILE_SIZE);
         vbox.getChildren().add(fileSize);
 
         // Line Count  Node:
         lineCount = new Text();
-        lineCount.setFont(setFileDetailsProperties(Constants.SF_TYPE_TEXT));
+        lineCount.setFont(setFileDetailsProperties());
         lineCount.setText(Constants.SF_TEXT_LINE_COUNT);
         vbox.getChildren().add(lineCount);
 
@@ -167,20 +169,9 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     }
     //endregion
 
-    public Font setFileDetailsProperties(String type) {
-        //default font
-        Font fieldFont=Font.font(Constants.SF_TEXT_FONT, Constants.SF_TEXT_FONT_WEIGHT, Constants.SF_TEXT_SIZE);
+    public Font setFileDetailsProperties() {
 
-        // Text Node
-        if(type.equals(Constants.SF_TYPE_TEXT))
-        {
-            fieldFont = Font.font(Constants.SF_TEXT_FONT, Constants.SF_TEXT_FONT_WEIGHT, Constants.SF_TEXT_SIZE);
-        }
-        //HyperlinkNode
-        else if (type.equals(Constants.SF_TYPE_HYPERLINK))
-        {
-            fieldFont =Font.font( Constants.SF_HYPERLINK_FONT, Constants.SF_HYPERLINK_FONT_WEIGHT, Constants.SF_HYPERLINK_SIZE);
-        }
+        Font fieldFont=Font.font(Constants.SF_TEXT_FONT, Constants.SF_TEXT_FONT_WEIGHT, Constants.SF_TEXT_SIZE);
         return fieldFont;
 //        text.wrappingWidthProperty().bind(parent.widthProperty().multiply(0.9f));
     }
@@ -231,9 +222,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     @Override
     public void fileSelected(@NotNull FileObject selectedFile, Iterator<Commit> filesCommits) {
         // Filename
-        fileName.setText(String.format("%s%s%s", Constants.SF_TEXT_FILENAME,selectedFile.getFilename(),"  "));
-
-
+        openFile.setText(String.format("%s",selectedFile.getFilename()));
         setSelectedFile(selectedFile);
 
         // Package
