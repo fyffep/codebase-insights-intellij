@@ -28,6 +28,9 @@ public class Codebase implements CodeBaseObservable {
     private String latestCommitHash;
     private String targetCommit;
 
+    private static TreeMap<String, TreeSet<FileObject>> packageBasedMapGroup;
+    private static TreeMap<String, TreeSet<FileObject>> commitBasedMapGroup;
+
     private GroupingMode currentGroupingMode = GroupingMode.PACKAGES;
     private HeatMetricOptions currentHeatMetricOption = HeatMetricOptions.FILE_SIZE;
     // endregion
@@ -38,6 +41,8 @@ public class Codebase implements CodeBaseObservable {
         branchNameList = new LinkedHashSet<>();
         activeCommits = new LinkedHashSet<>();
         activeFileObjects = new LinkedHashSet<>();
+        packageBasedMapGroup = new TreeMap<>();
+        commitBasedMapGroup = new TreeMap<>();
     }
 
     public static synchronized Codebase getInstance() {
@@ -210,17 +215,15 @@ public class Codebase implements CodeBaseObservable {
 
     public TreeMap<String, TreeSet<FileObject>> getSetOfFiles() {
         // Update views with data
-        TreeMap<String, TreeSet<FileObject>> setOfFiles;
         switch (currentGroupingMode) {
             case COMMITS:
-                setOfFiles = groupDataByCommits();
-                break;
+                if (commitBasedMapGroup.isEmpty()) commitBasedMapGroup = groupDataByCommits();
+                return commitBasedMapGroup;
             case PACKAGES:
             default:
-                setOfFiles = groupDataByPackages();
-                break;
+                if (packageBasedMapGroup.isEmpty()) packageBasedMapGroup = groupDataByPackages();
+                return packageBasedMapGroup;
         }
-        return setOfFiles;
     }
 
     public TreeMap<String, TreeSet<FileObject>> groupDataByCommits() {

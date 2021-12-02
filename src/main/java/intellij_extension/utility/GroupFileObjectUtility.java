@@ -6,6 +6,8 @@ import intellij_extension.models.redesign.FileObject;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static intellij_extension.Constants.SEPARATOR;
+
 public class GroupFileObjectUtility {
 
     // Sorting for TreeSet
@@ -44,16 +46,17 @@ public class GroupFileObjectUtility {
                 Set<String> commonCommits = commonElements(activeFileCommits, fileCommits);
                 if (commonCommits.size() == 0) continue;
                 else if (commonCommits.size() == maxCommonCommits) { // Add to current set of pairs if maxCommonCommits is same
-                    maxCommonCommits = commonCommits.size();
                     fileObjectSetMap.computeIfAbsent(activeFile, k -> Set.of(activeFile)).add(file);
                 } else if (commonCommits.size() > maxCommonCommits) { // Replace current pairs if current maxCommonCommits is greater
                     maxCommonCommits = commonCommits.size();
                     fileObjectSetMap.put(activeFile, new HashSet<>(Arrays.asList(activeFile, file)));
                 }
             }
+            // This is for groups with only a single file
+            if (maxCommonCommits == 0) maxCommonCommits = activeFile.getCommitHashToHeatObjectMap().size();
 
             // Adds to the final list of file objects to maintain the Set of computed File object groups
-            finalObjects.addAll(insertGroupsInMap(commitGroupedMap, fileObjectSetMap));
+            finalObjects.addAll(insertGroupsInMap(commitGroupedMap, fileObjectSetMap, maxCommonCommits));
         }
 
         return commitGroupedMap;
@@ -66,16 +69,17 @@ public class GroupFileObjectUtility {
     }
 
     private static TreeSet<FileObject> insertGroupsInMap(TreeMap<String, TreeSet<FileObject>> commitGroupedMap,
-                                                         LinkedHashMap<FileObject, Set<FileObject>> fileObjectSetMap) {
+                                                         LinkedHashMap<FileObject, Set<FileObject>> fileObjectSetMap,
+                                                         int maxCommonCommits) {
         TreeSet<FileObject> fileObjects = new TreeSet<>(FILE_OBJECT_COMPARATOR);
         fileObjects.addAll(fileObjectSetMap.values()
                 .stream().flatMap(Set::stream).collect(Collectors.toSet()));
-        commitGroupedMap.put(getKeyFromSet(fileObjects), fileObjects);
+        commitGroupedMap.put(getKeyFromSet(fileObjects, maxCommonCommits), fileObjects);
         return fileObjects;
     }
 
-    private static String getKeyFromSet(TreeSet<FileObject> fileObjects) {
-        return Integer.toString(fileObjects.hashCode());
+    private static String getKeyFromSet(TreeSet<FileObject> fileObjects, int maxCommonCommits) {
+        return maxCommonCommits + SEPARATOR + fileObjects.hashCode();
     }
 
     private static Set<String> commonElements(Set<String> set1, Set<String> set2) {
