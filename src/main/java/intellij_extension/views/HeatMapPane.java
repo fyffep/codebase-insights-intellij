@@ -14,9 +14,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -33,7 +31,7 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
     // Basically this class' main node
     private VBox parent;
     // Banner that holds heat metric and branch comboBoxes
-    private HBox topHorizontalBanner;
+    private VBox topHorizontalBanner;
     private ComboBox<String> heatMetricComboBox;
     private ComboBox<String> branchComboBox;
     // Holds HeatMapPane and CommitGroupingPane
@@ -49,25 +47,33 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         parent.setMinWidth(Constants.ZERO_WIDTH);
 
         // Create the top horizontal banner
-        topHorizontalBanner = new HBox();
-        parent.getChildren().add(topHorizontalBanner);
-        // Add constraints to width/height
-        topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT);
+        topHorizontalBanner = new VBox();
         topHorizontalBanner.setMinWidth(Constants.ZERO_WIDTH);
         topHorizontalBanner.prefWidthProperty().bind(parent.widthProperty());
         // Child layout properties
         topHorizontalBanner.setAlignment(Constants.BANNER_ALIGNMENT);
-        topHorizontalBanner.setSpacing(Constants.BANNER_SPACING);
-        topHorizontalBanner.setPadding(Constants.BANNER_INSETS);
+        parent.getChildren().add(topHorizontalBanner);
+
+        // Create the HBox for the combo boxes
+        HBox comboBoxContainer = new HBox();
+        topHorizontalBanner.getChildren().add(comboBoxContainer);
+        // Add constraints to width/height
+        comboBoxContainer.setMinHeight(Constants.BANNER_MIN_HEIGHT);
+        comboBoxContainer.setMinWidth(Constants.ZERO_WIDTH);
+        comboBoxContainer.prefWidthProperty().bind(parent.widthProperty());
+        // Child layout properties
+        comboBoxContainer.setAlignment(Constants.BANNER_ALIGNMENT);
+        comboBoxContainer.setSpacing(Constants.BANNER_SPACING);
+        comboBoxContainer.setPadding(Constants.BANNER_INSETS);
 
         // Label for heatMetric ComboBox
         Text heatMetricTitle = new Text();
-        topHorizontalBanner.getChildren().add(heatMetricTitle);
+        comboBoxContainer.getChildren().add(heatMetricTitle);
         heatMetricTitle.setText(Constants.HEAT_METRIC_COMBOBOX_TITLE);
 
         // Create heatMetric comboBox
         heatMetricComboBox = new ComboBox<>();
-        topHorizontalBanner.getChildren().add(heatMetricComboBox);
+        comboBoxContainer.getChildren().add(heatMetricComboBox);
         // Set up observable list
         heatMetricComboBox.setItems(Constants.HEAT_METRIC_OPTIONS);
         heatMetricComboBox.getSelectionModel().select(0);
@@ -78,20 +84,62 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
 
         // Label for branch ComboBox
         Text branchTitle = new Text();
-        topHorizontalBanner.getChildren().add(branchTitle);
+        comboBoxContainer.getChildren().add(branchTitle);
         branchTitle.setText(Constants.BRANCH_COMBOBOX_TITLE);
 
         // Create branch comboBox
         branchComboBox = new ComboBox<>();
-        topHorizontalBanner.getChildren().add(branchComboBox);
+        comboBoxContainer.getChildren().add(branchComboBox);
         // Set up observable list
         branchComboBox.setItems(activeBranchList);
         // Set up the select action
         branchComboBox.setOnAction(this::branchSelectedAction);
 
+        // Top-Vs-All commit controls
+        // Create the HBox for the radio buttons +
+        HBox commitFilterContainer = new HBox();
+        topHorizontalBanner.getChildren().add(commitFilterContainer);
+        // Add constraints to width/height
+        commitFilterContainer.setMinWidth(Constants.ZERO_WIDTH);
+        commitFilterContainer.prefWidthProperty().bind(parent.widthProperty());
+        commitFilterContainer.setMinHeight(Constants.BANNER_MIN_HEIGHT);
+        // Child layout properties
+        commitFilterContainer.setAlignment(Constants.BANNER_ALIGNMENT);
+        commitFilterContainer.setSpacing(Constants.BANNER_SPACING);
+        commitFilterContainer.setPadding(Constants.BANNER_INSETS);
+
+        // Radio button group
+        ToggleGroup commitFilteringGroup = new ToggleGroup();
+
+        // Radio buttons
+        RadioButton allCommitsButton = new RadioButton("All Files");
+        allCommitsButton.setToggleGroup(commitFilteringGroup);
+        allCommitsButton.setSelected(false);
+        commitFilterContainer.getChildren().add(allCommitsButton);
+
+        RadioButton topCommitsButton = new RadioButton("Top 10 Hottest Files");
+        topCommitsButton.setToggleGroup(commitFilteringGroup);
+        topCommitsButton.setSelected(true);
+        commitFilterContainer.getChildren().add(topCommitsButton);
+
+        // Slider to control # of top commits
+        Slider topCommitsSlider = new Slider();
+        topCommitsSlider.setMin(1);
+        topCommitsSlider.setMax(10);
+        topCommitsSlider.setValue(10/2);
+        topCommitsSlider.setShowTickLabels(true);
+//        topCommitsSlider.setShowTickMarks(true);
+        topCommitsSlider.setSnapToTicks(true);
+        topCommitsSlider.setSnapToPixel(true);
+        topCommitsSlider.setMajorTickUnit(1);
+        topCommitsSlider.setMinorTickCount(0);
+        topCommitsSlider.setBlockIncrement(1);
+        commitFilterContainer.getChildren().add(topCommitsSlider);
+
         // Tabbed view
         TabPane tabPane = new TabPane();
         parent.getChildren().add(tabPane);
+        tabPane.setMinHeight(Constants.ZERO_WIDTH);
         tabPane.prefHeightProperty().bind(parent.heightProperty());
         // Set  up tabs
         // Package tab
@@ -110,7 +158,6 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         tabPane.getTabs().add(tab);
 
         tabPane.getSelectionModel().selectedItemProperty().addListener(this::tabSelectedAction);
-
 
         Codebase model = Codebase.getInstance();
         model.registerObserver(this);
