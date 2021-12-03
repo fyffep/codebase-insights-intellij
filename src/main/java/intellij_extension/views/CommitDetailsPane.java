@@ -49,7 +49,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
         // Create the top horizontal banner
         topHorizontalBanner = new VBox();
-        setBannerProperties();    
+        setBannerProperties();
         parent.getChildren().add(topHorizontalBanner);
 
         // Create the banner text
