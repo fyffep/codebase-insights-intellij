@@ -49,7 +49,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
         // Create the top horizontal banner
         topHorizontalBanner = new VBox();
-//        setBannerProperties();    // Removing this property fixes JIRA 256
+        setBannerProperties();    
         parent.getChildren().add(topHorizontalBanner);
 
         // Create the banner text
@@ -128,7 +128,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
     //region Properties setting
     private void setBannerProperties() {
         // Set up constraints on width/height
-        topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT);
+//        topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT); // Removing this property fixes JIRA 256
         topHorizontalBanner.setMinWidth(Constants.ZERO_WIDTH);
         topHorizontalBanner.prefWidthProperty().bind(parent.widthProperty());
 
