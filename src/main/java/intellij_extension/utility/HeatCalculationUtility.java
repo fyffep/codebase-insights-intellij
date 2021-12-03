@@ -173,21 +173,26 @@ public class HeatCalculationUtility
 
     public static void assignHeatLevelsNumberOfAuthors(Codebase codebase)
     {
+        /*
+        ---- General description of this method ----
+         By default, every author implicitly has 0 "points" to represent how active they are.
+         Every time an author joins, they are given 10 points.
+         (So, an author who just pushes 1 commit will be considered absent from the file after 10 commits)
+         For every commit after that, they incur 1 point.
+         At the same time, every other author loses 1 point because they did not touch the file.
+         Once the author's score reaches 0, they are considered "absent" from the file.
+         An absent author can re-gain the 10-point penalty upon rejoining.
+
+         The more a person modifies a file, the more they "own" the file...so it takes longer for them to be considered inactive.
+         */
+
         System.out.println("Calculating heat based on number of authors...");
-        final int REQUIRED_NUM_COMMITS_WITH_AUTHOR_ABSENCE = 5; //how many consecutive commits another author must make to a file before a particular author can be considered absent
-        final int SCORE_PENALTY_FOR_RETURNING = 1;
-        final int NEW_AUTHOR_HEAT_CONSEQUENCE = 1; //how much the heat increases when another author joins
-        final int AUTHOR_ABSENCE_HEAT_CONSEQUENCE = -1; //how much the heat decreases when an author is absent for long enough
+        final int SCORE_PENALTY_FOR_NEW_AUTHOR = 10; //how many consecutive commits another author must make to a file before a particular author can be considered absent
+        final int SCORE_PENALTY_FOR_RETURNING = 1; //how many points an author is given when they return
 
         //Determine total number of authors
         Set<FileObject> fileObjectSet = codebase.getActiveFileObjects();
-        Set<String> allAuthorSet = new LinkedHashSet<>();
-        for (FileObject fileObject : fileObjectSet)
-        {
-            allAuthorSet.addAll(fileObject.getUniqueAuthors());
-        }
-        final double totalAuthorCount = allAuthorSet.size();
-        System.out.println("There are "+allAuthorSet.size()+" authors in the codebase: "+allAuthorSet);
+        final int totalAuthorCount = countTotalNumberOfAuthors(codebase);
 
         //Assign heat level to every HeatObject based on number of authors
         for (FileObject fileObject : fileObjectSet)
@@ -199,28 +204,27 @@ public class HeatCalculationUtility
             //The oldest commits are at the front of the LinkedHashMap
             LinkedHashMap<String, HeatObject> commitHashToHeatObjectMap = fileObject.getCommitHashToHeatObjectMap();
             HeatObject lastHeatObject = null;
+            int numberOfActiveAuthors = 0;
 
             //Look at every commit that the file changed in
             for (Map.Entry<String, HeatObject> commitToHeatObjectEntry : commitHashToHeatObjectMap.entrySet())
             {
                 HeatObject newerHeatObject = commitToHeatObjectEntry.getValue();
 
-                int heatLevel;
+                //Get the author of the commit
+                String commitHash = commitToHeatObjectEntry.getKey();
+                String authorEmail = codebase.getCommitFromCommitHash(commitHash).getAuthorEmail();
+
                 //Reuse previous heat value for every HeatObject except the first
                 if (lastHeatObject != null)
                 {
-                    heatLevel = lastHeatObject.getHeatLevel();
-
                     //Ensure the file was a part of the commit
                     if (newerHeatObject.getNumberOfCommits() > lastHeatObject.getNumberOfCommits())
                     {
-                        //Get the author of the commit
-                        String commitHash = commitToHeatObjectEntry.getKey();
-                        String authorEmail = codebase.getCommitFromCommitHash(commitHash).getAuthorEmail();
                         System.out.println("Author of "+commitHash+": "+authorEmail);
+                        System.out.println("activeAuthors = "+activeAuthors);
 
                         //Returning author
-                        System.out.println("activeAuthors = "+activeAuthors);
                         if (activeAuthors.containsKey(authorEmail) && activeAuthors.get(authorEmail) > 0)
                         {
                             //Add the following: 1 to mark this current commit
@@ -233,25 +237,13 @@ public class HeatCalculationUtility
                         {
                             //Add the following: REQUIRED_NUM_COMMITS_WITH_AUTHOR_ABSENCE to mark this current commit
                             //..and 1 to reverse the subtraction step below that affects all authors, including this one.
-                            int score = REQUIRED_NUM_COMMITS_WITH_AUTHOR_ABSENCE + 1;
+                            int score = SCORE_PENALTY_FOR_NEW_AUTHOR + 1;
                             activeAuthors.put(authorEmail, score);
-                            //Increase heat
-                            heatLevel += NEW_AUTHOR_HEAT_CONSEQUENCE;
+                            numberOfActiveAuthors++;
                         }
 
                         for (Map.Entry<String, Integer> authorEntry : activeAuthors.entrySet())
                         {
-                    /*//Decrement the number of recent commits for every author to indicate that they have not modified the file in this commit
-                    int decrementedNumberOfCommits = authorEntry.getValue() - 1;
-                    //If the value is now 0, remove the author and reduce the heat
-                    if (decrementedNumberOfCommits <= 0) {
-                        activeAuthors.remove(authorEntry.getKey());
-                        heatLevel += AUTHOR_ABSENCE_HEAT_CONSEQUENCE;
-                    }
-                    else {
-                        activeAuthors.put(authorEntry.getKey(), decrementedNumberOfCommits);
-                    }*/
-
                             //Decrement the score of every author to indicate that they have not modified the file in this commit
                             int score = authorEntry.getValue();
                             if (score > 0) //if author is active
@@ -260,7 +252,7 @@ public class HeatCalculationUtility
 
                                 //If the value is now 0 (the author is sufficiently inactive) and reduce the heat
                                 if (score == 0) {
-                                    heatLevel += AUTHOR_ABSENCE_HEAT_CONSEQUENCE;
+                                    numberOfActiveAuthors--;
                                 }
                             }
 
@@ -268,12 +260,17 @@ public class HeatCalculationUtility
                         }
                     }
                 }
-                else
-                    heatLevel = Constants.HEAT_MIN;
-
+                //Account for the first commit
+                else if (newerHeatObject.getNumberOfCommits() == 1) {
+                    System.out.println("First author in "+commitHash+": "+authorEmail);
+                    activeAuthors.put(authorEmail, SCORE_PENALTY_FOR_NEW_AUTHOR);
+                    numberOfActiveAuthors = 1; //there is 1 active author on the first commit
+                }
 
 
                 //Store the new heat level
+                //lastHeatBeforeTransformation = heatLevel;
+                int heatLevel = activeAuthorsToHeatLevel(numberOfActiveAuthors, totalAuthorCount);
                 newerHeatObject.setHeatLevel(heatLevel);
                 System.out.println("Heat level: "+heatLevel);
                 lastHeatObject = newerHeatObject;
@@ -282,12 +279,42 @@ public class HeatCalculationUtility
         System.out.println("Finished calculating heat based on number of authors.");
     }
 
-//UNUSED
-    private int authorScoreToHeatLevel(int score, int totalAuthorCount)
+
+    /**
+     * Transforms numberOfActiveAuthors into a heat level.
+     * Currently, this scales linearly based on how close numberOfActiveAuthors is to 4.
+     * That is, 4 authors is too many and yields max heat.
+     */
+    private static int activeAuthorsToHeatLevel(int numberOfActiveAuthors, int totalAuthorCount)
     {
-        final int n = totalAuthorCount;
+        //Special case for only 1 author in the codebase:
+        if (totalAuthorCount == 1)
+            return 1; //every file should be the same heat for them
+
+        //Heat should grow exponentially as the numberOfActiveAuthors approaches totalAuthorCount
+        /*final int n = totalAuthorCount;
         double base = Math.pow(Constants.HEAT_MAX, 1.0 / (n - 1));
-        return (int)((1.0 / base) * Math.pow(base, score));
+        return (int)((1.0 / base) * Math.pow(base, numberOfActiveAuthors));*/
+
+        final double NUM_AUTHORS_FOR_MAX_HEAT = 4.0; //if a file has this many authors or more, it should have max heat
+
+        if (numberOfActiveAuthors <= 1)
+            return 1;
+        else if (numberOfActiveAuthors >= NUM_AUTHORS_FOR_MAX_HEAT)
+            return Constants.HEAT_MAX;
+
+        return (int)((numberOfActiveAuthors / NUM_AUTHORS_FOR_MAX_HEAT) * Constants.HEAT_MAX);
+    }
+
+    public static int countTotalNumberOfAuthors(Codebase codebase)
+    {
+        Set<FileObject> fileObjectSet = codebase.getActiveFileObjects();
+        Set<String> allAuthorSet = new LinkedHashSet<>();
+        for (FileObject fileObject : fileObjectSet)
+        {
+            allAuthorSet.addAll(fileObject.getUniqueAuthors());
+        }
+        return allAuthorSet.size();
     }
 
 
