@@ -18,11 +18,17 @@ public class Constants {
     public static final String[] DEFAULT_BRANCHES = {"development", "master", "main"};
 
     public static final GroupingMode DEFAULT_GROUPING = GroupingMode.PACKAGES;
-
     public enum GroupingMode {
         COMMITS,
         PACKAGES
     }
+
+    public static final FilterMode DEFAULT_FILTERING = FilterMode.X_FILES;
+    public enum FilterMode {
+        ALL_FILES,
+        X_FILES
+    }
+    public static final int MAX_NUMBER_OF_FILTERING_FILES = 20;
 
     // Heat Metric List
     //Note that this affects HeatMapController::newHeatMetricSelected()
