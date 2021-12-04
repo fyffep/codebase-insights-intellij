@@ -6,6 +6,7 @@ import intellij_extension.Constants;
 import intellij_extension.Constants.GroupingMode;
 import intellij_extension.Constants.HeatMetricOptions;
 import intellij_extension.models.redesign.Codebase;
+import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.utility.RepositoryAnalyzer;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +38,10 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
     @Override
     public void preload(@NotNull ProgressIndicator indicator) {
         System.out.println("Preloading HeatMapController..."); //logger fails here
+        //Analyze Codebase
         extractData();
+        computeDashboardData();
+        //Trigger view update
         codeBase.heatMapGroupingChanged(Constants.DEFAULT_GROUPING);
         System.out.println("Finished preloading HeatMapController.");
     }
@@ -60,6 +64,24 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
             System.out.println(e.getMessage());
         }
         System.out.println("Heat calculations complete. Number of files: " + codeBase.getActiveFileObjects().size());
+    }
+
+    /**
+     * Determines the average score for every heat metric.
+     */
+    public void computeDashboardData()
+    {
+        double scoreOverall = HeatCalculationUtility.averageHeatLevel(codeBase, HeatMetricOptions.OVERALL);
+        codeBase.setAverageHeatOverall(scoreOverall);
+
+        double scoreFileSize = HeatCalculationUtility.averageHeatLevel(codeBase, HeatMetricOptions.FILE_SIZE);
+        codeBase.setAverageHeatFileSize(scoreFileSize);
+
+        double scoreNumberOfCommits = HeatCalculationUtility.averageHeatLevel(codeBase, HeatMetricOptions.NUM_OF_COMMITS);
+        codeBase.setAverageHeatNumberOfCommits(scoreNumberOfCommits);
+
+        double scoreNumberOfAuthors = HeatCalculationUtility.averageHeatLevel(codeBase, HeatMetricOptions.NUM_OF_AUTHORS);
+        codeBase.setAverageHeatNumberOfAuthors(scoreNumberOfAuthors);
     }
     //endregion
 

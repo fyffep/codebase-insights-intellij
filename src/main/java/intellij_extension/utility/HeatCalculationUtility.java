@@ -320,97 +320,9 @@ public class HeatCalculationUtility
     }
 
 
-
-    /*public static void assignHeatLevelsNumberOfAuthors(Codebase codebase)
-    {
-        System.out.println("Calculating heat based on number of authors...");
-        final int REQUIRED_NUM_COMMITS_WITH_AUTHOR_ABSENCE = 10; //how many consecutive commits another author must make to a file before a particular author can be considered absent
-        final int NEW_AUTHOR_HEAT_CONSEQUENCE = 2; //how much the heat increases when another author joins
-        final int AUTHOR_ABSENCE_HEAT_CONSEQUENCE = -2; //how much the heat decreases when an author is absent for long enough
-
-        //Assign heat level to every HeatObject based on number of authors
-        Set<FileObject> fileObjectSet = codebase.getActiveFileObjects();
-        for (FileObject fileObject : fileObjectSet)
-        {
-            ArrayList<String> authorEmails = new ArrayList<>();
-            ArrayList<Integer> authorCommits = new ArrayList<>();
-
-            //The oldest commits are at the front of the LinkedHashMap
-            LinkedHashMap<String, HeatObject> commitHashToHeatObjectMap = fileObject.getCommitHashToHeatObjectMap();
-            HeatObject lastHeatObject = null;
-
-            for (Map.Entry<String, HeatObject> commitToHeatObjectEntry : commitHashToHeatObjectMap.entrySet())
-            {
-                HeatObject newerHeatObject = commitToHeatObjectEntry.getValue();
-                int heatLevel;
-                if (lastHeatObject != null)
-                    heatLevel = lastHeatObject.getHeatLevel();
-                else
-                    heatLevel = Constants.HEAT_MIN;
-
-                //Get the author of the commit
-                String commitHash = commitToHeatObjectEntry.getKey();
-                String authorEmail = codebase.getCommitFromCommitHash(commitHash).getAuthorEmail();
-
-                //Returning author
-                int indexOf = authorEmails.indexOf(authorEmail);
-                if (indexOf >= 0)
-                {
-                    //Add the following: 1 to mark this current commit
-                    //..and 1 to reverse the subtraction step below that affects all authors, including this one.
-                    int newNumberOfCommits = authorCommits.get(indexOf) + 1 + 1;
-                    authorCommits.set(indexOf, newNumberOfCommits);
-                }
-                //New author -> incur a hefty penalty
-                else
-                {
-                    //Add the following: REQUIRED_NUM_COMMITS_WITH_AUTHOR_ABSENCE to mark this current commit
-                    //..and 1 to reverse the subtraction step below that affects all authors, including this one.
-                    int newNumberOfCommits = REQUIRED_NUM_COMMITS_WITH_AUTHOR_ABSENCE + 1;
-                    authorEmails.add(authorEmail);
-                    authorCommits.add(newNumberOfCommits);
-                    //Increase heat
-                    heatLevel += NEW_AUTHOR_HEAT_CONSEQUENCE;
-                }
-
-                for (Map.Entry<String, Integer> authorEntry : activeAuthors.entrySet())
-                {
-                    ///Decrement the number of recent commits for every author to indicate that they have not modified the file in this commit
-                    int decrementedNumberOfCommits = authorEntry.getValue() - 1;
-                    //If the value is now 0, remove the author and reduce the heat
-                    if (decrementedNumberOfCommits <= 0) {
-                        activeAuthors.remove(authorEntry.getKey());
-                        heatLevel += AUTHOR_ABSENCE_HEAT_CONSEQUENCE;
-                    }
-                    else {
-                        activeAuthors.put(authorEntry.getKey(), decrementedNumberOfCommits);
-                    }
-
-                    //Decrement the number of recent commits for every author to indicate that they have not modified the file in this commit
-                    int numberOfCommits = authorEntry.getValue();
-                    if (numberOfCommits > 0) //if author is active
-                        numberOfCommits--;
-
-                    //If the value is now 0 (the author is sufficiently inactive) and reduce the heat
-                    if (numberOfCommits == 0) {
-                        heatLevel += AUTHOR_ABSENCE_HEAT_CONSEQUENCE;
-                    }
-                    activeAuthors.put(authorEntry.getKey(), numberOfCommits);
-                }
-
-                //Store the new heat level
-                newerHeatObject.setHeatLevel(heatLevel);
-                lastHeatObject = newerHeatObject;
-            }
-        }
-        System.out.println("Finished calculating heat based on number of authors.");
-    }*/
-
-
-
-
     public static void assignHeatLevelsOverall(Codebase codebase)
     {
+        System.out.println("Calculating overall heat...");
         final float WEIGHT_FILE_SIZE = 0.2f;
         final float WEIGHT_NUM_COMMITS_NUM_OF_COMMITS = 0.4f;
         final float WEIGHT_NUM_OF_AUTHORS = 0.4f;
@@ -449,6 +361,7 @@ public class HeatCalculationUtility
                 commitToHeatObjectEntry.getValue().setHeatLevel(heatSum);
             }
         }
+        System.out.println("Finished calculating overall heat.");
     }
 
     /**
@@ -477,60 +390,32 @@ public class HeatCalculationUtility
     }
 
 
-    //public static double averageHeatLevel(Codebase codebase, Constants.HeatMetricOptions heatMetricOption)
-    /*public static void averageHeatLevel(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, Constants.HeatMetricOptions heatMetricOption)
-    {
-
-        long heatSum = 0;
-
-        /*String latestCommitHash = codebase.getLatestCommitHash();
-        System.out.println("LATEST HASH = "+codebase.getLatestCommitHash());
-        for (FileObject fileObject : codebase.getActiveFileObjects())
-        {
-            System.out.println("Heat obj at "+latestCommitHash+"?");
-            heatSum += fileObject.getHeatObjectAtCommit(latestCommitHash).getHeatLevel();
-        }
-
-        double heatAverage = (double)(heatSum) / codebase.getActiveFileObjects().size();
-        heatAverage = Math.floor(heatAverage * 10) / 10.0; //round to nearest 10th decimal place
-        return heatAverage;*
-
-        for (Map.Entry<String, TreeSet<FileObject>> entry : setOfFiles.entrySet())
-        {
-            // Add files to the package container
-            System.out.println("DASHBOARD AT "+targetCommit);
-            for (FileObject fileObject : entry.getValue())
-            {
-                // Get HeatObject for targetCommit
-                HeatObject heatObject = fileObject.getHeatObjectAtCommit(targetCommit);
-                if (heatObject == null) continue;
-
-                heatSum += heatObject.getHeatLevel();
-            }
-        }
-
-        double heatAverage = (double)(heatSum) / codebase.getActiveFileObjects().size();
-        heatAverage = Math.floor(heatAverage * 10) / 10.0; //round to nearest 10th decimal place
-        return heatAverage;
-    }*/
-
+    /**
+     * Returns the average heat level for latest commit in the Codebase.
+     * Rounds the output value to the nearest 10th place.
+     */
     public static double averageHeatLevel(Codebase codebase, Constants.HeatMetricOptions heatMetricOption)
     {
+        //Compute every file's heat
+        HeatCalculationUtility.assignHeatLevels(codebase, heatMetricOption);
+
+        //Compute total amount of heat across all files at the latest commit
         long heatSum = 0;
+        int numberOfFiles = 0;
         String latestCommitHash = codebase.getLatestCommitHash();
         for (FileObject fileObject : codebase.getActiveFileObjects())
         {
             HeatObject heatObject = fileObject.getHeatObjectAtCommit(latestCommitHash);
-            System.out.println("File "+fileObject.getFilename()+" present at "+latestCommitHash+"? "+(heatObject == null ? "No" : "Yes"));
 
-            if (heatObject == null)
-                continue;
+            if (heatObject == null) continue; //file was not a part of the commit
 
             heatSum += heatObject.getHeatLevel();
+            numberOfFiles++;
         }
 
-        double heatAverage = (double)(heatSum) / codebase.getActiveFileObjects().size();
-        heatAverage = Math.floor(heatAverage * 10) / 10.0; //round to nearest 10th decimal place
+        //Compute average heat
+        double heatAverage = (double)(heatSum) / numberOfFiles;
+        heatAverage = Math.round(heatAverage * 10) / 10.0; //round to nearest 10th decimal place
         return heatAverage;
     }
 

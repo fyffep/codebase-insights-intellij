@@ -31,6 +31,10 @@ public class Codebase implements CodeBaseObservable {
     private String targetCommit;
     private GroupingMode currentGroupingMode = GroupingMode.PACKAGES;
     private HeatMetricOptions currentHeatMetricOption = HeatMetricOptions.FILE_SIZE;
+    private double averageHeatOverall;
+    private double averageHeatFileSize;
+    private double averageHeatNumberOfCommits;
+    private double averageHeatNumberOfAuthors;
     // endregion
 
     // region Singleton Constructor
@@ -111,6 +115,38 @@ public class Codebase implements CodeBaseObservable {
     public void setLatestCommitHash(String latestCommitHash) {
         this.targetCommit = latestCommitHash;
         this.latestCommitHash = latestCommitHash;
+    }
+
+    public double getAverageHeatOverall() {
+        return averageHeatOverall;
+    }
+
+    public void setAverageHeatOverall(double averageHeatOverall) {
+        this.averageHeatOverall = averageHeatOverall;
+    }
+
+    public double getAverageHeatFileSize() {
+        return averageHeatFileSize;
+    }
+
+    public void setAverageHeatFileSize(double averageHeatFileSize) {
+        this.averageHeatFileSize = averageHeatFileSize;
+    }
+
+    public double getAverageHeatNumberOfCommits() {
+        return averageHeatNumberOfCommits;
+    }
+
+    public void setAverageHeatNumberOfCommits(double averageHeatNumberOfCommits) {
+        this.averageHeatNumberOfCommits = averageHeatNumberOfCommits;
+    }
+
+    public double getAverageHeatNumberOfAuthors() {
+        return averageHeatNumberOfAuthors;
+    }
+
+    public void setAverageHeatNumberOfAuthors(double averageHeatNumberOfAuthors) {
+        this.averageHeatNumberOfAuthors = averageHeatNumberOfAuthors;
     }
 
     // Should only be used when building model data
