@@ -218,8 +218,8 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         String fileName = fileObject.getFilename();
         Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d\n%s\n\nGroup: %s", fileName, heatLevel, heatMetricString, groupName));
         tooltip.setFont(Constants.TOOLTIP_FONT);
-        tooltip.setShowDelay(Duration.seconds(0));
-        tooltip.setAutoHide(false);
+        tooltip.setShowDelay(Duration.ZERO);
+        tooltip.setHideDelay(Duration.seconds(10));
         Tooltip.install(heatFileComponent, tooltip);
     }
 
