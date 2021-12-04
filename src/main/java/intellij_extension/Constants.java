@@ -64,9 +64,14 @@ public class Constants {
     public static final int HEADER_TEXT_SIZE = 24;
     public static final FontWeight HEADER_TEXT_FONT_WEIGHT = FontWeight.BOLD;
     // Text Font properties in Selected File Pane
+    public static final String SF_TYPE_TEXT = "text";
+    public static final String SF_TYPE_HYPERLINK = "hyperlink";
     public static final String SF_TEXT_FONT = "Veranda";
     public static final int SF_TEXT_SIZE = 14;
     public static final FontWeight SF_TEXT_FONT_WEIGHT = FontWeight.BOLD;
+    public static final String SF_HYPERLINK_FONT = "Veranda";
+    public static final int SF_HYPERLINK_SIZE = 14;
+    public static final FontWeight SF_HYPERLINK_FONT_WEIGHT = FontWeight.EXTRA_LIGHT;
     public static final String SF_FILE_NAME_SPECIFIER = "%-20s";
     public static final String SF_PACKAGE_NAME_SPECIFIER = "%-15s";
     public static final String SF_FILE_AUTHOR_SPECIFIER = "%-22s";
@@ -83,7 +88,7 @@ public class Constants {
     //Commit Details Banner
     public static final Pos CD_BANNER_ALIGNMENT = Pos.TOP_LEFT;
     public static final int CD_BANNER_SPACING = 5;
-    public static final double FILE_LIST_SIZE_MULTIPLIER = 0.60;
+    public static final double FILE_LIST_SIZE_MULTIPLIER = 0.70;
     // Commit Details File List
     public static final double CD_DETAILS_WRAPPING_PERCENTAGE = 0.9f;
     public static final int FILE_LIST_MIN_HEIGHT = 0;
