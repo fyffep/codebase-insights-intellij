@@ -148,6 +148,7 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         topFilesSlider.setMajorTickUnit(2);
         topFilesSlider.setMinorTickCount(0);
         topFilesSlider.setBlockIncrement(2);
+        topFilesSlider.valueProperty().addListener(this::sliderValueUpdated);
         filesFilterContainer.getChildren().add(topFilesSlider);
     }
 
@@ -234,6 +235,12 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
 
     private void topRadioButtonClicked(Observable observable, boolean oldValue, boolean newValue) {
         topFilesSlider.setVisible(oldValue);
+    }
+
+    private void sliderValueUpdated(Observable observable, Number oldValue, Number newValue) {
+        System.out.printf("Slider updated to %s, change how many files are showing.%n", newValue.toString());
+
+
     }
     //endregion
 
