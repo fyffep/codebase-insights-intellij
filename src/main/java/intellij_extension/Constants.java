@@ -18,11 +18,17 @@ public class Constants {
     public static final String[] DEFAULT_BRANCHES = {"development", "master", "main"};
 
     public static final GroupingMode DEFAULT_GROUPING = GroupingMode.PACKAGES;
-
     public enum GroupingMode {
         COMMITS,
         PACKAGES
     }
+
+    public static final FilterMode DEFAULT_FILTERING = FilterMode.X_FILES;
+    public enum FilterMode {
+        ALL_FILES,
+        X_FILES
+    }
+    public static final int MAX_NUMBER_OF_FILTERING_FILES = 20;
 
     // Heat Metric List
     //Note that this affects HeatMapController::newHeatMetricSelected()
@@ -88,7 +94,7 @@ public class Constants {
     //Commit Details Banner
     public static final Pos CD_BANNER_ALIGNMENT = Pos.TOP_LEFT;
     public static final int CD_BANNER_SPACING = 5;
-    public static final double FILE_LIST_SIZE_MULTIPLIER = 0.60;
+    public static final double FILE_LIST_SIZE_MULTIPLIER = 0.70;
     // Commit Details File List
     public static final double CD_DETAILS_WRAPPING_PERCENTAGE = 0.9f;
     public static final int FILE_LIST_MIN_HEIGHT = 0;

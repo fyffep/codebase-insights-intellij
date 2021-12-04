@@ -1,5 +1,6 @@
 package intellij_extension.views;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
@@ -85,7 +86,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         openFile.setOnAction(this::openSelectedFileInEditor);
         openFile.setAlignment(Pos.TOP_CENTER);
 
-        hbox.getChildren().addAll(fileName,openFile);
+        hbox.getChildren().addAll(fileName, openFile);
         vbox.getChildren().add(hbox);
 
 
@@ -132,11 +133,15 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
             // TODO if we open more than one project in our plugin ,this will always consider the first opened project.Need to optimize
             Project project = pm.getOpenProjects()[0];
 
+
             //To get the absolute path of the project root within the system
             ProjectRootManager prm = ProjectRootManager.getInstance(project);
             VirtualFile[] projectRoot = prm.getContentRoots();
 
+
             String projectRootPath = projectRoot[0].getPath();
+
+
             projectRootPath = projectRootPath.replace('/', '\\');
 
             // relative path of the selected file
@@ -147,6 +152,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
             System.out.println("vFiles" + fileAbsolutePath);
 
             VirtualFile vFile = LocalFileSystem.getInstance().findFileByIoFile(new File(fileAbsolutePath));
+
             //open file
             if (vFile == null) {
                 System.out.println("No File Found in specified path");
@@ -154,9 +160,10 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
             FileEditorManager.getInstance(project).openFile(vFile, true);
 
-        } catch (Exception e) {
 
-            System.out.println(e);
+        } catch (Exception e) {
+//            e.printStackTrace();
+            System.out.println("In here :" + e);
         }
     }
 
@@ -172,7 +179,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
 
     public Font setFileDetailsProperties() {
 
-        Font fieldFont=Font.font(Constants.SF_TEXT_FONT, Constants.SF_TEXT_FONT_WEIGHT, Constants.SF_TEXT_SIZE);
+        Font fieldFont = Font.font(Constants.SF_TEXT_FONT, Constants.SF_TEXT_FONT_WEIGHT, Constants.SF_TEXT_SIZE);
         return fieldFont;
 //        text.wrappingWidthProperty().bind(parent.widthProperty().multiply(0.9f));
     }
@@ -190,7 +197,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     // action listener to the "open file" button
     private void openSelectedFileInEditor(ActionEvent event) {
         // openFile has to be called from Event Dispatcher Thread (EDT)
-        EventQueue.invokeLater(() -> {
+        ApplicationManager.getApplication().invokeLater(() -> {
             openFileInEditor(getSelectedFile());
         });
     }
@@ -223,7 +230,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
     @Override
     public void fileSelected(@NotNull FileObject selectedFile, Iterator<Commit> filesCommits) {
         // Filename
-        openFile.setText(String.format("%s",selectedFile.getFilename()));
+        openFile.setText(String.format("%s", selectedFile.getFilename()));
         openFile.setUnderline(true);
         setSelectedFile(selectedFile);
 
