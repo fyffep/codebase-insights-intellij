@@ -32,11 +32,15 @@ public class Constants {
 
     // Heat Metric List
     //Note that this affects HeatMapController::newHeatMetricSelected()
+    public static final String OVERALL_TEXT = "Overall Heat";
+    public static final String FILE_SIZE_TEXT = "File size";
+    public static final String NUMBER_OF_COMMITS_TEXT = "Number of Commits";
+    public static final String NUMBER_OF_AUTHORS_TEXT = "Number of Authors";
     public static final ObservableList<String> HEAT_METRIC_OPTIONS = FXCollections.observableArrayList(
-            "Overall Heat",
-            "File Size",
-            "Number of Commits",
-            "Number of Authors"
+            OVERALL_TEXT,
+            FILE_SIZE_TEXT,
+            NUMBER_OF_COMMITS_TEXT,
+            NUMBER_OF_AUTHORS_TEXT
     );
     public enum HeatMetricOptions {
         OVERALL,
@@ -127,11 +131,6 @@ public class Constants {
     public static final String HEAT_GROUPING_TEXT = "Group by Package";
     public static final String COMMIT_GROUPING_TEXT = "Group by Commit Contiguity";
     public static final String SEPARATOR = "~";
-    // Tool Tips
-    public static final String TT_FILE_SIZE = "File size: ";
-    public static final String TT_NUMBER_OF_COMMITS = "Number of Commits: ";
-    public static final String TT_NUMBER_OF_AUTHORS = "Number of Authors: ";
-    public static final String TT_OVERALL = "Overall: ";
     //endregion
 
     //Prevent instantiation

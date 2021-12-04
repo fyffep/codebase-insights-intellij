@@ -128,17 +128,16 @@ public class FileObject {
         String text = "";
         switch (heatMetricOption) {
             case FILE_SIZE:
-                text = String.format("%s%d", Constants.TT_FILE_SIZE, heatObject.getFileSize());
+                text = String.format("%s: %d", Constants.FILE_SIZE_TEXT, heatObject.getFileSize());
                 break;
             case NUM_OF_AUTHORS:
-                text = String.format("%s%d", Constants.TT_NUMBER_OF_AUTHORS, heatObject.getNumberOfAuthors());
+                text = String.format("%s: %d", Constants.NUMBER_OF_AUTHORS_TEXT, heatObject.getNumberOfAuthors());
                 break;
             case NUM_OF_COMMITS:
-                text = String.format("%s%d", Constants.TT_NUMBER_OF_COMMITS, heatObject.getNumberOfCommits());
+                text = String.format("%s: %d", Constants.NUMBER_OF_COMMITS_TEXT, heatObject.getNumberOfCommits());
                 break;
             case OVERALL:
-                // TODO this might not be correct - revisit when overall is implemented
-                text = String.format("%s%d", Constants.TT_OVERALL, heatObject.getHeatLevel());
+                text = String.format("%s: %d", Constants.OVERALL_TEXT, heatObject.getHeatLevel());
                 break;
             default:
                 throw new UnsupportedOperationException("Heat Metric Option is invalid or not implemented for this method.");
