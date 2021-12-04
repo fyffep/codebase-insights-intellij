@@ -6,6 +6,8 @@ import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.models.redesign.HeatObject;
+import intellij_extension.views.HeatFileComponent;
+import intellij_extension.views.HeatFileContainer;
 import javafx.scene.paint.Color;
 
 import java.util.*;
@@ -197,7 +199,7 @@ public class HeatCalculationUtility
         //Assign heat level to every HeatObject based on number of authors
         for (FileObject fileObject : fileObjectSet)
         {
-            System.out.println("\n---------------"+fileObject.getFilename()+"---------------\n");
+//System.out.println("\n---------------"+fileObject.getFilename()+"---------------\n");
             HashMap<String, Integer> activeAuthors = new HashMap<>(); //the emails of which authors have been committing to the file recently
             //...and their integer score, which increases based on how many commits they have pushed recently
 
@@ -221,8 +223,8 @@ public class HeatCalculationUtility
                     //Ensure the file was a part of the commit
                     if (newerHeatObject.getNumberOfCommits() > lastHeatObject.getNumberOfCommits())
                     {
-                        System.out.println("Author of "+commitHash+": "+authorEmail);
-                        System.out.println("activeAuthors = "+activeAuthors);
+//System.out.println("Author of "+commitHash+": "+authorEmail);
+//System.out.println("activeAuthors = "+activeAuthors);
 
                         //Returning author
                         if (activeAuthors.containsKey(authorEmail) && activeAuthors.get(authorEmail) > 0)
@@ -262,7 +264,7 @@ public class HeatCalculationUtility
                 }
                 //Account for the first commit
                 else if (newerHeatObject.getNumberOfCommits() == 1) {
-                    System.out.println("First author in "+commitHash+": "+authorEmail);
+//System.out.println("First author in "+commitHash+": "+authorEmail);
                     activeAuthors.put(authorEmail, SCORE_PENALTY_FOR_NEW_AUTHOR);
                     numberOfActiveAuthors = 1; //there is 1 active author on the first commit
                 }
@@ -272,7 +274,7 @@ public class HeatCalculationUtility
                 //lastHeatBeforeTransformation = heatLevel;
                 int heatLevel = activeAuthorsToHeatLevel(numberOfActiveAuthors, totalAuthorCount);
                 newerHeatObject.setHeatLevel(heatLevel);
-                System.out.println("Heat level: "+heatLevel);
+//System.out.println("Heat level: "+heatLevel);
                 lastHeatObject = newerHeatObject;
             }
         }
@@ -472,6 +474,64 @@ public class HeatCalculationUtility
                 commitToHeatSumMap.merge(commitHash, weightedHeat, Float::sum);
             }
         }
+    }
+
+
+    //public static double averageHeatLevel(Codebase codebase, Constants.HeatMetricOptions heatMetricOption)
+    /*public static void averageHeatLevel(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, Constants.HeatMetricOptions heatMetricOption)
+    {
+
+        long heatSum = 0;
+
+        /*String latestCommitHash = codebase.getLatestCommitHash();
+        System.out.println("LATEST HASH = "+codebase.getLatestCommitHash());
+        for (FileObject fileObject : codebase.getActiveFileObjects())
+        {
+            System.out.println("Heat obj at "+latestCommitHash+"?");
+            heatSum += fileObject.getHeatObjectAtCommit(latestCommitHash).getHeatLevel();
+        }
+
+        double heatAverage = (double)(heatSum) / codebase.getActiveFileObjects().size();
+        heatAverage = Math.floor(heatAverage * 10) / 10.0; //round to nearest 10th decimal place
+        return heatAverage;*
+
+        for (Map.Entry<String, TreeSet<FileObject>> entry : setOfFiles.entrySet())
+        {
+            // Add files to the package container
+            System.out.println("DASHBOARD AT "+targetCommit);
+            for (FileObject fileObject : entry.getValue())
+            {
+                // Get HeatObject for targetCommit
+                HeatObject heatObject = fileObject.getHeatObjectAtCommit(targetCommit);
+                if (heatObject == null) continue;
+
+                heatSum += heatObject.getHeatLevel();
+            }
+        }
+
+        double heatAverage = (double)(heatSum) / codebase.getActiveFileObjects().size();
+        heatAverage = Math.floor(heatAverage * 10) / 10.0; //round to nearest 10th decimal place
+        return heatAverage;
+    }*/
+
+    public static double averageHeatLevel(Codebase codebase, Constants.HeatMetricOptions heatMetricOption)
+    {
+        long heatSum = 0;
+        String latestCommitHash = codebase.getLatestCommitHash();
+        for (FileObject fileObject : codebase.getActiveFileObjects())
+        {
+            HeatObject heatObject = fileObject.getHeatObjectAtCommit(latestCommitHash);
+            System.out.println("File "+fileObject.getFilename()+" present at "+latestCommitHash+"? "+(heatObject == null ? "No" : "Yes"));
+
+            if (heatObject == null)
+                continue;
+
+            heatSum += heatObject.getHeatLevel();
+        }
+
+        double heatAverage = (double)(heatSum) / codebase.getActiveFileObjects().size();
+        heatAverage = Math.floor(heatAverage * 10) / 10.0; //round to nearest 10th decimal place
+        return heatAverage;
     }
 
 

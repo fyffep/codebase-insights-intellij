@@ -148,9 +148,8 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         // Dashboard tab
         Tab tab = new Tab();
         tab.setText(Constants.DASHBOARD_TEXT);
-        Pane dashboardPane = new Pane();
-//        tab.setContent(dashboardPane.getNode());
-        tab.setContent(dashboardPane);
+        DashboardPane dashboardContent = new DashboardPane();
+        tab.setContent(dashboardContent.getNode());
         tabPane.getTabs().add(tab);
 
         // Package tab
