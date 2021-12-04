@@ -47,6 +47,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
     public CommitDetailsPane() {
         parent = new VBox();
         parent.setMinWidth(Constants.ZERO_WIDTH);
+        parent.setMinHeight(Constants.ZERO_WIDTH);
 
         // Create the top horizontal banner
         topHorizontalBanner = new VBox();
@@ -152,15 +153,13 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
     private void setFileListContainerProperties(@NotNull ScrollPane fileListContainer) {
         // Set up constraints on width/height
-        fileListContainer.minHeightProperty().bind(parent.heightProperty().multiply(Constants.FILE_LIST_SIZE_MULTIPLIER));
         fileListContainer.prefWidthProperty().bind(parent.widthProperty());
         fileListContainer.fitToHeightProperty().set(true);
     }
 
     private void setFileListProperties() {
         // Set up constraints on width/height
-//        fileList.setMinHeight(Constants.FILE_LIST_MIN_HEIGHT);
-//        fileList.prefWidthProperty().bind(parent.widthProperty()); // Removing this property for bug: JIRA 255
+        fileListContainer.prefHeightProperty().bind(parent.heightProperty());
 
         // Child layout properties
         fileList.setAlignment(Constants.CD_BANNER_ALIGNMENT);
@@ -283,6 +282,8 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
         // Show scroll pane
         fileListContainer.setVisible(true);
+
+        parent.layout();
     }
     //endregion
 
