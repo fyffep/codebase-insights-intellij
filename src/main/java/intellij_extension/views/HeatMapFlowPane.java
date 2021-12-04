@@ -21,10 +21,7 @@ import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * A view that holds rectangles to represent files for a particular commit.
@@ -39,6 +36,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     private AnchorPane anchorPane;
     private FlowPane flowPane;
     private GroupingMode groupingMode;
+    private TreeSet<HeatFileComponent> topHeatFileComponents = new TreeSet<>(Comparator.comparing(HeatFileComponent::getFileHeatLevel));
     //endregion
 
     //region Constructors
@@ -111,15 +109,16 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                 String groupingKey = entry.getKey();
                 // Create a container for it
                 HeatFileContainer heatFileContainer = new HeatFileContainer(groupingKey);
+                heatFileContainer.setStyle("-fx-background-color: #BBBBBB");
+
 //                heatFileContainer.maxWidthProperty().bind(flowPane.widthProperty());
-                //setContainerToolTip(heatFileContainer, groupingKey);
+//                setContainerToolTip(heatFileContainer, groupingKey);
 
                 // Add files to the package container
                 for (FileObject fileObject : entry.getValue()) {
-                    // Get HeatObject for targetCommit
+                    // Get HeatObject/Level for targetCommit
                     HeatObject heatObject = fileObject.getHeatObjectAtCommit(targetCommit);
                     if (heatObject == null) continue;
-
                     int heatLevel = heatObject.getHeatLevel();
 
                     // Generate color
@@ -130,19 +129,29 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                     String colorFormat = String.format("-fx-background-color: #%s", colorString.substring(colorString.indexOf("x") + 1));
 
                     // Add a pane (rectangle) package container
-                    HeatFileComponent heatFileComponent = new HeatFileComponent(fileObject);
+                    HeatFileComponent heatFileComponent = new HeatFileComponent(fileObject, heatLevel, heatFileContainer);
                     heatFileComponent.setStyle(colorFormat);
                     heatFileContainer.addNode(heatFileComponent);
+                    topHeatFileComponents.add(heatFileComponent);
 
                     setFileToolTip(fileObject, heatLevel, groupingKey, fileObject.getHeatMetricString(heatObject, heatMetricOption), heatFileComponent);
                 }
 
-                heatFileContainer.setStyle("-fx-background-color: #BBBBBB");
                 // Only add if we actually made children for it.
                 if (heatFileContainer.getChildren().size() > 0) {
                     flowPane.getChildren().add(heatFileContainer);
                 }
             }
+
+//            int index = 0;
+//            Iterator<HeatFileComponent> topHeatFileComponentIterator = topHeatFileComponents.iterator();
+//            topHeatFileComponents.clear();
+//            while(topHeatFileComponentIterator.hasNext() && index < 20) {
+//                HeatFileComponent component = topHeatFileComponentIterator.next();
+//                topHeatFileComponents.add(component);
+//                System.out.printf("Added %s component");
+//                index++;
+//            }
 
             System.out.println("Finished adding panes to the heat map.");
         });
