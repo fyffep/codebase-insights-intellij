@@ -41,6 +41,7 @@ public class FileHistoryPane implements IContainerView, CodeBaseObserver {
     public FileHistoryPane() {
         parent = new VBox();
         parent.setMinWidth(Constants.ZERO_WIDTH);
+        parent.setMinHeight(Constants.ZERO_WIDTH);
 
         // Create the top horizontal banner
         topHorizontalBanner = new HBox();
