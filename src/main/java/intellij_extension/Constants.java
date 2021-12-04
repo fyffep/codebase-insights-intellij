@@ -29,7 +29,9 @@ public class Constants {
         X_FILES
     }
     public static final int MAX_NUMBER_OF_FILTERING_FILES = 20;
-
+    public static final double X_FILES_MAJOR_TICK = 5;
+    public static final int X_FILES_MINOR_TICK = 5;
+    
     // Heat Metric List
     //Note that this affects HeatMapController::newHeatMetricSelected()
     public static final String OVERALL_TEXT = "Overall Heat";

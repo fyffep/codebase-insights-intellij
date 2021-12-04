@@ -149,8 +149,8 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         topFilesSlider.setShowTickLabels(true);
         topFilesSlider.setSnapToTicks(true);
         topFilesSlider.setSnapToPixel(true);
-        topFilesSlider.setMajorTickUnit(5);
-        topFilesSlider.setMinorTickCount(1);
+        topFilesSlider.setMajorTickUnit(Constants.X_FILES_MAJOR_TICK);
+        topFilesSlider.setMinorTickCount(Constants.X_FILES_MINOR_TICK);
         topFilesSlider.setOnMouseReleased(this::sliderValueUpdated);
         filesFilterContainer.getChildren().add(topFilesSlider);
     }
