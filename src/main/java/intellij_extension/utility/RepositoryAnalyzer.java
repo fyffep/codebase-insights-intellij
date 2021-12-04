@@ -90,7 +90,8 @@ public class RepositoryAnalyzer {
         try {
 
             // Get all commits in the repos for active branch
-            Iterator<RevCommit> commitIterator = getCommitsByBranch(codebase.getActiveBranch());
+            List<RevCommit> commitList = getCommitsByBranch(codebase.getActiveBranch());
+            Iterator<RevCommit> commitIterator = commitList.iterator();
 
             // Iterate through the commits and gather data per file
             RevCommit previousCommit = null;
@@ -171,17 +172,18 @@ public class RepositoryAnalyzer {
 
                 // Set project root
                 codebase.setProjectRootPath(git.getRepository().getDirectory().getAbsoluteFile().getParentFile().getParent());
-
-                // Record latest commit hash
-                codebase.setLatestCommitHash(processCommit.getName());
             }
+
+            // Record latest commit hash
+            codebase.setLatestCommitHash(latestCommitHash(commitList));
+
         } catch (IOException | GitAPIException e) {
             Constants.LOG.error(e);
             Constants.LOG.error(e.getMessage());
         }
     }
 
-    private static Iterator<RevCommit> getCommitsByBranch(String branchName) throws IOException, GitAPIException {
+    private static List<RevCommit> getCommitsByBranch(String branchName) throws IOException, GitAPIException {
         // Get branch id
         ObjectId branchId = git.getRepository().resolve(branchName);
         // Get commits based on branch id
@@ -201,7 +203,18 @@ public class RepositoryAnalyzer {
             System.out.printf("Getting commits for branch %s,%n number of commits %s%n", branchName, commitList.size());
         }
 
-        return commitList.iterator();
+        return commitList;
+    }
+
+    private static String latestCommitHash(List<RevCommit> commitList) throws IOException, GitAPIException
+    {
+        //Choose the commit with the latest time value
+        Comparator<RevCommit> TIME = Comparator.comparingInt(RevCommit::getCommitTime);
+        Optional<RevCommit> optional = commitList.stream().max(TIME);
+        if (optional.isPresent())
+            return optional.get().getName();
+        else
+            throw new NoSuchElementException("No commits were made to the repository, so the latest could not be found");
     }
 
     // For every file create HeatObject for processCommit
