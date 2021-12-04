@@ -143,15 +143,14 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
 
         // Slider to control # of top commits
         topFilesSlider = new Slider();
-        topFilesSlider.setMin(1);
-        topFilesSlider.setMax(20);
-        topFilesSlider.setValue(20);
+        topFilesSlider.setMin(0);
+        topFilesSlider.setMax(Constants.MAX_NUMBER_OF_FILTERING_FILES);
+        topFilesSlider.setValue(Constants.MAX_NUMBER_OF_FILTERING_FILES);
         topFilesSlider.setShowTickLabels(true);
         topFilesSlider.setSnapToTicks(true);
         topFilesSlider.setSnapToPixel(true);
-        topFilesSlider.setMajorTickUnit(2);
-        topFilesSlider.setMinorTickCount(0);
-        topFilesSlider.setBlockIncrement(2);
+        topFilesSlider.setMajorTickUnit(5);
+        topFilesSlider.setMinorTickCount(1);
         topFilesSlider.setOnMouseReleased(this::sliderValueUpdated);
         filesFilterContainer.getChildren().add(topFilesSlider);
     }
@@ -255,6 +254,9 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
 //        System.out.printf("Slider updated to %s, change how many files are showing.%n", topFilesSlider.getValue());
         // We can only use this slider when top radio is selected
         // So we know we are in X_FILES mode
+        if(topFilesSlider.getValue() == 0) {
+            topFilesSlider.setValue(1);
+        }
         heatMapTabContent.setFilteringMode(Constants.FilterMode.X_FILES, (int)topFilesSlider.getValue());
         commitTabContent.setFilteringMode(Constants.FilterMode.X_FILES, (int)topFilesSlider.getValue());
     }

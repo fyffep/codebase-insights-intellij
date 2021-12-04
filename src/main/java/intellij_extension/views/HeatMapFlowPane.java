@@ -205,6 +205,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
 //                index++;
 //            }
 //            topHeatFileComponents = temp;
+
             if(filteringMode == FilterMode.X_FILES) {
                 filterHeatMap();
             }
