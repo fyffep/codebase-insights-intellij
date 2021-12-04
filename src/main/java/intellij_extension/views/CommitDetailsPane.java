@@ -31,6 +31,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
     private final Text authorText;
     private final Text dateText;
     private final Text hashText;
+    private final Text emptySpace;
     private final Text addHeader;
     private final Text addBody;
     private final Text copyHeader;
@@ -59,6 +60,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
         authorText = createCommitDetailsText(Constants.CD_AUTHOR, topHorizontalBanner);
         dateText = createCommitDetailsText(Constants.CD_DATE, topHorizontalBanner);
         hashText = createCommitDetailsText(Constants.CD_HASH, topHorizontalBanner);
+        emptySpace = createCommitDetailsText("", topHorizontalBanner);
 
         // Create the Commit Detail's file list container (i.e. scroll view)
         fileListContainer = new ScrollPane();
@@ -113,7 +115,7 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
     private @NotNull Text createCommitDetailsText(String label, Pane parent) {
         Text text = createText(label, parent);
-        setCommitDetailsTextProperties(text);
+//        setCommitDetailsTextProperties(text);// Removing this property for bug: JIRA 255
         return text;
     }
 
@@ -127,9 +129,11 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
 
     //region Properties setting
     private void setBannerProperties() {
+
+//        topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT); // Removing this property fixes the bugs : JIRA 256 and JIRA 255
+//        topHorizontalBanner.setMinWidth(Constants.ZERO_WIDTH); // Removing this property for bug: JIRA 255
+
         // Set up constraints on width/height
-//        topHorizontalBanner.setMinHeight(Constants.BANNER_MIN_HEIGHT); // Removing this property fixes JIRA 256
-        topHorizontalBanner.setMinWidth(Constants.ZERO_WIDTH);
         topHorizontalBanner.prefWidthProperty().bind(parent.widthProperty());
 
         // Child layout properties
@@ -150,12 +154,13 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
         // Set up constraints on width/height
         fileListContainer.minHeightProperty().bind(parent.heightProperty().multiply(Constants.FILE_LIST_SIZE_MULTIPLIER));
         fileListContainer.prefWidthProperty().bind(parent.widthProperty());
+        fileListContainer.fitToHeightProperty().set(true);
     }
 
     private void setFileListProperties() {
         // Set up constraints on width/height
 //        fileList.setMinHeight(Constants.FILE_LIST_MIN_HEIGHT);
-        fileList.prefWidthProperty().bind(parent.widthProperty());
+//        fileList.prefWidthProperty().bind(parent.widthProperty()); // Removing this property for bug: JIRA 255
 
         // Child layout properties
         fileList.setAlignment(Constants.CD_BANNER_ALIGNMENT);

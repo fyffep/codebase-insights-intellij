@@ -88,7 +88,7 @@ public class Constants {
     //Commit Details Banner
     public static final Pos CD_BANNER_ALIGNMENT = Pos.TOP_LEFT;
     public static final int CD_BANNER_SPACING = 5;
-    public static final double FILE_LIST_SIZE_MULTIPLIER = 0.60;
+    public static final double FILE_LIST_SIZE_MULTIPLIER = 0.70;
     // Commit Details File List
     public static final double CD_DETAILS_WRAPPING_PERCENTAGE = 0.9f;
     public static final int FILE_LIST_MIN_HEIGHT = 0;
