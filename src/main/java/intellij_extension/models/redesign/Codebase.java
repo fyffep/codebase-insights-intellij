@@ -214,7 +214,9 @@ public class Codebase implements CodeBaseObservable {
 
     //region Data packaging
 
-    public TreeMap<String, TreeSet<FileObject>> getSetOfFiles() {
+
+    //FIXME @Abhishek
+    /*public TreeMap<String, TreeSet<FileObject>> getSetOfFiles() {
         // Update views with data
         switch (currentGroupingMode) {
             case COMMITS:
@@ -225,6 +227,20 @@ public class Codebase implements CodeBaseObservable {
                 if (packageBasedMapGroup.isEmpty()) packageBasedMapGroup = groupDataByPackages();
                 return packageBasedMapGroup;
         }
+    }*/
+    public TreeMap<String, TreeSet<FileObject>> getSetOfFiles() {
+        // Update views with data
+        TreeMap<String, TreeSet<FileObject>> setOfFiles;
+        switch (currentGroupingMode) {
+            case COMMITS:
+                setOfFiles = groupDataByCommits();
+                break;
+            case PACKAGES:
+            default:
+                setOfFiles = groupDataByPackages();
+                break;
+        }
+        return setOfFiles;
     }
 
     public TreeMap<String, TreeSet<FileObject>> groupDataByCommits() {
