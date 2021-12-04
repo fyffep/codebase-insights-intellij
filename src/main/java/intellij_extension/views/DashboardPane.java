@@ -10,11 +10,13 @@ import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.views.interfaces.IContainerView;
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 import java.util.Iterator;
@@ -99,20 +101,28 @@ public class DashboardPane implements IContainerView, CodeBaseObserver {
             System.out.println("Creating the dashboard...");
             flowPane.getChildren().clear();
 
+            //FIXME adding this label causes the view to not render...
+            /*Label scoreTitleLabel = new Label("Average Heat Scores out of 10 for Each Metric");
+            scoreTitleLabel.setFont(Font.font(Constants.HEADER_FONT, Constants.SF_TEXT_FONT_WEIGHT, 18));
+            scoreTitleLabel.wrapTextProperty().set(true);
+            flowPane.getChildren().add(scoreTitleLabel);*/
+
+            String scoreFormat = "%s Score"; //displays text such as "Overall Score" in each label
             double scoreOverall = codebase.getAverageHeatOverall();
-            Label scoreOverallText = new Label(String.format("Overall Score: %s", scoreOverall));
+            ScoreContainer scoreContainerOverall = new ScoreContainer(scoreOverall, String.format(scoreFormat, Constants.OVERALL_TEXT));
+            flowPane.getChildren().add(scoreContainerOverall.getNode());
 
             double scoreFileSize = codebase.getAverageHeatFileSize();
-            Label scoreFileSizeText = new Label(String.format("File Size Score: %s", scoreFileSize));
+            ScoreContainer scoreContainerFileSize = new ScoreContainer(scoreFileSize, String.format(scoreFormat, Constants.OVERALL_TEXT));
+            flowPane.getChildren().add(scoreContainerFileSize.getNode());
 
             double scoreNumberOfCommits = codebase.getAverageHeatNumberOfCommits();
-            Label scoreNumberOfCommitsText = new Label(String.format("Number of Commits Score: %s", scoreNumberOfCommits));
+            ScoreContainer scoreContainerNumberOfCommits = new ScoreContainer(scoreNumberOfCommits, String.format(scoreFormat, Constants.OVERALL_TEXT));
+            flowPane.getChildren().add(scoreContainerNumberOfCommits.getNode());
 
             double scoreNumberOfAuthors = codebase.getAverageHeatNumberOfAuthors();
-            Label scoreNumberOfAuthorsText = new Label(String.format("Number of Authors Score: %s", scoreNumberOfAuthors));
-
-            //Add all labels to the view
-            flowPane.getChildren().addAll(scoreOverallText, scoreFileSizeText, scoreNumberOfCommitsText, scoreNumberOfAuthorsText);
+            ScoreContainer scoreContainerNumberOfAuthors = new ScoreContainer(scoreNumberOfAuthors, String.format(scoreFormat, Constants.OVERALL_TEXT));
+            flowPane.getChildren().add(scoreContainerNumberOfAuthors.getNode());
 
             System.out.println("Finished creating the dashboard.");
         });
