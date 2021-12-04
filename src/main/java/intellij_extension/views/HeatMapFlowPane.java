@@ -1,6 +1,7 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
+import intellij_extension.Constants.FilterMode;
 import intellij_extension.Constants.GroupingMode;
 import intellij_extension.Constants.HeatMetricOptions;
 import intellij_extension.models.redesign.Codebase;
@@ -21,10 +22,7 @@ import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * A view that holds rectangles to represent files for a particular commit.
@@ -38,7 +36,11 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     private ScrollPane scrollPane;
     private AnchorPane anchorPane;
     private FlowPane flowPane;
+    private FilterMode filteringMode;
+    private int filterMax = Constants.MAX_NUMBER_OF_FILTERING_FILES;
     private GroupingMode groupingMode;
+    // For filtering
+    private PriorityQueue<HeatFileComponent> topHeatFileComponents;
     //endregion
 
     //region Constructors
@@ -76,6 +78,55 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         this.groupingMode = groupingMode;
     }
 
+    public void setFilteringModeDefaults() {
+        this.filteringMode = Constants.DEFAULT_FILTERING;
+        this.filterMax = Constants.MAX_NUMBER_OF_FILTERING_FILES;
+    }
+
+    public void setFilteringMode(FilterMode filterMode, int numberOfFiles) {
+        this.filteringMode = filterMode;
+        this.filterMax = numberOfFiles;
+        // Radio buttons are weird and this is needed to guard against them
+        if(topHeatFileComponents != null) {
+            filterHeatMap();
+        }
+    }
+
+    private void filterHeatMap() {
+        // Clear the flowPane because we only want the top X files in it, but currently it has all files
+        flowPane.getChildren().clear();
+
+        // Iterator over topHeatFiles collected from refreshHeatMap(...)
+        // (not sorted/organized by package anymore, we lost that)
+        int index = 0;
+        for(HeatFileComponent heatFile: topHeatFileComponents) {
+            // Get the heatFile's container
+            HeatFileContainer currentContainer = heatFile.getContainer();
+//            System.out.printf("currentContainer %s%n", currentContainer.hashCode());
+
+            // Check if already added
+            if(!flowPane.getChildren().contains(currentContainer)) {
+                // Clear container
+                currentContainer.getChildren().clear();
+                // Add container to flowPane
+                flowPane.getChildren().add(heatFile.getContainer());
+            }
+
+            // Re-add the heatFile back to the parent
+            currentContainer.getChildren().add(heatFile);
+
+            // Break if we reached the max
+            if(index + 1 == filterMax)
+                break;
+
+            // Continue otherwise
+            index++;
+        }
+        System.out.printf("Index: %s%n", index);
+
+        flowPane.layout();
+    }
+
     //region IContainerView methods
     @Override
     public Node getNode() {
@@ -103,6 +154,9 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         // If not our grouping mode, then don't do anything
         if (!this.groupingMode.equals(groupingMode)) return;
 
+        // Set up for X top files
+        topHeatFileComponents = new PriorityQueue<>(Comparator.comparing(HeatFileComponent::getFileHeatLevel).reversed());
+
         Platform.runLater(() -> {
             flowPane.getChildren().clear();
 
@@ -111,15 +165,13 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                 String groupingKey = entry.getKey();
                 // Create a container for it
                 HeatFileContainer heatFileContainer = new HeatFileContainer(groupingKey);
-//                heatFileContainer.maxWidthProperty().bind(flowPane.widthProperty());
-                //setContainerToolTip(heatFileContainer, groupingKey);
+                heatFileContainer.setStyle("-fx-background-color: #BBBBBB");
 
                 // Add files to the package container
                 for (FileObject fileObject : entry.getValue()) {
-                    // Get HeatObject for targetCommit
+                    // Get HeatObject/Level for targetCommit
                     HeatObject heatObject = fileObject.getHeatObjectAtCommit(targetCommit);
                     if (heatObject == null) continue;
-
                     int heatLevel = heatObject.getHeatLevel();
 
                     // Generate color
@@ -130,39 +182,44 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                     String colorFormat = String.format("-fx-background-color: #%s", colorString.substring(colorString.indexOf("x") + 1));
 
                     // Add a pane (rectangle) package container
-                    HeatFileComponent heatFileComponent = new HeatFileComponent(fileObject);
+                    HeatFileComponent heatFileComponent = new HeatFileComponent(fileObject, heatLevel, heatFileContainer);
                     heatFileComponent.setStyle(colorFormat);
                     heatFileContainer.addNode(heatFileComponent);
+                    topHeatFileComponents.add(heatFileComponent);
 
                     setFileToolTip(fileObject, heatLevel, groupingKey, fileObject.getHeatMetricString(heatObject, heatMetricOption), heatFileComponent);
                 }
 
-                heatFileContainer.setStyle("-fx-background-color: #BBBBBB");
                 // Only add if we actually made children for it.
                 if (heatFileContainer.getChildren().size() > 0) {
                     flowPane.getChildren().add(heatFileContainer);
                 }
             }
 
+//            int index = 0;
+//            PriorityQueue<HeatFileComponent> temp = new PriorityQueue<>(Comparator.comparing(HeatFileComponent::getFileHeatLevel).reversed());
+//            Iterator<HeatFileComponent> topHeatFileComponentIterator = topHeatFileComponents.iterator();
+//            while(topHeatFileComponentIterator.hasNext() && index < Constants.MAX_NUMBER_OF_FILTERING_FILES) {
+//                HeatFileComponent component = topHeatFileComponentIterator.next();
+//                temp.add(component);
+//                index++;
+//            }
+//            topHeatFileComponents = temp;
+            if(filteringMode == FilterMode.X_FILES) {
+                filterHeatMap();
+            }
+
             System.out.println("Finished adding panes to the heat map.");
         });
     }
-
-    //UNUSED. It's glitchy to have multiple tool tips over the same area in JavaFX.
-    /*private void setContainerToolTip(@NotNull HeatFileContainer container, String info) {
-        // Add a tooltip to the file pane
-        Tooltip tooltip = new Tooltip(info);
-        tooltip.setFont(Constants.TOOLTIP_FONT);
-        tooltip.setShowDelay(Duration.seconds(0.5f));
-        Tooltip.install(container, tooltip);
-    }*/
 
     private void setFileToolTip(@NotNull FileObject fileObject, int heatLevel, String groupName, String heatMetricString, HeatFileComponent heatFileComponent) {
         // Add a tooltip to the file pane
         String fileName = fileObject.getFilename();
         Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d\n%s\n\nGroup: %s", fileName, heatLevel, heatMetricString, groupName));
         tooltip.setFont(Constants.TOOLTIP_FONT);
-        tooltip.setShowDelay(Duration.seconds(0));
+        tooltip.setShowDelay(Duration.ZERO);
+        tooltip.setHideDelay(Duration.seconds(10));
         Tooltip.install(heatFileComponent, tooltip);
     }
 
