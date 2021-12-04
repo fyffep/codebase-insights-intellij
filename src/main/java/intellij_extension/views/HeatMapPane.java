@@ -15,6 +15,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -36,6 +37,9 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
     private ComboBox<String> heatMetricComboBox;
     private ComboBox<String> branchComboBox;
 
+    // Heat flow panes
+    private HeatMapFlowPane heatMapTabContent;
+    private HeatMapFlowPane commitTabContent;
     private Slider topFilesSlider;
 
     //endregion
@@ -134,7 +138,7 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         RadioButton topFilesButton = new RadioButton("Top 10 Hottest Files");
         topFilesButton.setToggleGroup(fileFilteringGroup);
         topFilesButton.setSelected(true);
-        allFilesButton.selectedProperty().addListener(this::topRadioButtonClicked);
+        topFilesButton.selectedProperty().addListener(this::topRadioButtonClicked);
         filesFilterContainer.getChildren().add(topFilesButton);
 
         // Slider to control # of top commits
@@ -148,7 +152,7 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         topFilesSlider.setMajorTickUnit(2);
         topFilesSlider.setMinorTickCount(0);
         topFilesSlider.setBlockIncrement(2);
-        topFilesSlider.valueProperty().addListener(this::sliderValueUpdated);
+        topFilesSlider.setOnMouseReleased(this::sliderValueUpdated);
         filesFilterContainer.getChildren().add(topFilesSlider);
     }
 
@@ -172,16 +176,18 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         // Package tab
         tab = new Tab();
         tab.setText(Constants.HEAT_GROUPING_TEXT);
-        HeatMapFlowPane heatMapTabContent = new HeatMapFlowPane();
+        heatMapTabContent = new HeatMapFlowPane();
         heatMapTabContent.setGroupingMode(GroupingMode.PACKAGES);
+        heatMapTabContent.setFilteringModeDefaults();
         tab.setContent(heatMapTabContent.getNode());
         tabPane.getTabs().add(tab);
 
         // Commit tab
         tab = new Tab();
         tab.setText(Constants.COMMIT_GROUPING_TEXT);
-        HeatMapFlowPane commitTabContent = new HeatMapFlowPane();
+        commitTabContent = new HeatMapFlowPane();
         commitTabContent.setGroupingMode(GroupingMode.COMMITS);
+        commitTabContent.setFilteringModeDefaults();
         tab.setContent(commitTabContent.getNode());
         tabPane.getTabs().add(tab);
 
@@ -229,18 +235,29 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         parent.layout();
     }
 
-    private void allRadioButtonClicked(Observable observable, boolean oldValue, boolean newValue) {
-        topFilesSlider.setVisible(oldValue);
+    private void allRadioButtonClicked(Observable observable, boolean wasPreviouslySelected, boolean isNowSelected) {
+        System.out.printf("ARB isNowSelected %s%n", isNowSelected);
+        if(isNowSelected) {
+            heatMapTabContent.setFilteringMode(Constants.FilterMode.ALL_FILES, -1);
+            commitTabContent.setFilteringMode(Constants.FilterMode.ALL_FILES, -1);
+        }
     }
 
-    private void topRadioButtonClicked(Observable observable, boolean oldValue, boolean newValue) {
-        topFilesSlider.setVisible(oldValue);
+    private void topRadioButtonClicked(Observable observable, boolean wasPreviouslySelected, boolean isNowSelected) {
+        System.out.printf("TRD isNowSelected %s%n", isNowSelected);
+        topFilesSlider.setVisible(isNowSelected);
+        if(isNowSelected) {
+            heatMapTabContent.setFilteringMode(Constants.FilterMode.X_FILES, (int) topFilesSlider.getValue());
+            commitTabContent.setFilteringMode(Constants.FilterMode.X_FILES, (int) topFilesSlider.getValue());
+        }
     }
 
-    private void sliderValueUpdated(Observable observable, Number oldValue, Number newValue) {
-        System.out.printf("Slider updated to %s, change how many files are showing.%n", newValue.toString());
-
-
+    private void sliderValueUpdated(MouseEvent mouseEvent) {
+//        System.out.printf("Slider updated to %s, change how many files are showing.%n", topFilesSlider.getValue());
+        // We can only use this slider when top radio is selected
+        // So we know we are in X_FILES mode
+        heatMapTabContent.setFilteringMode(Constants.FilterMode.X_FILES, (int)topFilesSlider.getValue());
+        commitTabContent.setFilteringMode(Constants.FilterMode.X_FILES, (int)topFilesSlider.getValue());
     }
     //endregion
 

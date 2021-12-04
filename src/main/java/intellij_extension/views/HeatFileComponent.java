@@ -29,4 +29,8 @@ public class HeatFileComponent extends Pane {
     public Integer getFileHeatLevel() {
         return fileHeatLevel;
     }
+
+    public HeatFileContainer getContainer() {
+        return parent;
+    }
 }
