@@ -94,19 +94,18 @@ public class DashboardPane implements IContainerView, CodeBaseObserver {
     public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode, HeatMetricOptions heatMetricOption) {
 
         Codebase codebase = Codebase.getInstance();
-        //double scoreNumberOfAuthors = HeatCalculationUtility.averageHeatLevel(codebase, HeatMetricOptions.NUM_OF_AUTHORS);
 
         Platform.runLater(() -> {
             System.out.println("Creating the dashboard...");
             flowPane.getChildren().clear();
 
-            double scoreOverall = HeatCalculationUtility.averageHeatLevel(codebase, HeatMetricOptions.OVERALL);
+            double scoreOverall = codebase.getAverageHeatOverall();
             Label scoreOverallText = new Label(String.format("Overall Score: %s", scoreOverall));
 
-            double scoreFileSize = HeatCalculationUtility.averageHeatLevel(codebase, HeatMetricOptions.FILE_SIZE);
+            double scoreFileSize = codebase.getAverageHeatFileSize();
             Label scoreFileSizeText = new Label(String.format("File Size Score: %s", scoreFileSize));
 
-            double scoreNumberOfCommits = HeatCalculationUtility.averageHeatLevel(codebase, HeatMetricOptions.NUM_OF_COMMITS);
+            double scoreNumberOfCommits = codebase.getAverageHeatNumberOfCommits();
             Label scoreNumberOfCommitsText = new Label(String.format("Number of Commits Score: %s", scoreNumberOfCommits));
 
             double scoreNumberOfAuthors = codebase.getAverageHeatNumberOfAuthors();
