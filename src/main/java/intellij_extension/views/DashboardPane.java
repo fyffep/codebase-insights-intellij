@@ -92,29 +92,28 @@ public class DashboardPane implements IContainerView, CodeBaseObserver {
     //TODO edit method signature & Javadoc
     @Override
     public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode groupingMode, HeatMetricOptions heatMetricOption) {
+
+        Codebase codebase = Codebase.getInstance();
+        //double scoreNumberOfAuthors = HeatCalculationUtility.averageHeatLevel(codebase, HeatMetricOptions.NUM_OF_AUTHORS);
+
         Platform.runLater(() -> {
+            System.out.println("Creating the dashboard...");
             flowPane.getChildren().clear();
 
-            Codebase codebase = Codebase.getInstance();
-
-            /*double scoreOverall = HeatCalculationUtility.averageHeatLevel(codebase, HeatMetricOptions.OVERALL);
+            double scoreOverall = HeatCalculationUtility.averageHeatLevel(codebase, HeatMetricOptions.OVERALL);
             Label scoreOverallText = new Label(String.format("Overall Score: %s", scoreOverall));
 
             double scoreFileSize = HeatCalculationUtility.averageHeatLevel(codebase, HeatMetricOptions.FILE_SIZE);
             Label scoreFileSizeText = new Label(String.format("File Size Score: %s", scoreFileSize));
 
             double scoreNumberOfCommits = HeatCalculationUtility.averageHeatLevel(codebase, HeatMetricOptions.NUM_OF_COMMITS);
-            Label scoreNumberOfCommitsText = new Label(String.format("Number of Commits Score: %s", scoreNumberOfCommits));*/
+            Label scoreNumberOfCommitsText = new Label(String.format("Number of Commits Score: %s", scoreNumberOfCommits));
 
-            HeatCalculationUtility.assignHeatLevels(codebase, HeatMetricOptions.NUM_OF_AUTHORS);
-
-            //double scoreNumberOfAuthors = HeatCalculationUtility.averageHeatLevel(codebase, setOfFiles, targetCommit, HeatMetricOptions.NUM_OF_AUTHORS);
-            double scoreNumberOfAuthors = HeatCalculationUtility.averageHeatLevel(codebase, HeatMetricOptions.NUM_OF_AUTHORS);
+            double scoreNumberOfAuthors = codebase.getAverageHeatNumberOfAuthors();
             Label scoreNumberOfAuthorsText = new Label(String.format("Number of Authors Score: %s", scoreNumberOfAuthors));
 
             //Add all labels to the view
-            //flowPane.getChildren().addAll(scoreOverallText, scoreFileSizeText, scoreNumberOfCommitsText, scoreNumberOfAuthorsText);
-            flowPane.getChildren().add(scoreNumberOfAuthorsText);
+            flowPane.getChildren().addAll(scoreOverallText, scoreFileSizeText, scoreNumberOfCommitsText, scoreNumberOfAuthorsText);
 
             System.out.println("Finished creating the dashboard.");
         });
