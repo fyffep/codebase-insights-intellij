@@ -1,5 +1,6 @@
 package intellij_extension.utility;
 
+import intellij_extension.Constants;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.FileObject;
 import javafx.scene.paint.Color;
@@ -32,7 +33,7 @@ class HeatCalculationUtilityTest
         codebase.newBranchSelected("development");
         repositoryAnalyzer.attachCodebaseData(codebase);
 
-        HeatCalculationUtility.assignHeatLevelsFileSize(codebase); //method being tested
+        HeatCalculationUtility.assignHeatLevels(codebase, Constants.HeatMetricOptions.FILE_SIZE); //method being tested
 
         //Verify heat at certain commits
         FileObject fileUnderTest = codebase.createOrGetFileObjectFromPath("HeatMapPane.java");
