@@ -25,10 +25,7 @@ import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-/**
- * A view that holds rectangles to represent files for a particular commit.
- * Each rectangle is colored based on the heat values assigned to its corresponding file.
- */
+
 public class DashboardPane implements IContainerView, CodeBaseObserver {
 
     //region Vars
@@ -81,25 +78,28 @@ public class DashboardPane implements IContainerView, CodeBaseObserver {
 
     private void setupDashboard()
     {
-        Codebase codebase = Codebase.getInstance();
-
         Platform.runLater(() -> {
             System.out.println("Creating the dashboard...");
             clearPane();
 
-            //FIXME adding this label causes the view to not render...
-            Label scoreTitleLabel = new Label("Average Heat Scores out of 10 for Each Metric");
+            //Set a heading to explain the average scores below it
+            Label scoreTitleLabel = new Label("Average Heat Scores Out of 10 From Each Metric");
             scoreTitleLabel.setFont(Font.font(Constants.HEADER_FONT, Constants.SF_TEXT_FONT_WEIGHT, 18));
             scoreTitleLabel.wrapTextProperty().set(true);
             vbox.getChildren().add(scoreTitleLabel);
 
             //Add the average heat scores to the dashboard
-            FlowPane scoreFlowPane = createScoreFlowPane(codebase);
+            FlowPane scoreFlowPane = createScoreFlowPane();
             vbox.getChildren().add(scoreFlowPane);
 
-            //begin adding of hottest files
+            //Set a heading to explain the hottest files below it
+            Label hottestFilesTitleLabel = new Label("The #1 Hottest Files From Each Metric");
+            hottestFilesTitleLabel.setFont(Font.font(Constants.HEADER_FONT, Constants.SF_TEXT_FONT_WEIGHT, 18));
+            hottestFilesTitleLabel.wrapTextProperty().set(true);
+            vbox.getChildren().add(hottestFilesTitleLabel);
 
-            //end adding of hottest files
+            //Add hottest files
+            addHottestFileHyperlinks();
 
             System.out.println("Finished creating the dashboard.");
         });
@@ -110,7 +110,7 @@ public class DashboardPane implements IContainerView, CodeBaseObserver {
      * Inside each ScoreContainer is the average score for that metric across all files
      * present at the latest commit and a caption to indicate the metric name.
      */
-    private FlowPane createScoreFlowPane(Codebase codebase)
+    private FlowPane createScoreFlowPane()
     {
         FlowPane scoreFlowPane = new FlowPane();
         anchorPane.getChildren().add(scoreFlowPane);
@@ -121,37 +121,18 @@ public class DashboardPane implements IContainerView, CodeBaseObserver {
         scoreFlowPane.setHgap(Constants.HEATMAP_HORIZONTAL_SPACING);
         scoreFlowPane.setPadding(Constants.HEATMAP_PADDING);
 
-        /*double scoreOverall = codebase.getAverageHeatOverall();
-        ScoreContainer scoreContainerOverall = new ScoreContainer(scoreOverall, String.format(scoreFormat, Constants.OVERALL_TEXT));
-        scoreFlowPane.getChildren().add(scoreContainerOverall.getNode());
-
-        double scoreFileSize = codebase.getAverageHeatFileSize();
-        ScoreContainer scoreContainerFileSize = new ScoreContainer(scoreFileSize, String.format(scoreFormat, Constants.OVERALL_TEXT));
-        scoreFlowPane.getChildren().add(scoreContainerFileSize.getNode());
-
-        double scoreNumberOfCommits = codebase.getAverageHeatNumberOfCommits();
-        ScoreContainer scoreContainerNumberOfCommits = new ScoreContainer(scoreNumberOfCommits, String.format(scoreFormat, Constants.OVERALL_TEXT));
-        scoreFlowPane.getChildren().add(scoreContainerNumberOfCommits.getNode());
-
-        double scoreNumberOfAuthors = codebase.getAverageHeatNumberOfAuthors();
-        ScoreContainer scoreContainerNumberOfAuthors = new ScoreContainer(scoreNumberOfAuthors, String.format(scoreFormat, Constants.OVERALL_TEXT));
-        scoreFlowPane.getChildren().add(scoreContainerNumberOfAuthors.getNode());*/
-
-        final String scoreFormat = "%s Score"; //displays text such as "Overall Score" in each label
-
+        //Get the list of all average scores
         DashboardModel dashboardModel = DashboardModel.getInstance();
         ArrayList<Double> averageScoreList = dashboardModel.getAverageHeatScoreList();
-        ArrayList<String> namesOfHottestFilesList = dashboardModel.getNamesOfHottestFileList();
-        assert averageScoreList.size() == namesOfHottestFilesList.size();
         assert averageScoreList.size() == HeatMetricOptions.values().length;
+
         //For every metric, add a ScoreContainer to represent the average of that metric
         int i = 0;
-        for (Constants.HeatMetricOptions heatMetricOption : Constants.HeatMetricOptions.values())
+        for (String heatMetricText : Constants.HEAT_METRIC_OPTIONS)
         {
             //Get the score and heat metric name (caption)
             double averageScore = averageScoreList.get(i);
-            String scoreText = Constants.HEAT_METRIC_OPTIONS.get(i);
-            String captionText = String.format(scoreFormat, scoreText);
+            String captionText = String.format("%s Score", heatMetricText); //displays text such as "Overall Score" in each label
 
             //Place above data into a ScoreContainer view
             ScoreContainer scoreContainerNumberOfAuthors = new ScoreContainer(averageScore, captionText);
@@ -163,12 +144,42 @@ public class DashboardPane implements IContainerView, CodeBaseObserver {
         return scoreFlowPane;
     }
 
-    private Hyperlink createFileHyperlink(String fileName)
+
+    /**
+     * Places a Hyperlink for the #1 hottest file from each metric onto the dashboard
+     */
+    private void addHottestFileHyperlinks()
     {
-        Hyperlink hyperlink = new Hyperlink(fileName);
-        //hyperlink.setAlignment(Pos.TOP_CENTER);
+        DashboardModel dashboardModel = DashboardModel.getInstance();
+        ArrayList<String> namesOfHottestFilesList = dashboardModel.getNamesOfHottestFileList();
+        assert namesOfHottestFilesList.size() == HeatMetricOptions.values().length;
+
+        //For every metric, add a Hyperlink containing the heat metric name and the file name
+        int i = 0;
+        for (String heatMetricText : Constants.HEAT_METRIC_OPTIONS)
+        {
+            String fileName = namesOfHottestFilesList.get(i);
+
+            //Add the name of the file as a Hyperlink to the Dashboard
+            Hyperlink hyperlink = createFileHyperlink(heatMetricText, fileName);
+            vbox.getChildren().add(hyperlink);
+
+            i++;
+        }
+    }
+
+    /**
+     * Creates a Hyperlink so that, when clicking on a file name, it is as if that file
+     * was selected in the heat map. Other views are populated with that file's data accordingly.
+     */
+    private Hyperlink createFileHyperlink(String heatMetricName, String fileName)
+    {
+        Hyperlink hyperlink = new Hyperlink(String.format("Hottest file from %s: %s", heatMetricName, fileName));
         //On clicking the hyperlink, populate the plugin panes with the file data
-        hyperlink.setOnAction(event -> HeatMapController.getInstance().heatMapComponentSelected(fileName));
+        if (!fileName.equals(Constants.NO_FILES_EXIST))
+        {
+            hyperlink.setOnAction(event -> HeatMapController.getInstance().heatMapComponentSelected(fileName));
+        }
 
         return hyperlink;
     }
