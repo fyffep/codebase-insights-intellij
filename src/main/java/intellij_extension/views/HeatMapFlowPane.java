@@ -13,7 +13,6 @@ import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.views.interfaces.IContainerView;
 import javafx.application.Platform;
 import javafx.scene.Node;
-import javafx.scene.control.Control;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
@@ -21,6 +20,10 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
+
+import static intellij_extension.Constants.TOOLTIP_FORMAT;
+import static intellij_extension.Constants.TOP_FILE_WARNING;
+import static intellij_extension.Constants.BLANK;
 
 import java.util.*;
 
@@ -159,6 +162,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
 
         Platform.runLater(() -> {
             flowPane.getChildren().clear();
+            int maxFileCounter = 0;
 
             for (Map.Entry<String, TreeSet<FileObject>> entry : setOfFiles.entrySet()) {
                 // Get package name
@@ -186,6 +190,12 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                     heatFileComponent.setStyle(colorFormat);
                     heatFileContainer.addNode(heatFileComponent);
                     topHeatFileComponents.add(heatFileComponent);
+
+                    // Adds the glowing behaviour to the file component iff the file is in the top 20
+                    if (maxFileCounter < Constants.MAX_NUMBER_OF_FILTERING_FILES) {
+                        heatFileComponent.setFadeTransition();
+                        maxFileCounter++;
+                    }
 
                     setFileToolTip(fileObject, heatLevel, groupingKey, fileObject.getHeatMetricString(heatObject, heatMetricOption), heatFileComponent);
                 }
@@ -216,11 +226,21 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     private void setFileToolTip(@NotNull FileObject fileObject, int heatLevel, String groupName, String heatMetricString, HeatFileComponent heatFileComponent) {
         // Add a tooltip to the file pane
         String fileName = fileObject.getFilename();
-        Tooltip tooltip = new Tooltip(String.format("%s\nHeat Level = %d\n%s\n\nGroup: %s", fileName, heatLevel, heatMetricString, groupName));
+        Tooltip tooltip = new Tooltip(getToolTipMessage(fileName, heatLevel, groupName, heatMetricString, heatFileComponent));
         tooltip.setFont(Constants.TOOLTIP_FONT);
         tooltip.setShowDelay(Duration.ZERO);
         tooltip.setHideDelay(Duration.seconds(10));
         Tooltip.install(heatFileComponent, tooltip);
+    }
+
+    private String getToolTipMessage(String fileName, int heatLevel, String groupName, String heatMetricString, HeatFileComponent heatFileComponent) {
+        return String.format(TOOLTIP_FORMAT, getWarningMessage(heatFileComponent), fileName, heatLevel, heatMetricString, groupName);
+    }
+
+    // Sets a top 20 warning message in the tool tip if file is one of the top 20 files
+    private String getWarningMessage(HeatFileComponent heatFileComponent) {
+        if (heatFileComponent.hasFadeTransition()) return TOP_FILE_WARNING;
+        else return BLANK;
     }
 
     @Override
