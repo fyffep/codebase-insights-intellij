@@ -6,12 +6,17 @@ import intellij_extension.Constants;
 import intellij_extension.Constants.GroupingMode;
 import intellij_extension.Constants.HeatMetricOptions;
 import intellij_extension.models.redesign.Codebase;
+import intellij_extension.models.redesign.DashboardModel;
+import intellij_extension.utility.DashboardCalculationUtility;
 import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.utility.RepositoryAnalyzer;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.ArrayList;
+
+import static intellij_extension.Constants.HEAT_METRIC_OPTIONS;
 
 public class HeatMapController extends PreloadingActivity implements IHeatMapController {
 
@@ -40,7 +45,7 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
         System.out.println("Preloading HeatMapController..."); //logger fails here
         //Analyze Codebase
         extractData();
-        computeDashboardData();
+        DashboardCalculationUtility.assignDashboardData();
         //Trigger view update
         codeBase.heatMapGroupingChanged(Constants.DEFAULT_GROUPING);
         System.out.println("Finished preloading HeatMapController.");
@@ -65,24 +70,6 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
         }
         System.out.println("Heat calculations complete. Number of files: " + codeBase.getActiveFileObjects().size());
     }
-
-    /**
-     * Determines the average score for every heat metric.
-     */
-    public void computeDashboardData()
-    {
-        double scoreOverall = HeatCalculationUtility.averageHeatLevel(codeBase, HeatMetricOptions.OVERALL);
-        codeBase.setAverageHeatOverall(scoreOverall);
-
-        double scoreFileSize = HeatCalculationUtility.averageHeatLevel(codeBase, HeatMetricOptions.FILE_SIZE);
-        codeBase.setAverageHeatFileSize(scoreFileSize);
-
-        double scoreNumberOfCommits = HeatCalculationUtility.averageHeatLevel(codeBase, HeatMetricOptions.NUM_OF_COMMITS);
-        codeBase.setAverageHeatNumberOfCommits(scoreNumberOfCommits);
-
-        double scoreNumberOfAuthors = HeatCalculationUtility.averageHeatLevel(codeBase, HeatMetricOptions.NUM_OF_AUTHORS);
-        codeBase.setAverageHeatNumberOfAuthors(scoreNumberOfAuthors);
-    }
     //endregion
 
     //region View-to-Model communication bridge
@@ -101,11 +88,11 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
 
     public void newHeatMetricSelected(String heatMetricOption) {
         HeatMetricOptions newOption;
-        if (heatMetricOption.equals(Constants.HEAT_METRIC_OPTIONS.get(0))) {
+        if (heatMetricOption.equals(HEAT_METRIC_OPTIONS.get(0))) {
             newOption = HeatMetricOptions.OVERALL;
-        } else if (heatMetricOption.equals(Constants.HEAT_METRIC_OPTIONS.get(1))) {
+        } else if (heatMetricOption.equals(HEAT_METRIC_OPTIONS.get(1))) {
             newOption = HeatMetricOptions.FILE_SIZE;
-        } else if (heatMetricOption.equals(Constants.HEAT_METRIC_OPTIONS.get(2))) {
+        } else if (heatMetricOption.equals(HEAT_METRIC_OPTIONS.get(2))) {
             newOption = HeatMetricOptions.NUM_OF_COMMITS;
         } else {
             newOption = HeatMetricOptions.NUM_OF_AUTHORS;

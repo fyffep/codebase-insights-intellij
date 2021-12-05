@@ -42,6 +42,10 @@ public class Constants {
             NUMBER_OF_COMMITS_TEXT,
             NUMBER_OF_AUTHORS_TEXT
     );
+    // !!!
+    //IMPORTANT: Make sure the HEAT_METRIC_OPTIONS and HeatMetricOptions correspond
+    //because other code iterates through them both with this assumption.
+    // !!!
     public enum HeatMetricOptions {
         OVERALL,
         FILE_SIZE,
@@ -131,6 +135,7 @@ public class Constants {
     public static final String HEAT_GROUPING_TEXT = "Group by Package";
     public static final String COMMIT_GROUPING_TEXT = "Group by Commit Contiguity";
     public static final String SEPARATOR = "~";
+    public static final String NO_FILES_EXIST = "No files exist";
     //endregion
 
     //Prevent instantiation
