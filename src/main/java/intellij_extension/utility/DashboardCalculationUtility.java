@@ -83,8 +83,10 @@ public class DashboardCalculationUtility
 
             if (heatObject == null) continue; //file was not a part of the commit
 
-            if (heatObject.getHeatLevel() > highestHeat)
+            if (heatObject.getHeatLevel() > highestHeat) {
                 highestHeat = heatObject.getHeatLevel();
+                nameOfHottestFile = fileObject.getFilename();
+            }
         }
 
         return nameOfHottestFile;
