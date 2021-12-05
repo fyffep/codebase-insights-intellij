@@ -21,7 +21,7 @@ public class HeatCalculationUtility
      * Converts the input heat level to a color.
      * Higher heat levels are indicated by higher intensities of red.
      * @param heatLevel a number from 1 to 10
-     * @return a hexadecimal String of the form "FFFFFF" representing a color
+     * @return a Color between blue (for 1) and red (for 10)
      */
     public static Color colorOfHeat(int heatLevel) {
         // Get percentage
@@ -31,6 +31,22 @@ public class HeatCalculationUtility
         Color heatColor = Constants.HEAT_MIN_COLOR.interpolate(Constants.HEAT_MAX_COLOR, heatPercentage);
 
         return heatColor;
+    }
+
+
+    /**
+     * Converts the input heat level to a color.
+     * Higher heat levels are indicated by higher intensities of red.
+     * @param heatLevel a number from 1 to 10
+     * @return a hexadecimal String of the form "FFFFFF" representing a color
+     */
+    public static String colorOfHeatAsHex(int heatLevel) {
+        //Convert heat level to Color
+        Color fileHeatColor = colorOfHeat(heatLevel);
+
+        //Convert Color to hex
+        String colorString = fileHeatColor.toString();
+        return colorString.substring(colorString.indexOf("x") + 1);
     }
 
 
