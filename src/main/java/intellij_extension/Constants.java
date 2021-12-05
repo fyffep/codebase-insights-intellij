@@ -109,6 +109,7 @@ public class Constants {
     //endregion
 
     //region UI Strings
+    public static final String BLANK = "";
     public static final String FCH_DEFAULT_HEADER_TEXT = "File's Commit History:";
     public static final String FCH_HEADER_SUFFIX_TEXT = "'s Commit History:";
     public static final String CD_HEADER_TEXT = "Commit Details:";
@@ -136,6 +137,8 @@ public class Constants {
     public static final String COMMIT_GROUPING_TEXT = "Group by Commit Contiguity";
     public static final String SEPARATOR = "~";
     public static final String NO_FILES_EXIST = "No files exist";
+    public static final String TOOLTIP_FORMAT = "%s%s\nHeat Level = %d\n%s\n\nGroup: %s";
+    public static final String TOP_FILE_WARNING = "THIS IS ONE OF THE TOP 20 HOTTEST FILES!!!\n\n";
     //endregion
 
     //Prevent instantiation
