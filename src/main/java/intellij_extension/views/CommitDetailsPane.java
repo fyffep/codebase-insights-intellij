@@ -154,7 +154,9 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
     private void setFileListContainerProperties(@NotNull ScrollPane fileListContainer) {
         // Set up constraints on width/height
         fileListContainer.prefWidthProperty().bind(parent.widthProperty());
-        fileListContainer.fitToHeightProperty().set(true);
+        fileListContainer.prefHeightProperty().bind(parent.heightProperty());
+        fileListContainer.setFitToWidth(true);
+        fileListContainer.setFitToHeight(true);
     }
 
     private void setFileListProperties() {
@@ -280,10 +282,10 @@ public class CommitDetailsPane implements IContainerView, CodeBaseObserver {
             fileList.getChildren().add(deleteBody);
         }
 
+        // Go to top of list
+        fileListContainer.setVvalue(0);
         // Show scroll pane
         fileListContainer.setVisible(true);
-
-        parent.layout();
     }
     //endregion
 

@@ -4,6 +4,7 @@ import intellij_extension.Constants;
 import intellij_extension.Constants.FilterMode;
 import intellij_extension.Constants.GroupingMode;
 import intellij_extension.Constants.HeatMetricOptions;
+import intellij_extension.controllers.HeatMapController;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
 import intellij_extension.models.redesign.FileObject;
@@ -12,12 +13,18 @@ import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.views.interfaces.IContainerView;
 import javafx.application.Platform;
+import javafx.beans.Observable;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.scene.Node;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,22 +43,48 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     //region Vars
     // Basically this class' main nodes
     // ScrollPane -> AnchorPane -> FlowPane
-    private ScrollPane scrollPane;
-    private AnchorPane anchorPane;
-    private FlowPane flowPane;
+    private final VBox parent;
+    private final ScrollPane scrollPane;
+    private final AnchorPane anchorPane;
+    private final FlowPane flowPane;
     private FilterMode filteringMode;
     private int filterMax = Constants.MAX_NUMBER_OF_FILTERING_FILES;
     private GroupingMode groupingMode;
+    // Banner that holds heat metric, branch comboBoxes, and filtering controls
+    private final VBox topHorizontalBanner;
+    private final HBox controlsContainer;
+    private ComboBox<String> heatMetricComboBox;
+    private RadioButton allFilesButton;
+    private RadioButton topFilesButton;
+    private Slider topFilesSlider;
+
     // For filtering
     private PriorityQueue<HeatFileComponent> topHeatFileComponents;
     //endregion
 
     //region Constructors
     public HeatMapFlowPane() {
+        parent = new VBox();
+        parent.setMinWidth(Constants.ZERO_WIDTH);
+        parent.setMinHeight(Constants.ZERO_WIDTH);
+
+        // Create the top horizontal banner
+        topHorizontalBanner = new VBox();
+        topHorizontalBanner.setMinWidth(Constants.ZERO_WIDTH);
+        topHorizontalBanner.prefWidthProperty().bind(parent.widthProperty());
+        // Child layout properties
+        topHorizontalBanner.setAlignment(Constants.BANNER_ALIGNMENT);
+        parent.getChildren().add(topHorizontalBanner);
+
         // Create ScrollPane
         scrollPane = new ScrollPane();
         // Set Properties
         scrollPane.setMinWidth(Constants.ZERO_WIDTH);
+        scrollPane.prefWidthProperty().bind(parent.widthProperty());
+        scrollPane.prefHeightProperty().bind(parent.heightProperty());
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        parent.getChildren().add(scrollPane);
 
         // Create the AnchorPane inside the ScrollPane
         anchorPane = new AnchorPane();
@@ -71,9 +104,115 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         flowPane.setHgap(Constants.HEATMAP_HORIZONTAL_SPACING);
         flowPane.setPadding(Constants.HEATMAP_PADDING);
 
+        // Create the controls!
+        controlsContainer = new HBox();
+        createHeatMetricComboBox();
+        createTopAllControls();
+
         // Register self as an observer of the model
         Codebase model = Codebase.getInstance();
         model.registerObserver(this);
+    }
+    //endregion
+
+    //region UI Creation
+    private void createHeatMetricComboBox() {
+        // Create the HBox for the combo boxes
+        topHorizontalBanner.getChildren().add(controlsContainer);
+        // Add constraints to width/height
+        controlsContainer.setMinHeight(Constants.BANNER_MIN_HEIGHT);
+        controlsContainer.setMinWidth(Constants.ZERO_WIDTH);
+        controlsContainer.prefWidthProperty().bind(topHorizontalBanner.widthProperty());
+        // Child layout properties
+        controlsContainer.setAlignment(Constants.BANNER_ALIGNMENT);
+        controlsContainer.setSpacing(Constants.BANNER_SPACING);
+        controlsContainer.setPadding(Constants.BANNER_INSETS);
+
+        // Label for heatMetric ComboBox
+        Text heatMetricTitle = new Text();
+        controlsContainer.getChildren().add(heatMetricTitle);
+        heatMetricTitle.setText(Constants.HEAT_METRIC_COMBOBOX_TITLE);
+
+        // Create heatMetric comboBox
+        heatMetricComboBox = new ComboBox<>();
+        controlsContainer.getChildren().add(heatMetricComboBox);
+        // Set up observable list
+        heatMetricComboBox.setItems(Constants.HEAT_METRIC_OPTIONS);
+        heatMetricComboBox.getSelectionModel().select(0);
+        // Set up the select action
+        heatMetricComboBox.setOnAction(this::heatMetricOptionSelectedAction);
+        //Set default option (TEMPORARY to avoid confusion while Overall heat is not yet implemented)
+        heatMetricComboBox.setValue("Number of Commits");
+    }
+
+    private void createTopAllControls() {
+        // Top-Vs-All Files controls
+        // Radio button group
+        ToggleGroup fileFilteringGroup = new ToggleGroup();
+
+        // Radio buttons
+        allFilesButton = new RadioButton("All Files");
+        allFilesButton.setToggleGroup(fileFilteringGroup);
+        allFilesButton.setSelected(false);
+        allFilesButton.selectedProperty().addListener(this::allRadioButtonClicked);
+        controlsContainer.getChildren().add(allFilesButton);
+
+        topFilesButton = new RadioButton(String.format("Top %s Hottest Files", Constants.MAX_NUMBER_OF_FILTERING_FILES));
+        topFilesButton.setToggleGroup(fileFilteringGroup);
+        topFilesButton.setSelected(true);
+        topFilesButton.selectedProperty().addListener(this::topRadioButtonClicked);
+        controlsContainer.getChildren().add(topFilesButton);
+
+        // Slider to control # of top commits
+        topFilesSlider = new Slider();
+        topFilesSlider.setMin(0);
+        topFilesSlider.setMax(Constants.MAX_NUMBER_OF_FILTERING_FILES);
+        topFilesSlider.setValue(Constants.MAX_NUMBER_OF_FILTERING_FILES);
+        topFilesSlider.setShowTickLabels(true);
+        topFilesSlider.setSnapToTicks(true);
+        topFilesSlider.setSnapToPixel(true);
+        topFilesSlider.setMajorTickUnit(Constants.X_FILES_MAJOR_TICK);
+        topFilesSlider.setMinorTickCount(Constants.X_FILES_MINOR_TICK);
+        topFilesSlider.setOnMouseReleased(this::sliderValueChangeConfirmed);
+        topFilesSlider.valueProperty().addListener(this::sliderValueChanging);
+        controlsContainer.getChildren().add(topFilesSlider);
+    }
+    //endregion
+
+    //region UI Actions
+    private void heatMetricOptionSelectedAction(ActionEvent event) {
+        String selectedValue = heatMetricComboBox.getValue();
+
+        HeatMapController.getInstance().newHeatMetricSelected(selectedValue);
+    }
+
+    private void allRadioButtonClicked(javafx.beans.Observable observable, boolean wasPreviouslySelected, boolean isNowSelected) {
+        System.out.printf("ARB isNowSelected %s%n", isNowSelected);
+        if(isNowSelected) {
+            setFilteringMode(Constants.FilterMode.ALL_FILES, -1);
+        }
+    }
+
+    private void topRadioButtonClicked(Observable observable, boolean wasPreviouslySelected, boolean isNowSelected) {
+        System.out.printf("TRD isNowSelected %s%n", isNowSelected);
+        topFilesSlider.setVisible(isNowSelected);
+        if(isNowSelected) {
+            setFilteringMode(Constants.FilterMode.X_FILES, (int) topFilesSlider.getValue());
+        }
+    }
+
+    private void sliderValueChangeConfirmed(MouseEvent mouseEvent) {
+        // We can only use this slider when top radio is selected
+        // So we know we are in X_FILES mode
+        if(topFilesSlider.getValue() == 0) {
+            topFilesSlider.setValue(1);
+        }
+        topFilesButton.setText(String.format("Top %s Hottest Files", (int)topFilesSlider.getValue()));
+        setFilteringMode(Constants.FilterMode.X_FILES, (int)topFilesSlider.getValue());
+    }
+
+    private void sliderValueChanging(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
+        topFilesButton.setText(String.format("Top %s Hottest Files", (int)topFilesSlider.getValue()));
     }
     //endregion
 
@@ -133,7 +272,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     //region IContainerView methods
     @Override
     public Node getNode() {
-        return scrollPane;
+        return parent;
     }
 
     @Override
@@ -205,16 +344,6 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                     flowPane.getChildren().add(heatFileContainer);
                 }
             }
-
-//            int index = 0;
-//            PriorityQueue<HeatFileComponent> temp = new PriorityQueue<>(Comparator.comparing(HeatFileComponent::getFileHeatLevel).reversed());
-//            Iterator<HeatFileComponent> topHeatFileComponentIterator = topHeatFileComponents.iterator();
-//            while(topHeatFileComponentIterator.hasNext() && index < Constants.MAX_NUMBER_OF_FILTERING_FILES) {
-//                HeatFileComponent component = topHeatFileComponentIterator.next();
-//                temp.add(component);
-//                index++;
-//            }
-//            topHeatFileComponents = temp;
 
             if(filteringMode == FilterMode.X_FILES) {
                 filterHeatMap();
