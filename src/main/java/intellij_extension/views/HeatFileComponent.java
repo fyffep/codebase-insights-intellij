@@ -6,6 +6,7 @@ import intellij_extension.models.redesign.FileObject;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
+import javafx.scene.effect.Glow;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 
@@ -42,10 +43,13 @@ public class HeatFileComponent extends Pane {
     // Adds a fade transition to the file when called
     public void setFadeTransition() {
         this.hasFadeTransition = true;
+        Glow glow = new Glow();
+        glow.setLevel(1.5);
+        this.setEffect(glow);
         Platform.runLater(() -> {
-            FadeTransition fadeTransition = new FadeTransition(Duration.seconds(0.8), this);
-            fadeTransition.setFromValue(1.0);
-            fadeTransition.setToValue(0.0);
+            FadeTransition fadeTransition = new FadeTransition(Duration.seconds(0.6), this);
+            fadeTransition.setFromValue(0.5);
+            fadeTransition.setToValue(1.5);
             fadeTransition.setCycleCount(Animation.INDEFINITE);
             fadeTransition.play();
         });
