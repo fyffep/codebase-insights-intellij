@@ -6,6 +6,7 @@ import intellij_extension.Constants.HeatMetricOptions;
 import intellij_extension.controllers.HeatMapController;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
+import intellij_extension.models.redesign.DashboardModel;
 import intellij_extension.models.redesign.FileObject;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.views.interfaces.IContainerView;
@@ -19,6 +20,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -103,6 +105,11 @@ public class DashboardPane implements IContainerView, CodeBaseObserver {
         });
     }
 
+    /**
+     * Creates a FlowPane that holds ScoreContainers for every heat metric.
+     * Inside each ScoreContainer is the average score for that metric across all files
+     * present at the latest commit and a caption to indicate the metric name.
+     */
     private FlowPane createScoreFlowPane(Codebase codebase)
     {
         FlowPane scoreFlowPane = new FlowPane();
@@ -114,9 +121,7 @@ public class DashboardPane implements IContainerView, CodeBaseObserver {
         scoreFlowPane.setHgap(Constants.HEATMAP_HORIZONTAL_SPACING);
         scoreFlowPane.setPadding(Constants.HEATMAP_PADDING);
 
-        //TODO use Iterator Pattern here
-        String scoreFormat = "%s Score"; //displays text such as "Overall Score" in each label
-        double scoreOverall = codebase.getAverageHeatOverall();
+        /*double scoreOverall = codebase.getAverageHeatOverall();
         ScoreContainer scoreContainerOverall = new ScoreContainer(scoreOverall, String.format(scoreFormat, Constants.OVERALL_TEXT));
         scoreFlowPane.getChildren().add(scoreContainerOverall.getNode());
 
@@ -130,7 +135,30 @@ public class DashboardPane implements IContainerView, CodeBaseObserver {
 
         double scoreNumberOfAuthors = codebase.getAverageHeatNumberOfAuthors();
         ScoreContainer scoreContainerNumberOfAuthors = new ScoreContainer(scoreNumberOfAuthors, String.format(scoreFormat, Constants.OVERALL_TEXT));
-        scoreFlowPane.getChildren().add(scoreContainerNumberOfAuthors.getNode());
+        scoreFlowPane.getChildren().add(scoreContainerNumberOfAuthors.getNode());*/
+
+        final String scoreFormat = "%s Score"; //displays text such as "Overall Score" in each label
+
+        DashboardModel dashboardModel = DashboardModel.getInstance();
+        ArrayList<Double> averageScoreList = dashboardModel.getAverageHeatScoreList();
+        ArrayList<String> namesOfHottestFilesList = dashboardModel.getNamesOfHottestFileList();
+        assert averageScoreList.size() == namesOfHottestFilesList.size();
+        assert averageScoreList.size() == HeatMetricOptions.values().length;
+        //For every metric, add a ScoreContainer to represent the average of that metric
+        int i = 0;
+        for (Constants.HeatMetricOptions heatMetricOption : Constants.HeatMetricOptions.values())
+        {
+            //Get the score and heat metric name (caption)
+            double averageScore = averageScoreList.get(i);
+            String scoreText = Constants.HEAT_METRIC_OPTIONS.get(i);
+            String captionText = String.format(scoreFormat, scoreText);
+
+            //Place above data into a ScoreContainer view
+            ScoreContainer scoreContainerNumberOfAuthors = new ScoreContainer(averageScore, captionText);
+            scoreFlowPane.getChildren().add(scoreContainerNumberOfAuthors.getNode());
+
+            i++;
+        }
 
         return scoreFlowPane;
     }
@@ -148,7 +176,7 @@ public class DashboardPane implements IContainerView, CodeBaseObserver {
 
     @Override
     public void refreshHeatMap(TreeMap<String, TreeSet<FileObject>> setOfFiles, String targetCommit, GroupingMode currentGroupingMode, HeatMetricOptions currentHeatMetricOption) {
-        // Nothing to do for this action
+        setupDashboard();
     }
 
     @Override
