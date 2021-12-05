@@ -17,6 +17,9 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.Glow;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
@@ -274,6 +277,15 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
 
             // Re-add the heatFile back to the parent
             currentContainer.getChildren().add(heatFile);
+            if(index < filterMax) {
+                if (heatFile.getEffect() == null) {
+                    DropShadow ds = new DropShadow();
+                    ds.setColor(Color.RED);
+                    ds.setRadius(15);
+                    ds.setBlurType(BlurType.GAUSSIAN);
+                    heatFile.setEffect(ds);
+                }
+            }
 
             // Break if we reached the max
             if (index + 1 == filterMax)
@@ -350,7 +362,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
 
                     // Adds the glowing behaviour to the file component iff the file is in the top 20
                     if (maxFileCounter < Constants.MAX_NUMBER_OF_FILTERING_FILES) {
-                        heatFileComponent.setFadeTransition();
+//                        heatFileComponent.setFadeTransition();
                         maxFileCounter++;
                     }
 
