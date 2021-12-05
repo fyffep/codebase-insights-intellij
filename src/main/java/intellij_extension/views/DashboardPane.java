@@ -175,6 +175,8 @@ public class DashboardPane implements IContainerView, CodeBaseObserver {
     private Hyperlink createFileHyperlink(String heatMetricName, String fileName)
     {
         Hyperlink hyperlink = new Hyperlink(String.format("Hottest file from %s: %s", heatMetricName, fileName));
+        hyperlink.setFont(Font.font(Constants.SF_TEXT_FONT, Constants.SF_TEXT_FONT_WEIGHT, Constants.SF_TEXT_SIZE));
+        hyperlink.wrapTextProperty().set(true);
         //On clicking the hyperlink, populate the plugin panes with the file data
         if (!fileName.equals(Constants.NO_FILES_EXIST))
         {

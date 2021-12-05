@@ -1,11 +1,13 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
+import intellij_extension.utility.HeatCalculationUtility;
 import intellij_extension.views.interfaces.IContainerView;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
 /**
@@ -20,16 +22,19 @@ public class ScoreContainer implements IContainerView
 
     public ScoreContainer(double numericPart, String caption) {
         String numberAsText = Double.toString(numericPart);
-        setup(numberAsText, caption);
+        Color numberTextColor = HeatCalculationUtility.colorOfHeat((int) Math.round(numericPart)); //Color numberAsText font according to the heat score
+
+        setup(numberAsText, numberTextColor, caption);
     }
 
     //Create the view elements
-    private void setup(String numericPart, String caption)
+    private void setup(String numericPart, Color numberTextColor, String caption)
     {
         Label jumboNumberLabel = new Label(numericPart);
         jumboNumberLabel.setFont(jumboNumberFont);
         jumboNumberLabel.wrapTextProperty().set(true);
         jumboNumberLabel.setAlignment(Pos.CENTER);
+        jumboNumberLabel.setTextFill(numberTextColor);
 
         Label captionLabel = new Label(caption);
         captionLabel.setFont(captionFont);
