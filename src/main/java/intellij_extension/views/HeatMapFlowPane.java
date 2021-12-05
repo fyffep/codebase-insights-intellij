@@ -148,13 +148,13 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         ToggleGroup fileFilteringGroup = new ToggleGroup();
 
         // Radio buttons
-        allFilesButton = new RadioButton("All Files");
+        allFilesButton = new RadioButton(Constants.ALL_FILES_RADIO_BUTTON_DISPLAY_TEXT);
         allFilesButton.setToggleGroup(fileFilteringGroup);
         allFilesButton.setSelected(false);
         allFilesButton.selectedProperty().addListener(this::allRadioButtonClicked);
         controlsContainer.getChildren().add(allFilesButton);
 
-        topFilesButton = new RadioButton(String.format("Top %s Hottest Files", Constants.MAX_NUMBER_OF_FILTERING_FILES));
+        topFilesButton = new RadioButton(String.format(Constants.TOP_FILES_RADIO_BUTTON_DISPLAY_TEXT, Constants.MAX_NUMBER_OF_FILTERING_FILES));
         topFilesButton.setToggleGroup(fileFilteringGroup);
         topFilesButton.setSelected(true);
         topFilesButton.selectedProperty().addListener(this::topRadioButtonClicked);
@@ -178,7 +178,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     private void setFileToolTip(@NotNull FileObject fileObject, int heatLevel, String groupName, String heatMetricString, HeatFileComponent heatFileComponent) {
         // Add a tooltip to the file pane
         String fileName = fileObject.getFilename();
-        HoveringTooltip tooltip = new HoveringTooltip(120, getToolTipMessage(fileName, heatLevel, groupName, heatMetricString, heatFileComponent));
+        HoveringTooltip tooltip = new HoveringTooltip(Constants.TOOLTIP_DURATION, getToolTipMessage(fileName, heatLevel, groupName, heatMetricString, heatFileComponent));
         tooltip.addHoveringTarget(heatFileComponent);
         tooltip.setFont(Constants.TOOLTIP_FONT);
         tooltip.setShowDelay(Duration.ZERO);
@@ -190,7 +190,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     }
 
     // Sets a top 20 warning message in the tool tip if file is one of the top 20 files
-    private String getWarningMessage(HeatFileComponent heatFileComponent) {
+    private String getWarningMessage(@NotNull HeatFileComponent heatFileComponent) {
         if (heatFileComponent.hasFadeTransition()) return TOP_FILE_WARNING;
         else return BLANK;
     }

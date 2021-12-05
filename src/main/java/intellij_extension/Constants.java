@@ -28,12 +28,9 @@ public class Constants {
         ALL_FILES,
         X_FILES
     }
-    public static final int MAX_NUMBER_OF_FILTERING_FILES = 20;
-    public static final double X_FILES_MAJOR_TICK = 5;
-    public static final int X_FILES_MINOR_TICK = 5;
     
     // Heat Metric List
-    //Note that this affects HeatMapController::newHeatMetricSelected()
+    // Note that this affects HeatMapController::newHeatMetricSelected()
     public static final String OVERALL_TEXT = "Overall Heat";
     public static final String FILE_SIZE_TEXT = "File size";
     public static final String NUMBER_OF_COMMITS_TEXT = "Number of Commits";
@@ -62,7 +59,6 @@ public class Constants {
     //region UI Properties
     // Banners
     public static final int BANNER_MIN_HEIGHT = 40;
-    public static final double BANNER_SIZE_MULTIPLIER = 0.40f;
     // HeatMap FlowPane
     public static final int HEATMAP_VERTICAL_SPACING = 10;
     public static final int HEATMAP_HORIZONTAL_SPACING = 10;
@@ -80,34 +76,24 @@ public class Constants {
     public static final int HEADER_TEXT_SIZE = 24;
     public static final FontWeight HEADER_TEXT_FONT_WEIGHT = FontWeight.BOLD;
     // Text Font properties in Selected File Pane
-    public static final String SF_TYPE_TEXT = "text";
-    public static final String SF_TYPE_HYPERLINK = "hyperlink";
     public static final String SF_TEXT_FONT = "Veranda";
     public static final int SF_TEXT_SIZE = 14;
     public static final FontWeight SF_TEXT_FONT_WEIGHT = FontWeight.BOLD;
-    public static final String SF_HYPERLINK_FONT = "Veranda";
-    public static final int SF_HYPERLINK_SIZE = 14;
-    public static final FontWeight SF_HYPERLINK_FONT_WEIGHT = FontWeight.EXTRA_LIGHT;
-    public static final String SF_FILE_NAME_SPECIFIER = "%-20s";
-    public static final String SF_PACKAGE_NAME_SPECIFIER = "%-15s";
-    public static final String SF_FILE_AUTHOR_SPECIFIER = "%-22s";
-    // File Commit History Commit List
-    public static final int FCH_COMMIT_LIST_MIN_HEIGHT = 0;
     // File Commit History Commit List Columns
     public static final int FCH_DESCRIPTION_COLUMN_MAX_WIDTH = 300;
     // Commit Details Banner
     public static final Font TOOLTIP_FONT = new Font(16);
-    // Commit History Commit List
-    public static final int CH_COMMIT_LIST_MIN_HEIGHT = 0;
-    // Commit History Commit List Columns
-    public static final int CH_DESCRIPTION_COLUMN_MAX_WIDTH = 200;
     //Commit Details Banner
     public static final Pos CD_BANNER_ALIGNMENT = Pos.TOP_LEFT;
     public static final int CD_BANNER_SPACING = 5;
     public static final double FILE_LIST_SIZE_MULTIPLIER = 0.70;
     // Commit Details File List
     public static final double CD_DETAILS_WRAPPING_PERCENTAGE = 0.9f;
-    public static final int FILE_LIST_MIN_HEIGHT = 0;
+    // Heat Map Flow Pane
+    public static final int TOOLTIP_DURATION = 10;
+    public static final int MAX_NUMBER_OF_FILTERING_FILES = 20;
+    public static final double X_FILES_MAJOR_TICK = 5;
+    public static final int X_FILES_MINOR_TICK = 5;
     //endregion
 
     //region UI Strings
@@ -131,7 +117,6 @@ public class Constants {
     public static final String SF_TEXT_FILE_SIZE = "File Size: ";
     public static final String SF_TEXT_NO_OF_COMMITS = "No of Commits: ";
     public static final String SF_TEXT_LINE_COUNT = "Line Count: ";
-    public static final String SF_TEXT_SEPERATOR = ":";
     public static final String BRANCH_COMBOBOX_TITLE = "Evaluating Branch:";
     public static final String HEAT_METRIC_COMBOBOX_TITLE = "Heat Data:";
     public static final String DASHBOARD_TEXT = "Dashboard";
@@ -140,6 +125,8 @@ public class Constants {
     public static final String SEPARATOR = "~";
     public static final String NO_FILES_EXIST = "No files exist";
     public static final String TOOLTIP_FORMAT = "%s%s\nHeat Level = %d\n%s\n\nGroup: %s";
+    public static final String ALL_FILES_RADIO_BUTTON_DISPLAY_TEXT = "All Files";
+    public static final String TOP_FILES_RADIO_BUTTON_DISPLAY_TEXT = "Top %s Hottest Files";
     public static final String TOP_FILE_WARNING = "THIS IS ONE OF THE TOP 20 HOTTEST FILES!!!\n\n";
     //endregion
 
