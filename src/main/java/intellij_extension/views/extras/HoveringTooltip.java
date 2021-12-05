@@ -29,7 +29,6 @@ public class HoveringTooltip extends Tooltip {
     }
 
     public void addHoveringTarget(Node object) {
-
         mapHoveringTarget2Hovering.put(object, false);
         object.setOnMouseEntered(e -> {
             onMouseEntered(object);
@@ -40,7 +39,6 @@ public class HoveringTooltip extends Tooltip {
     }
 
     public void addHoveringTarget(Scene object) {
-
         mapHoveringTarget2Hovering.put(object, false);
         object.setOnMouseEntered(e -> {
             onMouseEntered(object);
@@ -52,17 +50,14 @@ public class HoveringTooltip extends Tooltip {
 
     @Override
     public void hide() {
-
         // super.hide();
     }
 
     public boolean isHovering() {
-
         return isHoveringProperty().get();
     }
 
     public BooleanProperty isHoveringProperty() {
-
         synchronized (mapHoveringTarget2Hovering) {
             for (Map.Entry<Object, Boolean> e : mapHoveringTarget2Hovering.entrySet()) {
                 if (e.getValue()) {
@@ -76,34 +71,25 @@ public class HoveringTooltip extends Tooltip {
     }
 
     private synchronized void onMouseEntered(Object object) {
-
-        // System.err.println("Mouse entered for " + object + ", cancelling timer");
         // stop a potentially running hide timer
         timer.cancel();
         mapHoveringTarget2Hovering.put(object, true);
     }
 
     private synchronized void onMouseExited(Object object) {
-
-        // System.err.println("Mouse exit for " + object + ", starting timer");
         mapHoveringTarget2Hovering.put(object, false);
         startTimer();
     }
 
     private void startTimer() {
-
         timer.cancel();
         timer = new Timer();
         timer.schedule(new TimerTask() {
-
             @Override
             public void run() {
-
                 Platform.runLater(new Runnable() {
-
                     @Override
                     public void run() {
-
                         if (!isHovering())
                             HoveringTooltip.super.hide();
                     }
