@@ -1,17 +1,15 @@
 package intellij_extension.utility;
 
-import com.intellij.vcs.log.Hash;
 import intellij_extension.Constants;
-import intellij_extension.models.redesign.Codebase;
-import intellij_extension.models.redesign.Commit;
-import intellij_extension.models.redesign.FileObject;
-import intellij_extension.models.redesign.HeatObject;
-import intellij_extension.views.HeatFileComponent;
-import intellij_extension.views.HeatFileContainer;
+import intellij_extension.models.redesign.*;
 import javafx.scene.paint.Color;
 
 import java.util.*;
 
+/**
+ * Modifies the Codebase so that every HeatObject within it is given a heat level
+ * according to the specified metric.
+ */
 public class HeatCalculationUtility
 {
     private HeatCalculationUtility() {
@@ -37,7 +35,7 @@ public class HeatCalculationUtility
 
 
 
-    public static void assignHeatLevelsFileSize(Codebase codebase)
+    private static void assignHeatLevelsFileSize(Codebase codebase)
     {
         System.out.println("Calculating heat based on file size...");
         final int REQUIRED_NUM_COMMITS_WITHOUT_CHANGING = 5; //the number of consecutive commits where no increase in a file's size is recorded needed in order to reduce the accumulated heat level.
@@ -109,7 +107,7 @@ public class HeatCalculationUtility
     }
 
 
-    public static void assignHeatLevelsNumberOfCommits(Codebase codebase)
+    private static void assignHeatLevelsNumberOfCommits(Codebase codebase)
     {
         System.out.println("Calculating heat based on number of commits...");
         final int REQUIRED_NUM_COMMITS_WITHOUT_CHANGING = 5; //the number of consecutive commits where the file is not modified in order to reduce the accumulated heat level.
@@ -173,7 +171,7 @@ public class HeatCalculationUtility
 
 
 
-    public static void assignHeatLevelsNumberOfAuthors(Codebase codebase)
+    private static void assignHeatLevelsNumberOfAuthors(Codebase codebase)
     {
         /*
         ---- General description of this method ----
@@ -320,7 +318,7 @@ public class HeatCalculationUtility
     }
 
 
-    public static void assignHeatLevelsOverall(Codebase codebase)
+    private static void assignHeatLevelsOverall(Codebase codebase)
     {
         System.out.println("Calculating overall heat...");
         final float WEIGHT_FILE_SIZE = 0.2f;
@@ -388,37 +386,6 @@ public class HeatCalculationUtility
             }
         }
     }
-
-
-    /**
-     * Returns the average heat level for latest commit in the Codebase.
-     * Rounds the output value to the nearest 10th place.
-     */
-    public static double averageHeatLevel(Codebase codebase, Constants.HeatMetricOptions heatMetricOption)
-    {
-        //Compute every file's heat
-        HeatCalculationUtility.assignHeatLevels(codebase, heatMetricOption);
-
-        //Compute total amount of heat across all files at the latest commit
-        long heatSum = 0;
-        int numberOfFiles = 0;
-        String latestCommitHash = codebase.getLatestCommitHash();
-        for (FileObject fileObject : codebase.getActiveFileObjects())
-        {
-            HeatObject heatObject = fileObject.getHeatObjectAtCommit(latestCommitHash);
-
-            if (heatObject == null) continue; //file was not a part of the commit
-
-            heatSum += heatObject.getHeatLevel();
-            numberOfFiles++;
-        }
-
-        //Compute average heat
-        double heatAverage = (double)(heatSum) / numberOfFiles;
-        heatAverage = Math.round(heatAverage * 10) / 10.0; //round to nearest 10th decimal place
-        return heatAverage;
-    }
-
 
     public static void assignHeatLevels(Codebase codebase, Constants.HeatMetricOptions heatMetricOption)
     {
