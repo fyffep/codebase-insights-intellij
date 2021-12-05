@@ -1,9 +1,7 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
-import intellij_extension.Constants.FilterMode;
-import intellij_extension.Constants.GroupingMode;
-import intellij_extension.Constants.HeatMetricOptions;
+import intellij_extension.Constants.*;
 import intellij_extension.controllers.HeatMapController;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
@@ -11,6 +9,7 @@ import intellij_extension.models.redesign.FileObject;
 import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.utility.HeatCalculationUtility;
+import intellij_extension.views.extras.HoveringTooltip;
 import intellij_extension.views.interfaces.IContainerView;
 import javafx.application.Platform;
 import javafx.beans.Observable;
@@ -28,11 +27,9 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
 
-import static intellij_extension.Constants.TOOLTIP_FORMAT;
-import static intellij_extension.Constants.TOP_FILE_WARNING;
-import static intellij_extension.Constants.BLANK;
-
 import java.util.*;
+
+import static intellij_extension.Constants.*;
 
 /**
  * A view that holds rectangles to represent files for a particular commit.
@@ -47,12 +44,12 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     private final ScrollPane scrollPane;
     private final AnchorPane anchorPane;
     private final FlowPane flowPane;
-    private FilterMode filteringMode;
-    private int filterMax = Constants.MAX_NUMBER_OF_FILTERING_FILES;
-    private GroupingMode groupingMode;
     // Banner that holds heat metric, branch comboBoxes, and filtering controls
     private final VBox topHorizontalBanner;
     private final HBox controlsContainer;
+    private FilterMode filteringMode;
+    private int filterMax = Constants.MAX_NUMBER_OF_FILTERING_FILES;
+    private GroupingMode groupingMode;
     private ComboBox<String> heatMetricComboBox;
     private RadioButton allFilesButton;
     private RadioButton topFilesButton;
@@ -177,6 +174,27 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         topFilesSlider.valueProperty().addListener(this::sliderValueChanging);
         controlsContainer.getChildren().add(topFilesSlider);
     }
+
+    private void setFileToolTip(@NotNull FileObject fileObject, int heatLevel, String groupName, String heatMetricString, HeatFileComponent heatFileComponent) {
+        // Add a tooltip to the file pane
+        String fileName = fileObject.getFilename();
+        HoveringTooltip tooltip = new HoveringTooltip(120, getToolTipMessage(fileName, heatLevel, groupName, heatMetricString, heatFileComponent));
+        tooltip.addHoveringTarget(heatFileComponent);
+        tooltip.setFont(Constants.TOOLTIP_FONT);
+        tooltip.setShowDelay(Duration.ZERO);
+        Tooltip.install(heatFileComponent, tooltip);
+    }
+
+    private String getToolTipMessage(String fileName, int heatLevel, String groupName, String heatMetricString, HeatFileComponent heatFileComponent) {
+        return String.format(TOOLTIP_FORMAT, getWarningMessage(heatFileComponent), fileName, heatLevel, heatMetricString, groupName);
+    }
+
+    // Sets a top 20 warning message in the tool tip if file is one of the top 20 files
+    private String getWarningMessage(HeatFileComponent heatFileComponent) {
+        if (heatFileComponent.hasFadeTransition()) return TOP_FILE_WARNING;
+        else return BLANK;
+    }
+
     //endregion
 
     //region UI Actions
@@ -188,7 +206,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
 
     private void allRadioButtonClicked(javafx.beans.Observable observable, boolean wasPreviouslySelected, boolean isNowSelected) {
         System.out.printf("ARB isNowSelected %s%n", isNowSelected);
-        if(isNowSelected) {
+        if (isNowSelected) {
             setFilteringMode(Constants.FilterMode.ALL_FILES, -1);
         }
     }
@@ -196,7 +214,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     private void topRadioButtonClicked(Observable observable, boolean wasPreviouslySelected, boolean isNowSelected) {
         System.out.printf("TRD isNowSelected %s%n", isNowSelected);
         topFilesSlider.setVisible(isNowSelected);
-        if(isNowSelected) {
+        if (isNowSelected) {
             setFilteringMode(Constants.FilterMode.X_FILES, (int) topFilesSlider.getValue());
         }
     }
@@ -204,15 +222,15 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     private void sliderValueChangeConfirmed(MouseEvent mouseEvent) {
         // We can only use this slider when top radio is selected
         // So we know we are in X_FILES mode
-        if(topFilesSlider.getValue() == 0) {
+        if (topFilesSlider.getValue() == 0) {
             topFilesSlider.setValue(1);
         }
-        topFilesButton.setText(String.format("Top %s Hottest Files", (int)topFilesSlider.getValue()));
-        setFilteringMode(Constants.FilterMode.X_FILES, (int)topFilesSlider.getValue());
+        topFilesButton.setText(String.format("Top %s Hottest Files", (int) topFilesSlider.getValue()));
+        setFilteringMode(Constants.FilterMode.X_FILES, (int) topFilesSlider.getValue());
     }
 
     private void sliderValueChanging(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
-        topFilesButton.setText(String.format("Top %s Hottest Files", (int)topFilesSlider.getValue()));
+        topFilesButton.setText(String.format("Top %s Hottest Files", (int) topFilesSlider.getValue()));
     }
     //endregion
 
@@ -229,7 +247,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         this.filteringMode = filterMode;
         this.filterMax = numberOfFiles;
         // Radio buttons are weird and this is needed to guard against them
-        if(topHeatFileComponents != null) {
+        if (topHeatFileComponents != null) {
             filterHeatMap();
         }
     }
@@ -241,13 +259,13 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         // Iterator over topHeatFiles collected from refreshHeatMap(...)
         // (not sorted/organized by package anymore, we lost that)
         int index = 0;
-        for(HeatFileComponent heatFile: topHeatFileComponents) {
+        for (HeatFileComponent heatFile : topHeatFileComponents) {
             // Get the heatFile's container
             HeatFileContainer currentContainer = heatFile.getContainer();
 //            System.out.printf("currentContainer %s%n", currentContainer.hashCode());
 
             // Check if already added
-            if(!flowPane.getChildren().contains(currentContainer)) {
+            if (!flowPane.getChildren().contains(currentContainer)) {
                 // Clear container
                 currentContainer.getChildren().clear();
                 // Add container to flowPane
@@ -258,7 +276,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
             currentContainer.getChildren().add(heatFile);
 
             // Break if we reached the max
-            if(index + 1 == filterMax)
+            if (index + 1 == filterMax)
                 break;
 
             // Continue otherwise
@@ -345,32 +363,12 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                 }
             }
 
-            if(filteringMode == FilterMode.X_FILES) {
+            if (filteringMode == FilterMode.X_FILES) {
                 filterHeatMap();
             }
 
             System.out.println("Finished adding panes to the heat map.");
         });
-    }
-
-    private void setFileToolTip(@NotNull FileObject fileObject, int heatLevel, String groupName, String heatMetricString, HeatFileComponent heatFileComponent) {
-        // Add a tooltip to the file pane
-        String fileName = fileObject.getFilename();
-        Tooltip tooltip = new Tooltip(getToolTipMessage(fileName, heatLevel, groupName, heatMetricString, heatFileComponent));
-        tooltip.setFont(Constants.TOOLTIP_FONT);
-        tooltip.setShowDelay(Duration.ZERO);
-        tooltip.setHideDelay(Duration.seconds(10));
-        Tooltip.install(heatFileComponent, tooltip);
-    }
-
-    private String getToolTipMessage(String fileName, int heatLevel, String groupName, String heatMetricString, HeatFileComponent heatFileComponent) {
-        return String.format(TOOLTIP_FORMAT, getWarningMessage(heatFileComponent), fileName, heatLevel, heatMetricString, groupName);
-    }
-
-    // Sets a top 20 warning message in the tool tip if file is one of the top 20 files
-    private String getWarningMessage(HeatFileComponent heatFileComponent) {
-        if (heatFileComponent.hasFadeTransition()) return TOP_FILE_WARNING;
-        else return BLANK;
     }
 
     @Override
