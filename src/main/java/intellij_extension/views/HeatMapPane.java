@@ -14,10 +14,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
-import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -145,7 +145,7 @@ public class HeatMapPane implements IContainerView, CodeBaseObserver {
         switch (tab) {
             case Constants.COMMIT_GROUPING_TEXT:
             case Constants.HEAT_GROUPING_TEXT:
-                if(!topHorizontalBanner.isVisible()) {
+                if (!topHorizontalBanner.isVisible()) {
                     parent.getChildren().add(0, topHorizontalBanner); // Make first child so its at the top
                 }
                 topHorizontalBanner.setVisible(true);
