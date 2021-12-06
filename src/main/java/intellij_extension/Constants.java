@@ -128,7 +128,7 @@ public class Constants {
     public static final String TOOLTIP_FORMAT = "%s%s\nHeat Level = %d\n%s\n\nGroup: %s";
     public static final String ALL_FILES_RADIO_BUTTON_DISPLAY_TEXT = "All Files";
     public static final String TOP_FILES_RADIO_BUTTON_DISPLAY_TEXT = "Top %s Hottest Files";
-    public static final String TOP_FILE_WARNING = "THIS IS ONE OF THE TOP 20 HOTTEST FILES!!!\n\n";
+    public static final String TOP_FILE_WARNING = ""; //""THIS IS ONE OF THE TOP 20 HOTTEST FILES!!!\n\n";
     //endregion
 
     //Prevent instantiation

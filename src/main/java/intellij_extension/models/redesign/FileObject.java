@@ -128,7 +128,7 @@ public class FileObject {
         String text = "";
         switch (heatMetricOption) {
             case FILE_SIZE:
-                text = String.format("%s: %d", Constants.FILE_SIZE_TEXT, heatObject.getFileSize());
+                text = String.format("%s: %d characters", Constants.FILE_SIZE_TEXT, heatObject.getFileSize());
                 break;
             case NUM_OF_AUTHORS:
                 text = String.format("%s: %d", Constants.NUMBER_OF_AUTHORS_TEXT, heatObject.getNumberOfAuthors());
