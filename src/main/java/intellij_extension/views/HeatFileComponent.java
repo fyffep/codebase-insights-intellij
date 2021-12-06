@@ -46,12 +46,16 @@ public class HeatFileComponent extends Pane {
     }
 
     public void setFileToolTip(String groupName) {
+        // No need to add it twice
+        if (toolTipAdded) return;
+
         // Add a tooltip to the file pane
         HoveringTooltip tooltip = new HoveringTooltip(Constants.TOOLTIP_DURATION, getToolTipMessage(groupName));
         tooltip.addHoveringTarget(this);
         tooltip.setFont(Constants.TOOLTIP_FONT);
         tooltip.setShowDelay(Duration.ZERO);
         Tooltip.install(this, tooltip);
+        toolTipAdded = true;
     }
 
     private String getToolTipMessage(String groupName) {
