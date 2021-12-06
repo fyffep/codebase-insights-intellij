@@ -94,6 +94,7 @@ public class Constants {
     public static final int MAX_NUMBER_OF_FILTERING_FILES = 20;
     public static final double X_FILES_MAJOR_TICK = 5;
     public static final int X_FILES_MINOR_TICK = 5;
+    public static final int DROP_SHADOW_DEPTH = 20;
     //endregion
 
     //region UI Strings

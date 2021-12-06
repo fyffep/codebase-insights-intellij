@@ -1,7 +1,6 @@
 package intellij_extension.views;
 
 import intellij_extension.Constants;
-import intellij_extension.Constants.*;
 import intellij_extension.controllers.HeatMapController;
 import intellij_extension.models.redesign.Codebase;
 import intellij_extension.models.redesign.Commit;
@@ -175,9 +174,8 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         controlsContainer.getChildren().add(topFilesSlider);
     }
 
-    private void setFileToolTip(@NotNull FileObject fileObject, int heatLevel, String groupName, String heatMetricString, HeatFileComponent heatFileComponent) {
+    private void setFileToolTip(@NotNull String fileName, int heatLevel, String groupName, String heatMetricString, HeatFileComponent heatFileComponent) {
         // Add a tooltip to the file pane
-        String fileName = fileObject.getFilename();
         HoveringTooltip tooltip = new HoveringTooltip(Constants.TOOLTIP_DURATION, getToolTipMessage(fileName, heatLevel, groupName, heatMetricString, heatFileComponent));
         tooltip.addHoveringTarget(heatFileComponent);
         tooltip.setFont(Constants.TOOLTIP_FONT);
@@ -259,10 +257,21 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         // Iterator over topHeatFiles collected from refreshHeatMap(...)
         // (not sorted/organized by package anymore, we lost that)
         int index = 0;
+        int maxFileCounter = 0;
         for (HeatFileComponent heatFile : topHeatFileComponents) {
+
+            String fileName = heatFile.getFileName();
             // Get the heatFile's container
             HeatFileContainer currentContainer = heatFile.getContainer();
-//            System.out.printf("currentContainer %s%n", currentContainer.hashCode());
+
+            // Adds the glowing behaviour to the file component iff the file is in the top 20
+            if (maxFileCounter < Constants.MAX_NUMBER_OF_FILTERING_FILES) {
+                heatFile.setFadeTransition();
+                maxFileCounter++;
+            }
+
+            setFileToolTip(fileName, heatFile.getFileHeatLevel(),
+                    currentContainer.getTitle(), heatFile.getHeatMetric(), heatFile);
 
             // Check if already added
             if (!flowPane.getChildren().contains(currentContainer)) {
@@ -319,7 +328,6 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
 
         Platform.runLater(() -> {
             flowPane.getChildren().clear();
-            int maxFileCounter = 0;
 
             for (Map.Entry<String, TreeSet<FileObject>> entry : setOfFiles.entrySet()) {
                 // Get package name
@@ -345,16 +353,11 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                     // Add a pane (rectangle) package container
                     HeatFileComponent heatFileComponent = new HeatFileComponent(fileObject, heatLevel, heatFileContainer);
                     heatFileComponent.setStyle(colorFormat);
+                    String heatMetric = fileObject.getHeatMetricString(heatObject, heatMetricOption);
+                    heatFileComponent.setHeatMetric(heatMetric);
+
                     heatFileContainer.addNode(heatFileComponent);
                     topHeatFileComponents.add(heatFileComponent);
-
-                    // Adds the glowing behaviour to the file component iff the file is in the top 20
-                    if (maxFileCounter < Constants.MAX_NUMBER_OF_FILTERING_FILES) {
-                        heatFileComponent.setFadeTransition();
-                        maxFileCounter++;
-                    }
-
-                    setFileToolTip(fileObject, heatLevel, groupingKey, fileObject.getHeatMetricString(heatObject, heatMetricOption), heatFileComponent);
                 }
 
                 // Only add if we actually made children for it.
@@ -363,9 +366,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
                 }
             }
 
-            if (filteringMode == FilterMode.X_FILES) {
-                filterHeatMap();
-            }
+            filterHeatMap();
 
             System.out.println("Finished adding panes to the heat map.");
         });
