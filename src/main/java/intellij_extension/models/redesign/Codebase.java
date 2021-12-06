@@ -30,7 +30,7 @@ public class Codebase implements CodeBaseObservable {
     private String latestCommitHash;
     private String targetCommit;
     private GroupingMode currentGroupingMode = GroupingMode.PACKAGES;
-    private HeatMetricOptions currentHeatMetricOption = HeatMetricOptions.FILE_SIZE;
+    private HeatMetricOptions currentHeatMetricOption = HeatMetricOptions.OVERALL;
     // endregion
 
     // region Singleton Constructor

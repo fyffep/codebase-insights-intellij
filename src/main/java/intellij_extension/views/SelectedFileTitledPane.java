@@ -24,12 +24,9 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -274,16 +271,16 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         authors.setText(String.format("%s%s", Constants.SF_TEXT_AUTHORS, fileAuthors));
 
         //No of Commits
-        noOfCommits.setText(String.format("%s%s", Constants.SF_TEXT_NO_OF_COMMITS, totalCommits));
+        noOfCommits.setText(String.format("%s%d", Constants.SF_TEXT_NO_OF_COMMITS, totalCommits));
 
         HeatObject heatobject = selectedFile.getHeatObjectAtCommit(selectedFile.getLatestCommitInTreeWalk());
 
         //File Size
-        fileSize.setText(String.format("%s%s", Constants.SF_TEXT_FILE_SIZE, heatobject.getFileSize()));
+        fileSize.setText(String.format("%s%d characters", Constants.SF_TEXT_FILE_SIZE, heatobject.getFileSize()));
 
 
         //Line count
-        lineCount.setText(String.format("%s%s", Constants.SF_TEXT_LINE_COUNT, heatobject.getLineCount()));
+        lineCount.setText(String.format("%s%d", Constants.SF_TEXT_LINE_COUNT, heatobject.getLineCount()));
 
         // Show the Pane
         showPane();

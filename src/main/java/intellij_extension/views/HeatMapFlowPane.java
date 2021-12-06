@@ -134,8 +134,6 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         heatMetricComboBox.getSelectionModel().select(0);
         // Set up the select action
         heatMetricComboBox.setOnAction(this::heatMetricOptionSelectedAction);
-        //Set default option (TEMPORARY to avoid confusion while Overall heat is not yet implemented)
-        heatMetricComboBox.setValue("Number of Commits");
     }
 
     private void createTopAllControls() {
