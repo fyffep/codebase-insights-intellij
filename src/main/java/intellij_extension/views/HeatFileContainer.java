@@ -6,13 +6,13 @@ import javafx.scene.layout.Pane;
 
 import java.util.ArrayList;
 
-public class HeatFileContainer extends GridPane
-{
+public class HeatFileContainer extends GridPane {
     private final ArrayList<Pane> children = new ArrayList<>();
     private String title;
 
     /**
      * Creates a FlowPane that holds HeatFileComponents or other elements.
+     *
      * @param title a label to help identify this container
      */
     public HeatFileContainer(String title) {
@@ -29,14 +29,12 @@ public class HeatFileContainer extends GridPane
         this.maxWidthProperty().addListener((observable, oldValue, newValue) -> reorganize());
     }
 
-    public void addNode(Pane node)
-    {
+    public void addNode(Pane node) {
         children.add(node);
         reorganize();
     }
 
-    private void reorganize()
-    {
+    private void reorganize() {
         //Determine size of grid
         int numColumns = (children.size() / 2) + 1;
         int numRows = (children.size() / 2) - 1;
@@ -55,10 +53,8 @@ public class HeatFileContainer extends GridPane
 
         //Add all children to the grid
         int i = 0;
-        for (int r = 0; r < numRows; r++)
-        {
-            for (int c = 0; c < numColumns && i < children.size(); c++)
-            {
+        for (int r = 0; r < numRows; r++) {
+            for (int c = 0; c < numColumns && i < children.size(); c++) {
                 Pane element = children.get(i++);
                 //Remove the child if it's already in the grid
                 if (this.getChildren().contains(element))
