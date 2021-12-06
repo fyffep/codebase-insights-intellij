@@ -8,7 +8,6 @@ import intellij_extension.models.redesign.FileObject;
 import intellij_extension.models.redesign.HeatObject;
 import intellij_extension.observer.CodeBaseObserver;
 import intellij_extension.utility.HeatCalculationUtility;
-import intellij_extension.views.extras.HoveringTooltip;
 import intellij_extension.views.interfaces.IContainerView;
 import javafx.application.Platform;
 import javafx.beans.Observable;
@@ -23,8 +22,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.util.Duration;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -173,26 +170,6 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         topFilesSlider.valueProperty().addListener(this::sliderValueChanging);
         controlsContainer.getChildren().add(topFilesSlider);
     }
-
-    private void setFileToolTip(@NotNull String fileName, int heatLevel, String groupName, String heatMetricString, HeatFileComponent heatFileComponent) {
-        // Add a tooltip to the file pane
-        HoveringTooltip tooltip = new HoveringTooltip(Constants.TOOLTIP_DURATION, getToolTipMessage(fileName, heatLevel, groupName, heatMetricString, heatFileComponent));
-        tooltip.addHoveringTarget(heatFileComponent);
-        tooltip.setFont(Constants.TOOLTIP_FONT);
-        tooltip.setShowDelay(Duration.ZERO);
-        Tooltip.install(heatFileComponent, tooltip);
-    }
-
-    private String getToolTipMessage(String fileName, int heatLevel, String groupName, String heatMetricString, HeatFileComponent heatFileComponent) {
-        return String.format(TOOLTIP_FORMAT, getWarningMessage(heatFileComponent), fileName, heatLevel, heatMetricString, groupName);
-    }
-
-    // Sets a top 20 warning message in the tool tip if file is one of the top 20 files
-    private String getWarningMessage(@NotNull HeatFileComponent heatFileComponent) {
-        if (heatFileComponent.hasFadeTransition()) return TOP_FILE_WARNING;
-        else return BLANK;
-    }
-
     //endregion
 
     //region UI Actions
@@ -257,21 +234,9 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
         // Iterator over topHeatFiles collected from refreshHeatMap(...)
         // (not sorted/organized by package anymore, we lost that)
         int index = 0;
-        int maxFileCounter = 0;
         for (HeatFileComponent heatFile : topHeatFileComponents) {
-
-            String fileName = heatFile.getFileName();
             // Get the heatFile's container
             HeatFileContainer currentContainer = heatFile.getContainer();
-
-            // Adds the glowing behaviour to the file component iff the file is in the top 20
-            if (maxFileCounter < Constants.MAX_NUMBER_OF_FILTERING_FILES) {
-                heatFile.setFadeTransition();
-                maxFileCounter++;
-            }
-
-            setFileToolTip(fileName, heatFile.getFileHeatLevel(),
-                    currentContainer.getTitle(), heatFile.getHeatMetric(), heatFile);
 
             // Check if already added
             if (!flowPane.getChildren().contains(currentContainer)) {
@@ -284,6 +249,14 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
             // Re-add the heatFile back to the parent
             currentContainer.getChildren().add(heatFile);
 
+            // Adds the glowing behaviour to the file component iff the file is in the top 20
+            if (index < Constants.MAX_NUMBER_OF_FILTERING_FILES) {
+                heatFile.setHottestFileEffect();
+            }
+
+            // Set the tool tip for the component (has to happen after glow is added, so we know what a top 20 file is)
+            heatFile.setFileToolTip(currentContainer.getTitle());
+
             // Break if we reached the max
             if (index + 1 == filterMax)
                 break;
@@ -291,8 +264,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
             // Continue otherwise
             index++;
         }
-        System.out.printf("Index: %s%n", index);
-
+//        System.out.printf("Index: %s%n", index);
         flowPane.layout();
     }
 
