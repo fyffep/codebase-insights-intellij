@@ -232,6 +232,7 @@ public class SelectedFileTitledPane implements IContainerView, CodeBaseObserver 
         // Filename
         openFile.setText(String.format("%s", selectedFile.getFilename()));
         openFile.setUnderline(true);
+        openFile.setVisited(false);
         setSelectedFile(selectedFile);
 
         // Package
