@@ -9,6 +9,7 @@ import java.util.ArrayList;
 public class HeatFileContainer extends GridPane
 {
     private final ArrayList<Pane> children = new ArrayList<>();
+    private String title;
 
     /**
      * Creates a FlowPane that holds HeatFileComponents or other elements.
@@ -22,6 +23,7 @@ public class HeatFileContainer extends GridPane
         this.setVgap(Constants.HEATMAP_VERTICAL_SPACING);
         this.setHgap(Constants.HEATMAP_HORIZONTAL_SPACING);
         this.setPadding(Constants.HEATMAP_PADDING);
+        this.title = title;
 
         //Every time the container resizes, re-arrange the grid
         this.maxWidthProperty().addListener((observable, oldValue, newValue) -> reorganize());
@@ -65,5 +67,9 @@ public class HeatFileContainer extends GridPane
                 this.add(element, c, r);
             }
         }
+    }
+
+    public String getTitle() {
+        return title;
     }
 }
