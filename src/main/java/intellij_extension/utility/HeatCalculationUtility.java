@@ -2,6 +2,7 @@ package intellij_extension.utility;
 
 import intellij_extension.Constants;
 import intellij_extension.models.redesign.*;
+import intellij_extension.utility.filesize.FileSizeCalculator;
 import javafx.scene.paint.Color;
 
 import java.util.*;
@@ -9,6 +10,8 @@ import java.util.*;
 /**
  * Modifies the Codebase so that every HeatObject within it is given a heat level
  * according to the specified metric.
+ * assignHeatLevels() is the entry point of this class, and it is capable of giving every
+ * HeatObject within a Codebase heat levels according to the given metric.
  */
 public class HeatCalculationUtility
 {
@@ -63,6 +66,7 @@ public class HeatCalculationUtility
         Set<FileObject> fileObjectSet = codebase.getActiveFileObjects();
         for (FileObject fileObject : fileObjectSet)
         {
+            //System.out.println("\n---------- "+fileObject.getFilename()+" ----------");
             //The oldest commits are at the front of the LinkedHashMap
             LinkedHashMap<String, HeatObject> commitHashToHeatObjectMap = fileObject.getCommitHashToHeatObjectMap();
 
@@ -74,29 +78,33 @@ public class HeatCalculationUtility
                 HeatObject newerHeatObject = commitToHeatObjectEntry.getValue();
                 if (lastHeatObject != null)
                 {
-                    newerHeatObject.setHeatLevel(lastHeatObject.getHeatLevel()); //use previous heat, then modify
+                    //Compute the heat based on how much the size has changed over time
+                    int accumulatedHeatLevel = lastHeatObject.getHeatLevel(); //use previous heat, then modify
 
                     //If the file size increased at all, incur 2 heat
                     long oldFileSize = lastHeatObject.getFileSize();
                     long newFileSize = newerHeatObject.getFileSize();
+
 /*if (fileObject.getFilename().equals("HeatMapPane.java"))
 {
     System.out.println("New Hash: "+commitToHeatObjectEntry.getKey());
     System.out.println("oldFileSize: "+oldFileSize);
     System.out.println("newFileSize: "+newFileSize);
 }*/
+
+                    //File size increase -> gain heat
                     if (newFileSize > oldFileSize)
                     {
-                        newerHeatObject.setHeatLevel(newerHeatObject.getHeatLevel() + SIZE_INCREASE_HEAT_CONSEQUENCE);
+                        accumulatedHeatLevel += SIZE_INCREASE_HEAT_CONSEQUENCE;
                         numberOfConsecutiveCommitsWithNoSizeIncrease = 0;
                     }
-                    //File size decrease -> lose 1 heat
+                    //File size decrease -> lose heat
                     else if (oldFileSize - newFileSize >= REQUIRED_SIZE_CHANGE)
                     {
-                        newerHeatObject.setHeatLevel(newerHeatObject.getHeatLevel() + SIZE_DECREASE_HEAT_CONSEQUENCE);
+                        accumulatedHeatLevel += SIZE_DECREASE_HEAT_CONSEQUENCE;
                         numberOfConsecutiveCommitsWithNoSizeIncrease++;
                     }
-                    //File size stayed equal ↓
+                    //File size stayed equal
                     else
                     {
                         numberOfConsecutiveCommitsWithNoSizeIncrease++;
@@ -104,23 +112,109 @@ public class HeatCalculationUtility
                         //If file went unchanged for long enough, the heat improved
                         if (numberOfConsecutiveCommitsWithNoSizeIncrease >= REQUIRED_NUM_COMMITS_WITHOUT_CHANGING)
                         {
-                            newerHeatObject.setHeatLevel(newerHeatObject.getHeatLevel() + SIZE_NO_CHANGE_HEAT_CONSEQUENCE);
+                            accumulatedHeatLevel += SIZE_NO_CHANGE_HEAT_CONSEQUENCE;
                             numberOfConsecutiveCommitsWithNoSizeIncrease = 0;
                         }
                     }
+
+                    //Now compute the heat based on the changes in size, current file size, and line count.
+                    //Then average all measurements.
+                    double heatLevel = MathUtility.average(
+                            accumulatedHeatLevel,
+                            computeFileSizeHeat(newerHeatObject.getFileSize()),
+                            computeLineCountHeat(newerHeatObject.getLineCount()));
+
+                    //Store the heat
+                    newerHeatObject.setHeatLevel((int) Math.round( heatLevel ));
                 }
                 else
                 {
-                    newerHeatObject.setHeatLevel(Constants.HEAT_MIN); //No in/decreases in file size yet
+                    //No in/decreases in file size yet:
+                    //Compute the heat based on the current file size & line count, then average all measurements
+                    double heatLevel = MathUtility.average(
+                            computeFileSizeHeat(newerHeatObject.getFileSize()),
+                            computeLineCountHeat(newerHeatObject.getLineCount()));
+
+                    //Store the heat
+                    newerHeatObject.setHeatLevel((int) Math.round( heatLevel ));
                 }
 //if (fileObject.getFilename().equals("HeatMapPane.java"))
-                //System.out.println("Heat: "+newerHeatObject.getHeatLevel()+"\n");
+//System.out.println("Heat: "+newerHeatObject.getHeatLevel()+"\n");
 
                 lastHeatObject = newerHeatObject;
             }
         }
         System.out.println("Finished calculating heat based on file size.");
     }
+
+    private static int computeFileSizeHeat(long fileSize)
+    {
+        /*/For every N characters, gain 1 heat
+        final int CHARACTER_HEAT_RATIO = 1800;
+
+        //Handle case of file size being too large
+        final int CHARACTERS_FOR_MAX_HEAT = CHARACTER_HEAT_RATIO * Constants.HEAT_MAX;
+        if (fileSize > CHARACTERS_FOR_MAX_HEAT)
+            return Constants.HEAT_MAX;
+
+        System.out.println(""+fileSize+" chars yields "+(fileSize / CHARACTER_HEAT_RATIO)+" heat");
+
+        return (int) (fileSize / CHARACTER_HEAT_RATIO);*/
+
+
+        if (fileSize < 0)
+            throw new IllegalArgumentException("computeFileSizeHeat() refuses to handle negative line count input `" + fileSize + "`");
+
+        //Use exponential function to calculate heat
+        final int CHARACTERS_FOR_MAX_HEAT = 10000;
+        double fixedPart = Math.pow(Constants.HEAT_MAX, 1.0 / (CHARACTERS_FOR_MAX_HEAT - 1));
+        int heatLevel = (int)((1.0 / fixedPart) * Math.pow(fixedPart, fileSize));
+
+        //System.out.println(""+fileSize+" chars yields "+heatLevel+" heat");
+
+        //If the result is too large, constrain it
+        if (heatLevel > Constants.HEAT_MAX)
+            return Constants.HEAT_MAX;
+
+        return heatLevel;
+    }
+
+    /**
+     * Returns a heat level that measures how hot (i.e. how large) the lineCount is.
+     * The function scales exponentially to guarantee the following:
+     * 1 point of heat for 98 lines or fewer (sorry it couldn't be 100 exactly; I'm bad at math).
+     * 10 heat (or heat max) for 550 lines or more.
+     */
+    private static int computeLineCountHeat(long lineCount)
+    {
+        //Linear technique -- commented out
+        /*//For every 100 lines, gain 1 heat
+        final int LINE_HEAT_RATIO = 80;
+
+        //Handle case of file size being too large
+        final int CHARACTERS_FOR_MAX_HEAT = CHARACTERS_PER_HEAT * Constants.HEAT_MAX;
+        if (fileSize > CHARACTERS_FOR_MAX_HEAT)
+            return CHARACTERS_FOR_MAX_HEAT;
+
+        return (int) (fileSize / CHARACTERS_PER_HEAT);*/
+
+        if (lineCount < 0)
+            throw new IllegalArgumentException("computeLineCountHeat() refuses to handle negative line count input `" + lineCount + "`");
+
+        //Use exponential function to calculate heat
+        final int LINES_FOR_MAX_HEAT = 550;
+        double fixedPart = Math.pow(Constants.HEAT_MAX, 1.0 / (LINES_FOR_MAX_HEAT - 1));
+        int heatLevel = (int)((1.0 / fixedPart) * Math.pow(fixedPart, lineCount));
+
+        //System.out.println(""+lineCount+" lines yields "+heatLevel+" heat");
+
+        //If the result is too large, constrain it
+        if (heatLevel > Constants.HEAT_MAX)
+            return Constants.HEAT_MAX;
+
+        return heatLevel;
+    }
+
 
 
     private static void assignHeatLevelsNumberOfCommits(Codebase codebase)
