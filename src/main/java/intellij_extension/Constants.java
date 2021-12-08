@@ -32,7 +32,7 @@ public class Constants {
     // Heat Metric List
     // Note that this affects HeatMapController::newHeatMetricSelected()
     public static final String OVERALL_TEXT = "Overall Heat";
-    public static final String FILE_SIZE_TEXT = "File size";
+    public static final String FILE_SIZE_TEXT = "File Size";
     public static final String NUMBER_OF_COMMITS_TEXT = "Number of Commits";
     public static final String NUMBER_OF_AUTHORS_TEXT = "Number of Authors";
     public static final ObservableList<String> HEAT_METRIC_OPTIONS = FXCollections.observableArrayList(
