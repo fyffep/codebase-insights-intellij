@@ -137,10 +137,14 @@ public class FileObject {
                 text = String.format("%s: %d", Constants.NUMBER_OF_COMMITS_TEXT, heatObject.getNumberOfCommits());
                 break;
             case OVERALL:
-                text = String.format("%s: %d", Constants.OVERALL_TEXT, heatObject.getHeatLevel());
+                //Overall shows all of the above metrics
+                text = String.format("%s: %d characters\n%s: %d\n%s: %d",
+                        Constants.FILE_SIZE_TEXT, heatObject.getFileSize(),
+                        Constants.NUMBER_OF_AUTHORS_TEXT, heatObject.getNumberOfAuthors(),
+                        Constants.NUMBER_OF_COMMITS_TEXT, heatObject.getNumberOfCommits());
                 break;
             default:
-                throw new UnsupportedOperationException("Heat Metric Option is invalid or not implemented for this method.");
+                throw new UnsupportedOperationException("Heat Metric Option is getHeatMetricString or not implemented for this method.");
         }
         return text;
     }
