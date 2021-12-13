@@ -13,13 +13,11 @@ import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
@@ -50,6 +48,7 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
     private RadioButton allFilesButton;
     private RadioButton topFilesButton;
     private Slider topFilesSlider;
+    private HeatFileComponent currentSelectedFile;
 
     // For filtering
     private PriorityQueue<HeatFileComponent> topHeatFileComponents;
@@ -328,6 +327,12 @@ public class HeatMapFlowPane implements IContainerView, CodeBaseObserver {
 
                     heatFileContainer.addNode(heatFileComponent);
                     topHeatFileComponents.add(heatFileComponent);
+                    heatFileComponent.setOnMouseClicked(event -> {
+                        if (currentSelectedFile != null) currentSelectedFile.setBorder(Border.EMPTY);
+                        currentSelectedFile = heatFileComponent;
+                        heatFileComponent.setBorder(BORDER);
+                        HeatMapController.getInstance().heatMapComponentSelected(fileObject.getPath().toString());
+                    });
                 }
 
                 // Only add if we actually made children for it.

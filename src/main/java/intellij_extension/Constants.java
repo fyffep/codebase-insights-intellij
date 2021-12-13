@@ -6,6 +6,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -129,6 +130,9 @@ public class Constants {
     public static final String ALL_FILES_RADIO_BUTTON_DISPLAY_TEXT = "All Files";
     public static final String TOP_FILES_RADIO_BUTTON_DISPLAY_TEXT = "Top %s Hottest Files";
     public static final String TOP_FILE_WARNING = ""; //""THIS IS ONE OF THE TOP 20 HOTTEST FILES!!!\n\n";
+    public static final Border BORDER = new Border(new BorderStroke(Color.BLUE,
+            BorderStrokeStyle.SOLID, new CornerRadii(1), new BorderWidths(4),
+            new Insets(-7, -7, -7, -7)));
     //endregion
 
     //Prevent instantiation
