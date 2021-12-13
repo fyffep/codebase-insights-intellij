@@ -47,7 +47,7 @@ public class HeatMapController extends PreloadingActivity implements IHeatMapCon
         extractData();
         DashboardCalculationUtility.assignDashboardData();
         //Trigger view update
-        codeBase.heatMapGroupingChanged(Constants.DEFAULT_GROUPING);
+        codeBase.heatMapGroupingChanged(GroupingMode.COMMITS); //ensures that our dashboard can render the top most-associated commit groups
         System.out.println("Finished preloading HeatMapController.");
     }
 

@@ -23,8 +23,9 @@ public class GroupFileObjectUtility {
      * Each group is the value of the TreeMap, mapped to the hashcode of itself (TreeSet).
      * If FileObject1 and FileObject2 have been frequently appearing in multiple commits, they'd form 1 pair.
      *
-     * @param Codebase reference of the Codebase object.
-     * @return TreeMap of groups formed based on commits.
+     * @param codebase reference of the Codebase object.
+     * @return TreeMap of groups formed based on commits. It is sorted in descending order by
+     * the number of commits the files were seen together in.
      */
     public static TreeMap<String, TreeSet<FileObject>> groupByCommit(Codebase codebase) {
         HashSet<FileObject> activeFiles = codebase.getActiveFileObjects();
@@ -59,7 +60,28 @@ public class GroupFileObjectUtility {
             finalObjects.addAll(insertGroupsInMap(commitGroupedMap, fileObjectSetMap, maxCommonCommits));
         }
 
-        return commitGroupedMap;
+
+        //Re-build the TreeMap so that it is sorted by the count (the number of common commits) in descending order
+        TreeMap<String, TreeSet<FileObject>> outputMap = new TreeMap<>((o1, o2) -> {
+            try
+            {
+                int count1 = Integer.parseInt(o1.split(SEPARATOR)[0]);
+                int count2 = Integer.parseInt(o2.split(SEPARATOR)[0]);
+
+                return -Integer.compare(count1, count2);
+            }
+            catch (ArrayIndexOutOfBoundsException | NumberFormatException ex)
+            {
+                System.err.println("One or more keys in groupByCommit's commitGroupedMap were defined incorrectly. " +
+                        "Expected format: COUNT~HASHCODE where COUNT and HASHCODE are integers");
+
+                throw ex;
+            }
+        });
+        for (Map.Entry<String, TreeSet<FileObject>> entry : commitGroupedMap.entrySet())
+            outputMap.put(entry.getKey(), entry.getValue());
+
+        return outputMap;
     }
 
     private static LinkedHashMap<FileObject, Set<FileObject>> initObjectSetMap(FileObject activeFile) {

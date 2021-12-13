@@ -36,7 +36,7 @@ public class FileSizeCalculator {
     }*/
 
     /**
-     * @param in an InputStream with a File open. This method does not close the InputStream when it is done.
+     * @param in an InputStream with a File open. This method closes the InputStream when it is done.
      * @return the number of lines in a file or -1 if there was an IOException.
      */
     public static long computeLineCount(InputStream in)
@@ -58,4 +58,39 @@ public class FileSizeCalculator {
             return -1;
         }
     }
+
+
+    /**
+     * Unused
+     * Counts the number of semi-colons in a file
+     * @param in an InputStream with a File open. This method closes the InputStream when it is done.
+     * @return the number of semi-colons in a file or -1 if there was an IOException.
+     */
+    /*public static long computeStatementCount(InputStream in)
+    {
+        final char CHAR_TO_SEARCH_FOR = ';';
+        try
+        {
+            //Compute number of semi-colons
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            long charCount = 0;
+            String line;
+            while ((line = reader.readLine()) != null)
+            {
+                for (int i = 0; i < line.length(); i++)
+                {
+                    if (line.charAt(i) == CHAR_TO_SEARCH_FOR)
+                        charCount++;
+                }
+            }
+            reader.close();
+
+            return charCount;
+        }
+        catch (IOException ex)
+        {
+            Constants.LOG.error(ex);
+            return -1;
+        }
+    }*/
 }
